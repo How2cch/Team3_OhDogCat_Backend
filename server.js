@@ -15,6 +15,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('<h2>首頁<h2>');
 });
+// ====EC 穗懷區域=
+
+// ====EC 穗懷區域=
 
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth');
