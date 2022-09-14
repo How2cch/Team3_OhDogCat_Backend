@@ -130,6 +130,7 @@ app.get('/', async (req, res) => {
   let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   res.send(JSON.parse(result));
 });
+
 app.listen(process.env.SERVER_PORT, () => {
   console.log(`Server start at ${process.env.SERVER_PORT}`);
 });
