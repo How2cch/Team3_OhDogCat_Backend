@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 
-const registerFormatRules = [
+const registerRules = [
   body('email').isEmail().withMessage('Email 欄位格式錯誤'),
   body('password').isLength({ min: 8 }).withMessage('密碼長度需要至少為 8'),
   body('confirmPassword')
@@ -12,4 +12,4 @@ const registerFormatRules = [
 
 const loginFormatRules = [body('email').isEmail().withMessage('Email 欄位格式錯誤'), body('password').isLength({ min: 8 }).withMessage('密碼長度需要至少為 8')];
 
-module.exports = { registerFormatRules, loginFormatRules };
+module.exports = { registerRules, loginFormatRules };
