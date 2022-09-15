@@ -4,10 +4,12 @@ const mysql = require('mysql2');
 const pool = require('./utils/db');
 const cors = require('cors');
 const corsConfig = require('./utils/cors_config');
+const path = require('path');
 // console.log(pool);
 require('dotenv').config();
 
 app.use(cors(corsConfig));
+app.use(express.static(path.join(__dirname, 'public'))); // ? 設定可讀取靜態檔案的路徑
 
 // ============== API Routers ==============
 app.use(express.json());
@@ -17,11 +19,9 @@ app.get('/', (req, res) => {
 });
 
 // ----EC穗懷區
-app.get('/api/1.0/ec-commodity-hp-card', async(req, res) => {
-  let [result] = await pool.execute('SELECT * FROM product WHERE id < ?', [6]);
-  console.log(result);
-  res.json(result);
-});
+const ecHpCommodityAPI = require('./routers/ECommerce/HomePage/Commodity_Products');
+app.use('/api/1.0/product', ecHpCommodityAPI);
+
 // ----EC穗懷區
 
 
