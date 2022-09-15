@@ -1,14 +1,16 @@
 const express = require('express');
 const app = express();
-const pool = require('./utils/db');
 const cors = require('cors');
-const corsConfig = require('./utils/cors_config');
+const corsConfig = require('./utils/corsConfig');
+const path = require('path');
 
 require('dotenv').config(); // ? 叫出 .env
 
 app.use(cors(corsConfig)); // ? 設定 cors
+app.use(express.static(path.join(__dirname, 'public'))); // ? 設定可讀取靜態檔案的路徑
 
 // ============== API Routers ==============
+app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth'); // ? 將 API route 整理於 ./routers 個別檔案中
 app.use('/api/1.0/auth', userAuthAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
