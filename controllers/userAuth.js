@@ -4,7 +4,7 @@ const authModel = require('../models/userAuth');
 
 const userRegister = async (req, res) => {
   console.log('register request', req.body);
-
+  console.log('session', req.session);
   // = 將驗證結果取出，並將客製化的驗證結果與前面的驗證結果合併
   const validation = validationResult(req);
   let error = validation.array();
@@ -45,7 +45,7 @@ const userRegister = async (req, res) => {
       loginDt: new Date().toISOString(),
     };
     console.log('user register success');
-    res.json({ status: 'ok', message: '註冊成功', user: registerUser });
+    res.status(201).json({ status: 'ok', message: '註冊成功', user: registerUser });
   } catch (error) {
     res.status(500).json({ message: '異常，請洽系統管理員' });
     throw new Error(error);
