@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const pool = require('./utils/db');
 const cors = require('cors');
 const corsConfig = require('./utils/cors_config');
-
+// console.log(pool);
 require('dotenv').config();
 
 app.use(cors(corsConfig));
@@ -13,11 +13,17 @@ app.use(cors(corsConfig));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('<h2>首頁<h2>');
+  res.send('<h4>首頁<h4>');
 });
-// ====EC 穗懷區域=
 
-// ====EC 穗懷區域=
+// ----EC穗懷區
+app.get('/api/1.0/ec-commodity-hp-card', async(req, res) => {
+  let [result] = await pool.execute('SELECT * FROM product WHERE id < ?', [6]);
+  console.log(result);
+  res.json(result);
+});
+// ----EC穗懷區
+
 
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth');
