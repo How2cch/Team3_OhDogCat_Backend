@@ -19,6 +19,12 @@ app.get('/', (req, res) => {
   res.send('<h4>首頁f<h4>');
 });
 
+// ----社群luis區
+const CommunityTEST = require('./routers/post');
+app.use('/api/1.0/community', CommunityTEST);
+
+// ----社群luis區 要比404前面
+
 app.use((req, res) => {
   console.log('這個頁面找不到');
   res.status(404).send('Not Found');
