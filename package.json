@@ -15,7 +15,8 @@
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
     "express-validator": "^6.14.2",
-    "mysql2": "^2.3.3"
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.19"
   },
   "devDependencies": {
     "eslint-config-prettier": "^8.5.0",
