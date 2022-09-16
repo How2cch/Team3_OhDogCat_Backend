@@ -14,16 +14,27 @@ app.use(express.static(path.join(__dirname, 'public'))); // ? 設定可讀取靜
 // ============== API Routers ==============
 app.use(express.json());
 
-app.get('/', (req, res) => {
+app.get('/', async(req, res) => {
   res.send('<h4>首頁<h4>');
+  let [result] = await pool.execute('SELECT name FROM product WHERE id < ?', [11]);
+  console.log('result',result);
+  res.json(result);
 });
 
+// ------------------
+
+// ---------------------
+
+
+
 // ----EC穗懷區
-const ecHpCommodityAPI = require('./routers/ECommerce/HomePage/Commodity_Products');
+const ecHpCommodityAPI = require('./routers/ECommerce/HomePage/recommendProduct');
 app.use('/api/1.0/product', ecHpCommodityAPI);
 
 // ----EC穗懷區
 
+const userTESTAPI = require('./routers/test');
+app.use('/api/1.0/test', userTESTAPI);
 
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth');
