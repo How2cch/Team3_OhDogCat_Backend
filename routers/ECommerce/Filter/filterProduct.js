@@ -29,10 +29,60 @@ router.get('/products', async (req, res) => {
   // console.log(req.query);
   try {
     let [result] = await pool.execute(
-      'SELECT name,intro,price,per_score,main_photo,photo_path FROM `product` WHERE product_type_id = ?',[2]
+      'SELECT name,intro,price,per_score,main_photo,photo_path FROM `product` WHERE product_type_id = ? ORDER BY RAND() LIMIT 4',
+      [2]
     );
     console.log(result);
     res.json(result);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.get('/pages/:stockId', async (req, res, next) => {
+  try {
+    // /pages/:stockId
+    const stockId = req.params.stockId;
+    // const stockId = 2;
+
+    // 分頁
+    // 透過 query string 取得目前要第幾頁的資料
+    // 如果沒有設定，就預設要第一頁的資料
+    let page = req.query.page || 1;
+    // let page = 1;
+
+    // 每一頁拿五筆資料
+    const perPage = 5;
+    // 取得總筆數
+    const [total] = await pool.execute(
+      'SELECT COUNT(*) AS total FROM product WHERE product_type_id= ?',
+      [stockId]
+    );
+    console.log(total);
+    const totalAll = total[0].total;
+    console.log(totalAll);
+    // 計算總頁數 Math.ceil
+    let lastPage = Math.ceil(totalAll / perPage);
+
+    // 計算 offset
+    const offset = perPage * (page - 1);
+
+    // 根據 perPage 及 offset 去取得資料
+    let [data] = await pool.execute(
+      'SELECT * FROM product WHERE product_type_id = ? ORDER BY id LIMIT ? OFFSET ?',
+      [stockId, perPage, offset]
+    );
+
+    // 把取得的資料回覆給前端
+    res.json({
+      pagesDetail: {
+        total, // 總共有幾筆
+        perPage, // 一頁有幾筆
+        page, // 目前在第幾頁
+        lastPage, // 總頁數
+      },
+      data,
+    });
   } catch (error) {
     console.error(error);
   }
