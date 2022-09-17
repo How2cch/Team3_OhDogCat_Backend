@@ -6,7 +6,7 @@ const pool = require('../../../utils/db');
 // const { registerFormatRules } = require('../middlewares/userAuth.js');
 // const path = require('path');
 
-router.get('/recommendProduct', async (req, res) => {
+router.get('/recommendProduct/title', async (req, res) => {
   console.log(req.query);
   try {
     const [product] = await pool.execute(
@@ -18,4 +18,5 @@ router.get('/recommendProduct', async (req, res) => {
     console.error(error);
   }
 });
+
 module.exports = router;

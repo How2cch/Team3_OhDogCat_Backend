@@ -16,25 +16,17 @@ app.use(express.json());
 
 app.get('/', async(req, res) => {
   res.send('<h4>首頁<h4>');
-  let [result] = await pool.execute('SELECT name FROM product WHERE id < ?', [11]);
-  console.log('result',result);
-  res.json(result);
 });
 
-// ------------------
-
-// ---------------------
-
-
 
 // ----EC穗懷區
-const ecHpCommodityAPI = require('./routers/ECommerce/HomePage/recommendProduct');
-app.use('/api/1.0/product', ecHpCommodityAPI);
+const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
+app.use('/api/1.0/product', EcHomepagesAPI);
+
+const ECFilterAPI = require('./routers/ECommerce/Filter/filterProduct');
+app.use('/api/1.0/filter', ECFilterAPI);
 
 // ----EC穗懷區
-
-const userTESTAPI = require('./routers/test');
-app.use('/api/1.0/test', userTESTAPI);
 
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth');
