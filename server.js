@@ -16,12 +16,15 @@ const userAuthAPI = require('./routers/userAuth'); // ? 將 API route 整理於 
 app.use('/api/1.0/auth/user', userAuthAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
 
 app.get('/', (req, res) => {
-  res.send('<h4>首頁f<h4>');
+  res.send('<h4>首頁<h4>');
 });
 
 // ----社群luis區
 const CommunityTEST = require('./routers/post');
 app.use('/api/1.0/community', CommunityTEST);
+
+const recommendProductAPI = require('./routers/postRecommend');
+app.use('/api/1.0/post', recommendProductAPI);
 
 // ----社群luis區 要比404前面
 
