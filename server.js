@@ -25,8 +25,7 @@ app.use('/api/1.0/product', EcHomepagesAPI);
 
 const ECFilterAPI = require('./routers/ECommerce/Filter/filterProduct');
 app.use('/api/1.0/filter', ECFilterAPI);
-const ECFilterPagesAPI = require('./routers/ECommerce/Filter/filterProduct');
-app.use('/api/1.0/filter', ECFilterAPI);
+
 
 // ----EC穗懷區
 
