@@ -16,14 +16,20 @@ const userAuthAPI = require('./routers/userAuth'); // ? 將 API route 整理於 
 app.use('/api/1.0/auth/user', userAuthAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
 
 app.get('/', (req, res) => {
-  res.send('<h4>首頁f<h4>');
+  res.send('<h4>首頁<h4>');
 });
 
+//==== 孝強 ====//
+
+// CommunityHomePage //
+const communityHomePageAPI = require('./routers/Community/CommunityHomePage/homePage'); // ? 將 API route 整理於 ./routers 個別檔案中
+app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
+
+//==== 孝強 ====//
 app.use((req, res) => {
   console.log('這個頁面找不到');
   res.status(404).send('Not Found');
 });
-
 // = 錯誤處理中間件，四個參數，第一個為 error
 app.use((err, req, res, next) => {
   console.error('錯誤處理中間件', err);
