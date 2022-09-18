@@ -26,6 +26,15 @@ const communityHomePageAPI = require('./routers/Community/CommunityHomePage/home
 app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
 
 //==== 孝強 ====//
+// ----社群luis區
+const CommunityTEST = require('./routers/post');
+app.use('/api/1.0/community', CommunityTEST);
+
+const recommendProductAPI = require('./routers/postRecommend');
+app.use('/api/1.0/post', recommendProductAPI);
+
+// ----社群luis區 要比404前面
+
 app.use((req, res) => {
   console.log('這個頁面找不到');
   res.status(404).send('Not Found');
