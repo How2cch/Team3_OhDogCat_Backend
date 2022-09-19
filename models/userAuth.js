@@ -18,9 +18,15 @@ const isLoginUserExist = async (user) => {
   }
 };
 
-const insertUser = async (user, hashPassword) => {
+const insertUser = async (user) => {
   try {
-    const [result] = await pool.execute('INSERT INTO user (email, password, social_name) VALUE (?, ?, ?)', [user.email, hashPassword, user.socialName]);
+    const [result] = await pool.execute('INSERT INTO user (email, password, social_name, photo, create_time) VALUE (?, ?, ?, ?, ?)', [
+      user.email,
+      user.password,
+      user.social_name,
+      user.photo,
+      user.create_time,
+    ]);
     return result;
   } catch (error) {
     console.error(error);

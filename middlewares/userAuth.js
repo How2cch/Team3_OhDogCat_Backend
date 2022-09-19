@@ -1,4 +1,5 @@
 const { body } = require('express-validator');
+const session = require('express-session');
 
 const registerRules = [
   body('email').isEmail().withMessage('Email 欄位格式錯誤'),
@@ -11,9 +12,9 @@ const registerRules = [
 ];
 const loginRules = [body('email').isEmail().withMessage('Email 格式錯誤'), body('password').isLength({ min: 8 }).withMessage('密碼格式錯誤')];
 
-const checkLogin = (req, res, next) => {
-  if (!req.session.user) return res.status(401).json({ message: '尚未登入' });
+const authVerify = (req, res, next) => {
+  if (!req.session.user) return res.status(401).json({ login: false, message: '無登入權限' });
   next();
 };
 
-module.exports = { registerRules, loginRules, checkLogin };
+module.exports = { registerRules, loginRules, authVerify };
