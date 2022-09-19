@@ -8,6 +8,6 @@ router.post('/login', authMiddleware.loginRules, authController.userLogin);
 router.get('/register/line', authController.userLineRegister);
 router.post('/login/line', authController.userLineLogin);
 router.get('/logout', authController.userLogout);
-router.get('/vertify', authController.userVertifyStatus);
+router.get('/verify', authController.userVerifyStatus);
 
 module.exports = router;

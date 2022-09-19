@@ -1,5 +1,4 @@
 const { body } = require('express-validator');
-const session = require('express-session');
 
 const registerRules = [
   body('email').isEmail().withMessage('Email 欄位格式錯誤'),

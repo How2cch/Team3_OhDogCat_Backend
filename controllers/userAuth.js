@@ -173,7 +173,7 @@ const userLogout = async (req, res) => {
   res.status(201).json({ status: 'ok', message: '登出成功' });
 };
 
-const userVertifyStatus = async (req, res) => {
+const userVerifyStatus = async (req, res) => {
   console.log('初次驗證 sess id', req.sessionID);
   console.log('session ====================', req.session);
   console.log('用戶進行登入驗證');
@@ -186,4 +186,4 @@ const userVertifyStatus = async (req, res) => {
   }
 };
 
-module.exports = { userRegister, userLogin, userLogout, userVertifyStatus, userLineLogin, userLineRegister };
+module.exports = { userRegister, userLogin, userLogout, userVerifyStatus, userLineLogin, userLineRegister };
