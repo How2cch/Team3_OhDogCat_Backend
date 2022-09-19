@@ -23,6 +23,9 @@ app.get('/', (req, res) => {
 const CommunityTEST = require('./routers/post');
 app.use('/api/1.0/community', CommunityTEST);
 
+const TripTEST = require('./routers/post');
+app.use('/api/1.0/tripfetch', TripTEST);
+
 const recommendProductAPI = require('./routers/postRecommend');
 app.use('/api/1.0/post', recommendProductAPI);
 
