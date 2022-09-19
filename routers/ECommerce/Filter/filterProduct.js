@@ -2,6 +2,7 @@ const express = require('express');
 const router = express();
 const pool = require('../../../utils/db');
 
+//
 router.get('/choices', async (req, res) => {
   // console.log(req.query);
   try {
@@ -24,52 +25,84 @@ router.get('/choices', async (req, res) => {
     console.error(error);
   }
 });
-
 router.get('/products', async (req, res) => {
+  const { typeId, order, search, page, maxPrice, minPrice, tag } = req.query;
   console.log(req.query);
   console.log('==============================');
 
   try {
-    // 取得商品資料-------------------
-    let [result] = await pool.execute(
-      'SELECT name,intro,price,per_score,main_photo,photo_path FROM `product` WHERE product_type_id = ? ',
-      [2]
-    );
-    console.log(result);
-    // res.json(result);
-
     // 取得頁數---------------------
+    const page = req.query.page || 1;
+    const typeId = req.query.typeId || 2;
 
-    // /pages/:storeId
-    // const stockId = req.params.stockId;
-    const typeId = 2;
-    console.log(req.query);
-    // 分頁
-    // 透過 query string 取得目前要第幾頁的資料
-    // 如果沒有設定，就預設要第一頁的資料
-    let page = req.query.page || 1;
-    // let page = 1;
+    // TODO搜尋
+    const searchWord = search ? `AND name LIKE '%${search}%'` : '';
+    const tagArray = tag.split(',');
+    let tagSelect = 'AND';
+    if (tagArray.length === 0) {
+      tagSelect = '';
+    } else {
+      for (let i = 0; i < tagArray.length; i++) {
+        if (i === tagArray.length - 1) {
+          tagSelect += ` product_tag LIKE '%${tagArray[i]}%'`;
+        } else {
+          tagSelect += ` product_tag LIKE '%${tagArray[i]}%' OR `;
+        }
+      }
+    }
+    console.log('====================================');
+    console.log(tagSelect);
+    console.log('====================================');
+
+    const priceCount =
+      maxPrice || minPrice
+        ? AND(`price BETWEEN ${minPrice} AND ${maxPrice}`)
+        : '';
+    // orderType
+    let orderType = null;
+    switch (order) {
+      case '1':
+        orderType = 'price ASC';
+        break;
+      case '2':
+        orderType = 'price DESC';
+        break;
+      case '3':
+        orderType = 'per_score DESC';
+        break;
+      case '4':
+        orderType = 'per_score ASC';
+        break;
+      default:
+        orderType = 'id ASC';
+    }
 
     // 每一頁拿五筆資料
-    const perPage = 1;
+    const perPage = 5;
     // 取得總筆數
-    const [total] = await pool.execute(
-      'SELECT COUNT(*) AS total FROM product WHERE product_type_id= ?',
-      [typeId]
+    let [total] = await pool.execute(
+      `SELECT COUNT(*) AS total FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} `
     );
+
+    console.log('====================================');
+    console.log('total', total);
+    console.log('====================================');
     const totalAll = total[0].total;
-    // console.log(totalAll);
-    // 計算總頁數 Math.ceil
     let lastPage = Math.ceil(totalAll / perPage);
-
-    // 計算 offset
     const offset = perPage * (page - 1);
+    let newSql = `LIMIT ${perPage} OFFSET ${offset}`;
 
-    // 根據 perPage 及 offset 去取得資料
     let [data] = await pool.execute(
-      'SELECT name,intro,price,per_score,main_photo,photo_path FROM `product` WHERE product_type_id = ? ORDER BY ? LIMIT ? OFFSET ?',
-      [typeId, req.query.sortid, perPage, offset]
+      `SELECT name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} ${newSql} `
     );
+    console.log(
+      'SQL ==================',
+      `SELECT name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} ${newSql} `
+    );
+
+    console.log('====================================');
+    console.log(data);
+    console.log('====================================');
 
     // 把取得的資料回覆給前端
     res.json({
@@ -81,60 +114,10 @@ router.get('/products', async (req, res) => {
         offset,
       },
       data,
-      // result,
     });
   } catch (error) {
     console.error(error);
   }
 });
 
-// 沒有用
-// router.get('/products/:stockId', async (req, res, next) => {
-//   try {
-//     // /pages/:stockId
-//     // const stockId = req.params.stockId;
-//     const stockId = 2;
-
-//     // 分頁
-//     // 透過 query string 取得目前要第幾頁的資料
-//     // 如果沒有設定，就預設要第一頁的資料
-//     let page = req.query.page || 1;
-//     // let page = 1;
-
-//     // 每一頁拿五筆資料
-//     const perPage = 5;
-//     // 取得總筆數
-//     const [total] = await pool.execute(
-//       'SELECT COUNT(*) AS total FROM product WHERE product_type_id= ?',
-//       [stockId]
-//     );
-//     // console.log(total);
-//     const totalAll = total[0].total;
-//     // console.log(totalAll);
-//     // 計算總頁數 Math.ceil
-//     let lastPage = Math.ceil(totalAll / perPage);
-
-//     // 計算 offset
-//     const offset = perPage * (page - 1);
-
-//     // 根據 perPage 及 offset 去取得資料
-//     let [data] = await pool.execute(
-//       'SELECT name,intro,price,per_score,main_photo,photo_path FROM `product` WHERE product_type_id = ? ORDER BY id LIMIT ? OFFSET ?',
-//       [stockId, perPage, offset]
-//     );
-
-//     // 把取得的資料回覆給前端
-//     res.json({
-//       pagesDetail: {
-//         total, // 總共有幾筆
-//         perPage, // 一頁有幾筆
-//         page, // 目前在第幾頁
-//         lastPage, // 總頁數
-//       },
-//       data,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//   }
-// });
-// module.exports = router;
+module.exports = router;
