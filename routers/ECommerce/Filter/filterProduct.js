@@ -50,13 +50,10 @@ router.get('/products', async (req, res) => {
         }
       }
     }
-    console.log('====================================');
-    console.log(tagSelect);
-    console.log('====================================');
 
     const priceCount =
       maxPrice || minPrice
-        ? AND(`price BETWEEN ${minPrice} AND ${maxPrice}`)
+        ? `AND (price BETWEEN ${minPrice} AND ${maxPrice})`
         : '';
     // orderType
     let orderType = null;
@@ -84,25 +81,14 @@ router.get('/products', async (req, res) => {
       `SELECT COUNT(*) AS total FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} `
     );
 
-    console.log('====================================');
-    console.log('total', total);
-    console.log('====================================');
     const totalAll = total[0].total;
     let lastPage = Math.ceil(totalAll / perPage);
     const offset = perPage * (page - 1);
-    let newSql = `LIMIT ${perPage} OFFSET ${offset}`;
 
+    let newSql = `LIMIT ${perPage} OFFSET ${offset}`;
     let [data] = await pool.execute(
       `SELECT name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} ${newSql} `
     );
-    console.log(
-      'SQL ==================',
-      `SELECT name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} ${newSql} `
-    );
-
-    console.log('====================================');
-    console.log(data);
-    console.log('====================================');
 
     // 把取得的資料回覆給前端
     res.json({
