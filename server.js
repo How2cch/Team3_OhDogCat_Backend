@@ -11,6 +11,27 @@ app.use(express.static(path.join(__dirname, 'public'))); // ? 設定可讀取靜
 
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
+
+// Rain 票卷相關
+const TravelTicketAPI = require('./routers/Travel/TravelTicket/TravelTicket');
+app.use('/api/1.0/travel', TravelTicketAPI);
+
+// Rain 行程規劃
+const TravelPlanning = require('./routers/Travel/TravlePlanning/TravelPlanning');
+app.use('/api/1.0/travelplanning', TravelPlanning);
+
+// Rain 新增行程名稱 日期
+const TraveldateSubmit = require('./routers/Travel/TraveldateSubmit/TraveldateSubmit');
+app.use('/api/1.0/', TraveldateSubmit);
+
+// Rain 新增詳細地點資訊
+const TraveldetailSumbit = require('./routers/Travel/Tripdetail/traveldetail');
+app.use('/api/1.0/', TraveldetailSumbit);
+
+// Rain 篩選標題 日期
+const TravelTitle = require('./routers/Travel/TravelTitle/TravelTitle');
+app.use('/api/1.0/travelTitle', TravelTitle);
+
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth'); // ? 將 API route 整理於 ./routers 個別檔案中
 app.use('/api/1.0/auth/user', userAuthAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
