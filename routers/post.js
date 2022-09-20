@@ -23,7 +23,21 @@ router.get('/post', async (req, res) => {
     console.error(error);
   }
 });
-module.exports = router;
+
+router.get('/searchList', async (req, res) => {
+  const { search } = req.query;
+  console.log(req.query);
+  try {
+    let [result] = await pool.execute(
+      `SELECT * FROM post WHERE (title LIKE '%${search}%') OR (content LIKE '%${search}%') OR (coordinate LIKE '%${search}%') OR (tags LIKE '%${search}%');`
+    );
+    console.log(result);
+    res.json(result);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 // 取行程貼文資料 需要關聯資料表
 // 關聯行程名稱 行程預計花費時間 行程貼文
@@ -42,17 +56,15 @@ router.get('/postTrip', async (req, res) => {
   }
 });
 
-module.exports = router;
-
-
 // 取全部貼文資料 首頁查詢用
 // 會員中心社群設定
+// NOTE:
 router.get('/', async (req, res) => {
   console.log(req.query);
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >= 1',
-      [1]
+      'SELECT * FROM post WHERE id < ? AND status >= 1',
+      [4]
     );
     console.log(result);
     res.json(result);
