@@ -14,8 +14,16 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
+    "express-mysql-session": "^2.1.8",
+    "express-session": "^1.17.3",
     "express-validator": "^6.14.2",
-    "mysql2": "^2.3.3"
+    "fs": "^0.0.1-security",
+    "jwt-decode": "^3.1.2",
+    "moment": "^2.29.4",
+    "mysql2": "^2.3.3",
+    "nodemailer": "^6.7.8",
+    "pug": "^3.0.2",
+    "qs": "^6.11.0"
   },
   "devDependencies": {
     "eslint-config-prettier": "^8.5.0",

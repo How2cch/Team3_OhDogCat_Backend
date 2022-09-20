@@ -1,17 +1,13 @@
 const express = require('express');
 const router = express();
-const bcrypt = require('bcrypt');
-const { validationResult } = require('express-validator');
-const { registerFormatRules } = require('../middlewares/userAuth.js');
-const pool = require('../utils/db');
-const path = require('path');
+const authMiddleware = require('../middlewares/userAuth.js');
+const authController = require('../controllers/userAuth');
 
-router.post('/register', registerFormatRules, (req, res) => {
-  const validation = validationResult(req);
-  console.log('validateResult', validation);
-  if (validation.errors.length > 0) console.log('error');
-  // res.status(401).json({ message: '測試' });
-  res.json(req.body);
-});
+router.post('/register', authMiddleware.registerRules, authController.userRegister);
+router.post('/login', authMiddleware.loginRules, authController.userLogin);
+router.get('/register/line', authController.userLineRegister);
+router.post('/login/line', authController.userLineLogin);
+router.get('/logout', authController.userLogout);
+router.get('/verify', authController.userVerifyStatus);
 
 module.exports = router;
