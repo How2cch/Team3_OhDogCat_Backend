@@ -19,6 +19,13 @@ app.get('/', (req, res) => {
   res.send('<h4>首頁<h4>');
 });
 
+//==== 孝強 ====//
+// CommunityHomePage //
+const communityHomePageAPI = require('./routers/Community/CommunityHomePage/homePage'); // ? 將 API route 整理於 ./routers 個別檔案中
+app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
+
+//==== 孝強 ====//
+
 // ----社群luis區
 const CommunityTEST = require('./routers/post');
 app.use('/api/1.0/community', CommunityTEST);
@@ -29,13 +36,13 @@ app.use('/api/1.0/tripfetch', TripTEST);
 const recommendProductAPI = require('./routers/postRecommend');
 app.use('/api/1.0/post', recommendProductAPI);
 
+
 // ----社群luis區 要比404前面
 
 app.use((req, res) => {
   console.log('這個頁面找不到');
   res.status(404).send('Not Found');
 });
-
 // = 錯誤處理中間件，四個參數，第一個為 error
 app.use((err, req, res, next) => {
   console.error('錯誤處理中間件', err);
