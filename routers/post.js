@@ -67,7 +67,7 @@ router.get('/trip', async (req, res) => {
   console.log(req.query);
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM ((post JOIN travel ON post.travel_id = travel.id) JOIN user ON post.user_id = user.id) JOIN travel_days AS daycount ON post.travel_id = daycount.travel_id WHERE travel.id =? AND post_type_id = 2',
+      'SELECT * FROM ((post JOIN travel ON post.travel_id = travel.id) JOIN user ON post.user_id = user.id) JOIN travel_days AS daycount ON post.travel_id = daycount.travel_id WHERE travel.id =? AND post_type_id = 2 ORDER BY days ASC, sort ASC',
       [134]
     );
     console.log(result);
