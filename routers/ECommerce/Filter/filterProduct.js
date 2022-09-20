@@ -35,9 +35,10 @@ router.get('/products', async (req, res) => {
     const page = req.query.page || 1;
     const typeId = req.query.typeId || 2;
 
-    // TODO搜尋
     const searchWord = search ? `AND name LIKE '%${search}%'` : '';
-    const tagArray = tag.split(',');
+    // if (tag) {
+    // TODO搜尋
+    let tagArray = tag.split(',');
     let tagSelect = 'AND';
     if (tagArray.length === 0) {
       tagSelect = '';
@@ -50,6 +51,8 @@ router.get('/products', async (req, res) => {
         }
       }
     }
+    // }
+    const tagResult = tag ? tagSelect : '';
 
     const priceCount =
       maxPrice || minPrice
@@ -78,7 +81,7 @@ router.get('/products', async (req, res) => {
     const perPage = 5;
     // 取得總筆數
     let [total] = await pool.execute(
-      `SELECT COUNT(*) AS total FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} `
+      `SELECT COUNT(*) AS total FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagResult} ${priceCount} ORDER BY ${orderType} `
     );
 
     const totalAll = total[0].total;
@@ -87,7 +90,7 @@ router.get('/products', async (req, res) => {
 
     let newSql = `LIMIT ${perPage} OFFSET ${offset}`;
     let [data] = await pool.execute(
-      `SELECT name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord} ${tagSelect} ${priceCount} ORDER BY ${orderType} ${newSql} `
+      `SELECT name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord}${tagResult}${priceCount} ORDER BY ${orderType} ${newSql} `
     );
 
     // 把取得的資料回覆給前端
