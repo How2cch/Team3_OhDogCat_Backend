@@ -8,16 +8,33 @@ const authMiddleware = require('../../../middlewares/userAuth');
 // TODO記得驗證登入
 router.post(
   '/product/:productId',
-  // authMiddleware.authVerify,
+  authMiddleware.authVerify,
   async (req, res) => {
-    console.log(req.param('productId'));
+    const product_id = req.params.productId;
+    const user_id = req.session.user.id;
+    console.log('user', user_id);
     try {
-      // const [collectData] = await pool.execute(
-      //   `SELECT * FROM favorite WHERE product_id =?`,
-      //   [productId]
-      // );
-      // console.log(product);
-      res.json(product);
+      const [isExist] = await pool.execute(
+        `SELECT * FROM favorite WHERE product_id = ? `,
+        [product_id]
+      );
+      let result;
+      if (!isExist[0]) {
+        console.log('新增');
+        result = await pool.execute(
+          `INSERT INTO favorite (product_id, user_id) VALUE (?, ?)`,
+          [product_id, user_id]
+        );
+      } else {
+        console.log('刪除');
+        result = await pool.execute(
+          `DELETE FROM favorite WHERE  product_id = ? AND user_id = ?`,
+          [product_id, user_id]
+        );
+      }
+      res.json(
+        isExist[0] ? { message: '已成功移除收藏' } : { message: '已成功收藏' }
+      );
     } catch (error) {
       console.error(error);
     }
