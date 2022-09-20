@@ -44,6 +44,15 @@ app.get('/register-vetify', (req, res) => {
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 
+// ----EC穗懷區
+const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
+app.use('/api/1.0/product', EcHomepagesAPI);
+
+const ECFilterAPI = require('./routers/ECommerce/Filter/filterProduct');
+app.use('/api/1.0/filter', ECFilterAPI);
+
+// ----EC穗懷區
+
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth'); // ? 將 API route 整理於 ./routers 個別檔案中
 app.use('/api/1.0/auth/user', userAuthAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
