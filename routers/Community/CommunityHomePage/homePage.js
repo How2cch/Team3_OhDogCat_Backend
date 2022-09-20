@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
     const [searchResult] = await pool.execute(
       `SELECT * FROM post WHERE (title LIKE '%${search}%') OR (content LIKE '%${search}%') OR (coordinate LIKE '%${search}%') OR (tags LIKE '%${search}%');`
     );
-    console.log('searchResult1312312313123', searchResult);
+    console.log('searchResult', searchResult);
     res.json(searchResult);
   } catch (error) {
     console.error(error);
