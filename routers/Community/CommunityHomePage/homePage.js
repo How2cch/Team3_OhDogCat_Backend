@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// NOTE: 網美貼文，條件應為追蹤數，目前暫定用 id 10 以下
+// NOTE: 網美貼文，條件應為追蹤數，目前暫定 id 10 以下
 router.get('/kolPost', async (req, res) => {
   console.log(req.query);
   try {

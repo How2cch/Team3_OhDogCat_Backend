@@ -20,7 +20,6 @@ app.get('/', (req, res) => {
 });
 
 //==== 孝強 ====//
-
 // CommunityHomePage //
 const communityHomePageAPI = require('./routers/Community/CommunityHomePage/homePage'); // ? 將 API route 整理於 ./routers 個別檔案中
 app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
