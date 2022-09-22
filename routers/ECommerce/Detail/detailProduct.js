@@ -6,12 +6,12 @@ const pool = require('../../../utils/db');
 // const { registerFormatRules } = require('../middlewares/userAuth.js');
 // const path = require('path');
 
-//  ${API_URL}/api/1.0/productdetail/item
-
+// 商品細節細項
+//  ${API_URL}/api/1.0/productdetail/item?
 router.get('/item', async (req, res) => {
-  console.log(req.query);
+  // console.log(req.query);
   let [result] = await pool.execute(
-    `SELECT id,name,intro,price,per_score,main_photo,photo_path,product_tag,description,photo.file_name FROM product JOIN product_photo AS photo ON product.id = photo.product_id WHERE product.id = ${req.query.id}`
+    `SELECT id,product_type_id,name,intro,price,per_score,main_photo,photo_path,product_tag,description,photo.file_name FROM product JOIN product_photo AS photo ON product.id = photo.product_id WHERE product.id = ${req.query.id}`
   );
   let newArr = [];
   result.forEach((data) => {
@@ -46,4 +46,20 @@ router.get('/item', async (req, res) => {
   res.json(newArr[0]);
 });
 
+// 推薦商品
+//  ${API_URL}/api/1.0/productdetail/recommend?
+
+router.get('/recommend', async (req, res) => {
+  // console.log(req.query);
+  try {
+    const [recommend] = await pool.execute(
+      `SELECT name, price,photo_path,main_photo FROM product WHERE product_type_id = 4 ORDER BY RAND() LIMIT ?`,
+      [2]
+    );
+    console.log(recommend);
+    res.json(recommend);
+  } catch (error) {
+    console.error(error);
+  }
+});
 module.exports = router;
