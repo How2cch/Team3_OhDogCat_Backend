@@ -4,5 +4,8 @@ const adminController = require('../controllers/userAdmin');
 const authMiddleware = require('../middlewares/userAuth.js');
 
 router.post('/edit/social_name', authMiddleware.authVerify, adminController.userEditSocialName);
+router.post('/edit/profile');
+router.get('/voucher', adminController.userReadVouchers);
+router.get('/voucher/exchange/:productId', adminController.userGetVouchersId);
 
 module.exports = router;

@@ -31,28 +31,30 @@ let products = [];
 //     }
 //   })();
 
-//   // = 寫入寵物商品假資料
-//   await (async () => {
-//     let result = await fs.readFile(`./json/total.json`, 'utf-8');
-//     result = JSON.parse(result);
-//     for (const [index, item] of result.entries()) {
-//       try {
-//         let r = await pool.execute('INSERT IGNORE INTO product (product_type_id, name, store_id, description, price, product_status, per_score) VALUE (?, ?, ?, ?, ?, ?, ?)', [
-//           4,
-//           item.title,
-//           Number(item.store),
-//           item.desciption,
-//           index + 500,
-//           1,
-//           4 + (index % 10 === 0 ? 1 : (index % 10) / 10),
-//         ]);
-//         // console.log(4 + (index % 10 === 0 ? 1 : (index % 10) / 10));
-//         console.log('寵物商品第' + (index + 1) + '筆已寫入');
-//       } catch (error) {
-//         console.log('error', error);
-//       }
+// // = 寫入寵物商品假資料
+// await (async () => {
+//   let result = await fs.readFile(`./json/total.json`, 'utf-8'); // todo: 讀檔案
+//   result = JSON.parse(result); // todo: 檔案內容轉 JSON
+//   // todo: 針對剛剛的結果跑 for
+//   for (const [index, item] of result.entries()) {
+//     try {
+//       // todo: 寫進資料庫
+//       let r = await pool.execute('INSERT IGNORE INTO product (product_type_id, name, store_id, description, price, product_status, per_score) VALUE (?, ?, ?, ?, ?, ?, ?)', [
+//         4,
+//         item.title,
+//         Number(item.store),
+//         item.desciption,
+//         index + 500,
+//         1,
+//         4 + (index % 10 === 0 ? 1 : (index % 10) / 10),
+//       ]);
+//       // console.log(4 + (index % 10 === 0 ? 1 : (index % 10) / 10));
+//       console.log('寵物商品第' + (index + 1) + '筆已寫入');
+//     } catch (error) {
+//       console.log('error', error);
 //     }
-//   })();
+//   }
+// })();
 
 //   // = 整理圖片後讀取素材資料，一併寫入 DB
 //   let product_type = await fs.readdir(`./public/product`);
