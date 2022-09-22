@@ -6,9 +6,9 @@ const pool = require('../../../utils/db');
 // const { registerFormatRules } = require('../middlewares/userAuth.js');
 // const path = require('path');
 
-//  ${API_URL}/api/1.0/productdetail
+//  ${API_URL}/api/1.0/productdetail/item
 
-router.get('/', async (req, res) => {
+router.get('/item', async (req, res) => {
   console.log(req.query);
   let [result] = await pool.execute(
     `SELECT id,name,intro,price,per_score,main_photo,photo_path,product_tag,description,photo.file_name FROM product JOIN product_photo AS photo ON product.id = photo.product_id WHERE product.id = ${req.query.id}`
