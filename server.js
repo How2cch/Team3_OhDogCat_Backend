@@ -45,32 +45,32 @@ app.get('/register-vetify', (req, res) => {
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 
 // =============雨信區
-//Rain 票卷相關
-const TravelTicketAPI = require('./routers/Travel/TravelTicket/TravelTicket');
-app.use('/api/1.0/travel', TravelTicketAPI);
 
-// Rain 行程規劃
-const TravelPlanning = require('./routers/Travel/TravlePlanning/TravelPlanning');
-app.use('/api/1.0/travelplanning', TravelPlanning);
+//Rain 票卷相關 //userid title 開始時間相關
 
-// Rain 新增行程名稱 日期
+const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
+app.use('/api/1.0/', TravelGetAPI);
+
+// Rain post新增行程名稱 日期
 const TraveldateSubmit = require('./routers/Travel/TraveldateSubmit/TraveldateSubmit');
 app.use('/api/1.0/', TraveldateSubmit);
 
-// Rain 新增詳細地點資訊
-const TraveldetailSumbit = require('./routers/Travel/Tripdetail/traveldetail');
-app.use('/api/1.0/', TraveldetailSumbit);
+// Rain post新增詳細地點資訊
+const TraveldetailSumbits = require('./routers/Travel/Tripdetail/traveldetail');
+app.use('/api/1.0/', TraveldetailSumbits);
 
-// Rain 篩選標題 日期
-const TravelTitle = require('./routers/Travel/TravelTitle/TravelTitle');
-app.use('/api/1.0/travelTitle', TravelTitle);
+// Rain post更改日期 travel title
+const TraveldetailUpdate = require('./routers/Travel/Travel_post_LocationID/travelLocationID');
+app.use('/api/1.0/', TraveldetailUpdate);
+
+// =============雨信區
+
 // ----EC穗懷區
 const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
 app.use('/api/1.0/product', EcHomepagesAPI);
 
 const ECFilterAPI = require('./routers/ECommerce/Filter/filterProduct');
 app.use('/api/1.0/filter', ECFilterAPI);
-// =============雨信區
 
 // ----EC穗懷區
 
