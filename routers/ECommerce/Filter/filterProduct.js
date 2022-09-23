@@ -2,12 +2,16 @@ const express = require('express');
 const router = express();
 const pool = require('../../../utils/db');
 
+
 //取得篩選選項
+// = /api/1.0/filter/choices
 router.get('/choices', async (req, res) => {
   // console.log(req.query);
+  const typeId = req.query.typeId || 2;
+
   try {
     let [result] = await pool.execute(
-      'SELECT cate.id as cate_id, cate.name AS cate_name, tag.name AS tag_name, tag.id AS tag_id FROM product_tag as tag JOIN product_tag_category AS cate ON tag.tag_category_id = cate.id WHERE tag.product_type_id = 2 ORDER BY `tag_id` ASC'
+      `SELECT cate.id as cate_id, cate.name AS cate_name, tag.name AS tag_name, tag.id AS tag_id FROM product_tag as tag JOIN product_tag_category AS cate ON tag.tag_category_id = cate.id WHERE tag.product_type_id = ${typeId} ORDER BY tag_id ASC`
     );
     let newArr = [];
     result.forEach((data) => {

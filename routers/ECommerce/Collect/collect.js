@@ -4,7 +4,7 @@ const pool = require('../../../utils/db');
 
 const authMiddleware = require('../../../middlewares/userAuth');
 
-//  /api/1.0/collect
+//  /api/1.0/collect/product/:productId
 // TODO記得驗證登入
 router.post(
   '/product/:productId',

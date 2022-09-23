@@ -63,6 +63,10 @@ app.use('/api/1.0/collect', CollectAPI);
 const DetailAPI = require('./routers/ECommerce/Detail/detailProduct');
 app.use('/api/1.0/productdetail', DetailAPI);
 
+// ----Cart購物車
+const CartAPI = require('./routers/ECommerce/Cart/cart');
+app.use('/api/1.0/cart', CartAPI);
+
 // ============================================================================================EC穗懷區
 
 // = user 登入註冊相關
