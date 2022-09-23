@@ -81,7 +81,6 @@ app.use('/api/1.0/tripfetch', TripTEST);
 const recommendProductAPI = require('./routers/postRecommend');
 app.use('/api/1.0/post', recommendProductAPI);
 
-
 // ----社群luis區 要比404前面
 
 app.use((req, res) => {

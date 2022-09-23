@@ -5,7 +5,41 @@ const pool = require('../utils/db');
 
 // const path = require('path');
 
-// 取一般貼文資料 luis
+// 取全部貼文資料 首頁查詢用luis
+// 會員中心社群設定
+// NOTE:
+router.get('/', async (req, res) => {
+  console.log(req.query);
+  try {
+    let [result] = await pool.execute(
+      'SELECT * FROM post WHERE id >= ? AND status >= 1  ',
+      [1]
+    );
+    console.log(result);
+    res.json(result);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.post('/', async (req, res) => {
+  let myPostID = req.body.id;
+  console.log(req.query);
+  try {
+    let [result] = await pool.execute(
+      ' UPDATE post SET status =0 WHERE id = ?',
+      [myPostID]
+    );
+    console.log(result);
+    res.json(result);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// 單獨取一般貼文資料 抬頭 luis
 router.get('/post', async (req, res) => {
   console.log(req.query);
   try {
@@ -24,6 +58,24 @@ router.get('/post', async (req, res) => {
   }
 });
 
+// 單獨取行程貼文資料 抬頭 luis
+router.get('/tripPost', async (req, res) => {
+  console.log(req.query);
+  try {
+    let [result] = await pool.execute(
+      'SELECT * FROM post WHERE id = ? AND status >= 1 AND post_type_id =2',
+      [3]
+    );
+    console.log(result);
+    res.json(result);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// 搜尋列表
+
 router.get('/searchList', async (req, res) => {
   const { search } = req.query;
   console.log(req.query);
@@ -39,13 +91,12 @@ router.get('/searchList', async (req, res) => {
   }
 });
 
-// 取行程貼文資料 需要關聯資料表 luis
-// 關聯行程名稱 行程預計花費時間 行程貼文
-router.get('/postTrip', async (req, res) => {
+// 匯入行程(travel)＋ (travel_days)編輯用
+router.get('/tripDetailImport', async (req, res) => {
   console.log(req.query);
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >= 1 AND post_type_id =2',
+      'SELECT * FROM travel JOIN travel_days AS daycount ON travel.id = daycount.travel_id WHERE travel.id =? AND travel.valid =1 AND daycount.valid = 1  ORDER BY days ASC, sort ASC',
       [1]
     );
     console.log(result);
@@ -56,14 +107,12 @@ router.get('/postTrip', async (req, res) => {
   }
 });
 
-module.exports = router;
-
-// 單獨取行程＋明細 編輯用
-router.get('/postTripEdit', async (req, res) => {
+// 行程貼文 (post)關聯(travel)日程景點明細(travel_days) （匯入景點資訊）可在關聯景點貼文內容
+router.get('/tripPostDetail', async (req, res) => {
   console.log(req.query);
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM travel JOIN travel_days AS daycount ON travel.id = daycount.travel_id WHERE travel.id =? AND travel.valid =1 AND daycount.valid = 1',
+      'SELECT * FROM ((post JOIN travel ON post.travel_id = travel.id) JOIN user ON post.user_id = user.id) JOIN travel_days AS daycount ON post.travel_id = daycount.travel_id WHERE post.travel_id =? ORDER BY days ASC, sort ASC',
       [134]
     );
     console.log(result);
@@ -74,41 +123,71 @@ router.get('/postTripEdit', async (req, res) => {
   }
 });
 
-module.exports = router;
+// 回傳資料
+router.post('/tripPostDetailEdit', async (req, res) => {
+  console.log('tripPostDetailEdit 被請求');
+  // console.log('updateObject', req.body.updateObject);
+  const { travel_id, title, coordinate, tags } = req.body.updateObject;
+  // console.log('locateDetail', req.body.locateDetail);
+  const { id, locate_context, locate_duration } = req.body.locateDetail;
+  // let [locateDetail] = req.body.locateDetail;
+  // console.log('locateid', id);
+  // console.log('locatecontext', locate_context);
+  // console.log('locateduration', locate_duration);
 
-// 取行程資料關聯日程景點明細 （匯入景點資訊）可在關聯景點貼文內容
-router.get('/trip', async (req, res) => {
-  console.log(req.query);
-  try {
-    let [result] = await pool.execute(
-      'SELECT * FROM ((post JOIN travel ON post.travel_id = travel.id) JOIN user ON post.user_id = user.id) JOIN travel_days AS daycount ON post.travel_id = daycount.travel_id WHERE travel.id =? AND post_type_id = 2 ORDER BY days ASC, sort ASC',
-      [134]
-    );
-    console.log(result);
-    res.json(result);
-    // 轉換成JSON格式
-  } catch (error) {
-    console.error(error);
+  let newArrID = [];
+  for (let i = 0; i < id.length; i++) {
+    // console.log(i);
+    newArrID = [...id[0], ...id[i]];
   }
-});
+  // console.log(newArrID);
 
-module.exports = router;
+  let newArrContext = [];
+  for (let i = 0; i < id.length; i++) {
+    // console.log(i);
+    newArrContext = [...locate_context[0], ...locate_context[i]];
+  }
+  // console.log(newArrContext);
 
-// 取全部貼文資料 首頁查詢用luis
-// 會員中心社群設定
-// NOTE:
-router.get('/', async (req, res) => {
-  console.log(req.query);
+  let newArrDuration = [];
+  for (let i = 0; i < id.length; i++) {
+    // console.log(i);
+    newArrDuration = [...locate_duration[0], ...locate_duration[i]];
+  }
+  // console.log(newArrDuration);
+
+  let newLocatData = {};
+  // for (let j = 0; j < newArrID.length; j++) {
+  //   // console.log(j);
+  //   newLocatData = {
+  //     id: newArrID[j],
+  //     context: newArrContext[j],
+  //     duration: newArrDuration[j],
+  //   };
+  //   // console.log(newLocatData);
+  // }
+
   try {
-    let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >= 1 ',
-      [1]
+    for (let j = 0; j < newArrID.length; j++) {
+      let [resultTravel_days] = await pool.execute(
+        `UPDATE travel_days SET locate_duration = ?,locate_context = ? WHERE id = ?`,
+        [newArrDuration[j], newArrContext[j], newArrID[j]]
+      );
+      // console.log(j);
+      // console.log(newLocatData);
+    }
+
+    // console.log(newLocatData.duration, newLocatData.context, newLocatData.id);
+    let [resultPost] = await pool.execute(
+      'UPDATE post SET post_title= ?,coordinate=?,tags =? WHERE travel_id = ?',
+      [title, coordinate, tags, travel_id]
     );
-    console.log(result);
-    res.json(result);
+    // console.log('result', resultPost);
+    return res.json({ message: '更新資料ＯＫ', data: resultPost });
     // 轉換成JSON格式
   } catch (error) {
-    console.error(error);
+    console.error(error, '更新資料錯誤');
+    return res.status(500).json({ message: '錯誤' });
   }
 });
 
