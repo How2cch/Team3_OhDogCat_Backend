@@ -16,7 +16,7 @@ router.get('/choices', async (req, res) => {
     let newArr = [];
     result.forEach((data) => {
       const { cate_id, cate_name, ...newObject } = data;
-      console.log(data);
+      // console.log(data);
       if (newArr.length === 0 || cate_id !== newArr[newArr.length - 1].cate_id)
         return newArr.push({
           cate_id: cate_id,
