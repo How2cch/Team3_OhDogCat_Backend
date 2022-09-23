@@ -2,7 +2,6 @@ const express = require('express');
 const router = express();
 const pool = require('../../../utils/db');
 
-
 //取得篩選選項
 router.get('/choices', async (req, res) => {
   // console.log(req.query);
@@ -13,6 +12,7 @@ router.get('/choices', async (req, res) => {
     let newArr = [];
     result.forEach((data) => {
       const { cate_id, cate_name, ...newObject } = data;
+      console.log(data);
       if (newArr.length === 0 || cate_id !== newArr[newArr.length - 1].cate_id)
         return newArr.push({
           cate_id: cate_id,
@@ -26,6 +26,7 @@ router.get('/choices', async (req, res) => {
     console.error(error);
   }
 });
+
 //取得商品列表
 router.get('/products', async (req, res) => {
   const { typeId, order, search, page, maxPrice, minPrice, tag } = req.query;
@@ -92,7 +93,7 @@ router.get('/products', async (req, res) => {
 
     let newSql = `LIMIT ${perPage} OFFSET ${offset}`;
     let [data] = await pool.execute(
-      `SELECT id,name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord}${tagResult}${priceCount} ORDER BY ${orderType} ${newSql} `
+      `SELECT id,product_type_id,name,intro,price,per_score,main_photo,photo_path,product_tag FROM product WHERE product_type_id = ${typeId} ${searchWord}${tagResult}${priceCount} ORDER BY ${orderType} ${newSql} `
     );
 
     // 把取得的資料回覆給前端
