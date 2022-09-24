@@ -6,7 +6,7 @@ const pool = require('../../../utils/db');
 router.get('/recommendProduct', async (req, res) => {
   try {
     const [product] = await pool.execute(
-      `SELECT id, product_type_id,name, description, price, per_score,photo_path,main_photo FROM product WHERE product_type_id = ${req.query.typeId} And description LIKE '%${req.query.keyword}%'`
+      `SELECT id, product_type_id,name, description, price, per_score,photo_path,main_photo FROM product WHERE product_type_id = ${req.query.typeId} And product_tag LIKE '%${req.query.keyword}%'`
     );
     // console.log(product);
     res.json(product);

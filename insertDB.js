@@ -18,32 +18,32 @@ let products = [];
 // })();
 
 // (async () => {
-//   // = 建立寵物商品店家
-//   await (async () => {
-//     let storeArr = [
-//       '寵愛一生',
-//       '寵沙啦',
-//       '毛手毛腳',
-//       '毛落趣',
-//       '貓咪加百二',
-//       '米米貓貓',
-//       '躲貓貓',
-//       '汪汪先輩',
-//       '汪東汪西',
-//       '嗷嗚嗚嗚嗚',
-//     ];
-//     for (const item of storeArr) {
-//       try {
-//         let r = await pool.execute(
-//           'INSERT IGNORE INTO store (name) VALUE (?)',
-//           [item]
-//         );
-//         console.log(r);
-//       } catch (error) {
-//         console.log('error', error);
-//       }
-//     }
-//   })();
+  // = 建立寵物商品店家
+  await (async () => {
+    let storeArr = [
+      '寵愛一生',
+      '寵沙啦',
+      '毛手毛腳',
+      '毛落趣',
+      '貓咪加百二',
+      '米米貓貓',
+      '躲貓貓',
+      '汪汪先輩',
+      '汪東汪西',
+      '嗷嗚嗚嗚嗚',
+    ];
+    for (const item of storeArr) {
+      try {
+        let r = await pool.execute(
+          'INSERT IGNORE INTO store (name) VALUE (?)',
+          [item]
+        );
+        console.log(r);
+      } catch (error) {
+        console.log('error', error);
+      }
+    }
+  })();
 
 // // = 寫入寵物商品假資料
 // await (async () => {

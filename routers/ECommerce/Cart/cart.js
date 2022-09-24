@@ -47,42 +47,46 @@ router.post(
 );
 
 //  /api/1.0/cart/postreduce
-router.post('/postreduce', async (req, res) => {
-  // ? const user_id = req.session.user.id;
-  // ? const product_id = req.params.productId;
-  // const user_id = 1;
-  // const product_id = 520;
-  console.log(req.body);
-  try {
-    // 辨認購物車資料庫裡面有沒有相同的商品
-    const [isExist] = await pool.execute(
-      `SELECT * FROM cart WHERE user_id=? AND product_id = ? AND quantity>0 `,
-      [req.body.user_id, req.body.product_id]
-    );
-    const quantityNum = isExist[0]['quantity'];
-    console.log(isExist[0]);
-    console.log(quantityNum);
-    // 加入購物車
-    if (isExist[0] && quantityNum > 1) {
-      console.log('減一');
-      result = await pool.execute(
-        `UPDATE cart SET quantity=quantity-1 WHERE user_id=? AND product_id =? `,
-        [user_id, product_id]
+router.post(
+  '/postreduce/:productId',
+  authMiddleware.authVerify,
+  async (req, res) => {
+    const user_id = req.session.user.id;
+    const product_id = req.params.productId;
+    // const user_id = 1;
+    // const product_id = 520;
+    console.log(req.body);
+    try {
+      // 辨認購物車資料庫裡面有沒有相同的商品
+      const [isExist] = await pool.execute(
+        `SELECT * FROM cart WHERE user_id=? AND product_id = ? AND quantity>0 `,
+        [req.body.user_id, req.body.product_id]
       );
-    } else {
-      console.log('刪除');
-      // result = await pool.execute(
-      //   ` DELETE FROM cart WHERE user_id=? AND product_id =? `,
-      //   [user_id, product_id]
-      // );
+      const quantityNum = isExist[0]['quantity'];
+      console.log(isExist[0]);
+      console.log(quantityNum);
+      // 加入購物車
+      if (isExist[0] && quantityNum > 1) {
+        console.log('減一');
+        result = await pool.execute(
+          `UPDATE cart SET quantity=quantity-1 WHERE user_id=? AND product_id =? `,
+          [user_id, product_id]
+        );
+      } else {
+        console.log('刪除');
+        // result = await pool.execute(
+        //   ` DELETE FROM cart WHERE user_id=? AND product_id =? `,
+        //   [user_id, product_id]
+        // );
+      }
+      res.send(
+        quantityNum > 1 ? { message: '-1' } : { message: '刪除' }
+        // { message: '已成功加入購物車' }
+      );
+    } catch (error) {
+      console.error(error);
     }
-    res.send(
-      quantityNum > 1 ? { message: '-1' } : { message: '刪除' }
-      // { message: '已成功加入購物車' }
-    );
-  } catch (error) {
-    console.error(error);
   }
-});
+);
 
 module.exports = router;
