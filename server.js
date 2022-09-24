@@ -51,14 +51,6 @@ app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有�
 const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
 app.use('/api/1.0/', TravelGetAPI);
 
-// Rain post新增行程名稱 日期
-const TraveldateSubmit = require('./routers/Travel/TraveldateSubmit/TraveldateSubmit');
-app.use('/api/1.0/', TraveldateSubmit);
-
-// Rain post新增詳細地點資訊
-const TraveldetailSumbits = require('./routers/Travel/Tripdetail/traveldetail');
-app.use('/api/1.0/', TraveldetailSumbits);
-
 // Rain post更改日期 travel title
 const TraveldetailUpdate = require('./routers/Travel/Travel_post_LocationID/travelLocationID');
 app.use('/api/1.0/', TraveldetailUpdate);

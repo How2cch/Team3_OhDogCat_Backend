@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express();
 const pool = require('../../../utils/db');
+const moment = require('moment');
 
 router.get('/travelTicket/title', async (req, res) => {
   let [result] = await pool.execute(
@@ -13,8 +14,23 @@ router.get('/travelTicket/title', async (req, res) => {
 //userid title 開始時間相關
 router.get('/travelTitle', async (req, res) => {
   let [result] = await pool.execute(
-    'SELECT  title, start_time,end_time , user_id FROM travel WHERE id = 1'
+    'SELECT   title, start_time,end_time , user_id FROM travel WHERE id = 1'
   );
+  res.json(result);
+});
+
+//行程規劃社群頁面用 目前抓ID 2~6 宣染到前端
+
+router.get('/travelCommunity', async (req, res) => {
+  let [result] = await pool.execute(
+    // 'SELECT id, title, start_time,end_time , user_id ,main_photo  FROM travel WHERE id >1 AND id < 7'
+    'SELECT * FROM (travel JOIN user ON travel.user_id = user.id ) ;'
+  );
+  // const startDate = moment([result].start_time);
+  // const endDate = moment([result].end_time);
+  // const differentDate = endDate.diff(startDate, 'days');
+  // console.log(startDate + '跟' + endDate + '相差' + differentDate + '天');
+  // console.log('differentDate', differentDate);
   res.json(result);
 });
 
