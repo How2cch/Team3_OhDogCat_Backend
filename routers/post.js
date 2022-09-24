@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express();
 const pool = require('../utils/db');
-// 資料庫連接
 
-// const path = require('path');
+const path = require('path');
 
 // 取一般貼文資料
 router.get('/post', async (req, res) => {
@@ -72,6 +71,80 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error(error);
   }
+});
+
+// TODO: 資料驗證 npm install express-validator
+
+const multer = require('multer');
+//  圖片存法
+const storage = multer.diskStorage({
+  // 設定存擋資料夾 /public/uploads
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname + '..', '..', 'public', 'uploads'));
+  },
+  filename: function (req, file, cb) {
+    console.log('file=========', file);
+    const ext = file.originalname.split('.').pop();
+    cb(null, `postData-${Date.now()}.${ext}`);
+  },
+});
+
+const uploader = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    if (
+      file.mimetype !== 'image/jpeg' &&
+      file.mimetype !== 'image/jpg' &&
+      file.mimetype !== 'image/png' &&
+      file.mimetype !== 'image/webp'
+    ) {
+      cb(new Error('上傳的檔案型態不接受'), false);
+    } else {
+      cb(null, true);
+    }
+  },
+  // 過濾檔案的大小
+  // limits: {
+  //   // 1k = 1024 => 200k = 200 * 1024
+  //   fileSize: 500 * 1024,
+  // },
+});
+
+// 所見即所得圖片上傳 //
+router.post('/uploadImages', uploader.single('files'), async (req, res, next) => {
+  try {
+    // 確認資料有沒有收到
+    console.log('postEdit', req.file.filename);
+    res.json(req.file.filename);
+  } catch (err) {
+    console.error(err);
+  } 
+});
+
+// 一般貼文上傳 //
+router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
+  try {
+    // 確認資料有沒有收到
+    console.log('postEdit', req.body);
+
+    let filename = req.file ? '/uploads/' + req.file.filename : '';
+    let result = await pool.execute(
+      'INSERT INTO post (post_type_id, title, content, main_photo, coordinate, tags) VALUES (?, ?, ?, ?, ?, ?);',
+      [
+        1,
+        req.body.title,
+        req.body.content,
+        filename,
+        req.body.location,
+        req.body.tags,
+      ]
+    );
+    console.log('insert new post', result);
+    // // 回覆前端
+    res.json({ message: 'ok' });
+  } catch (err) {
+    console.error(err);
+  } 
 });
 
 module.exports = router;
