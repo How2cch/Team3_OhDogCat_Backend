@@ -17,4 +17,16 @@ const updateSocialName = async (id, socialName) => {
     console.error(error);
   }
 };
-module.exports = { isSocialNameExist, updateSocialName };
+
+const getUserVoucher = async (id) => {
+  try {
+    const [data] = await pool.execute(
+      'SELECT product.id AS product_id, product.name AS product_name , product.intro, product.description, product.valid_time_start, product.valid_time_end, product.main_photo, product.photo_path , voucher.quantity, photo.file_name AS photos, store.name AS store_name, store.id AS store_id FROM (((`voucher` AS voucher JOIN product AS product ON voucher.product_id = product.id) LEFT JOIN product_photo AS photo ON voucher.product_id = photo.product_id ) JOIN store AS store ON product.store_id = store.id ) WHERE voucher.user_id = ?',
+      [id]
+    );
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+module.exports = { isSocialNameExist, updateSocialName, getUserVoucher };

@@ -6,7 +6,7 @@ const options = {
   database: process.env.DB_NAME,
   clearExpired: true,
   checkExpirationInterval: 900000,
-  expiration: (86400000 / 24 / 60) * 10, // ? 暫時設定十分鐘
+  expiration: (86400000 / 24 / 60) * 60, // ? 暫時設定60分鐘
 };
 
 module.exports = options;
