@@ -12,6 +12,7 @@ router.post(
   async (req, res) => {
     const product_id = req.params.productId;
     const user_id = req.session.user.id;
+    // const user_id = 1;
     console.log('user', user_id);
     try {
       const [isExist] = await pool.execute(

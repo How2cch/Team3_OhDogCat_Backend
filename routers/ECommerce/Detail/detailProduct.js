@@ -53,7 +53,7 @@ router.get('/recommend', async (req, res) => {
   // console.log(req.query);
   try {
     const [recommend] = await pool.execute(
-      `SELECT name, price,photo_path,main_photo FROM product WHERE product_type_id = 4 ORDER BY RAND() LIMIT ?`,
+      `SELECT id,name, price,photo_path,main_photo FROM product WHERE product_type_id = 4 ORDER BY RAND() LIMIT ?`,
       [2]
     );
     console.log(recommend);
