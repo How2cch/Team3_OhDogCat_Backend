@@ -40,17 +40,35 @@ router.post('/', async (req, res) => {
   }
 });
 
+// 按讚數統計：
+
+router.get('/likesStatic', async (req, res) => {
+  const postID = req.body.postID;
+  console.log('查詢該貼文按讚會員數', postID);
+  try {
+    let [result] = await pool.execute(
+      ' SELECT user_id FROM post_like WHERE post_id=?',
+      [postID]
+    );
+    console.log('該貼文的按讚人ＩＤ資訊', result);
+    res.json(result);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 // 按讚互動
 router.post('/likes', async (req, res) => {
   const likesState = req.body.likesState;
   const postID = req.body.postID;
   console.log(likesState, postID);
 
-  if (likesState) {
+  if (likesState === 1) {
     try {
-      console.log(1);
+      // console.log(1);
       let [addLike] = await pool.execute(
-        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 2)',
+        'DELETE FROM `post_like` WHERE post_id=?',
         [postID]
       );
       console.log(addLike);
@@ -61,9 +79,9 @@ router.post('/likes', async (req, res) => {
     }
   } else {
     try {
-      console.log(0);
+      // console.log(0);
       let [removeLike] = await pool.execute(
-        'DELETE FROM `post_like` WHERE post_id=?',
+        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 2)',
         [postID]
       );
       console.log(removeLike);
@@ -213,6 +231,24 @@ router.post('/tripPostDetailEdit', async (req, res) => {
   } catch (error) {
     console.error(error, '更新資料錯誤');
     return res.status(500).json({ message: '錯誤' });
+  }
+});
+
+// 行程貼文封面照片上傳
+router.post('/tripPostCoverUpload`', async (req, res) => {
+  const postID = req.body.postID;
+  const coverPhoto = req.body.preview;
+  console.log('post, coverphoto', postID, coverPhoto);
+  try {
+    let [coverPhotoUpload] = await pool.execute(
+      ' UPDATE post SET main_photo =? WHERE id = ?',
+      [coverPhoto, postID]
+    );
+    // console.log(deleteResult);
+    res.json(coverPhotoUpload);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
   }
 });
 
