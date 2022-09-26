@@ -69,12 +69,20 @@ app.get('/', (req, res) => {
 const communityHomePageAPI = require('./routers/Community/CommunityHomePage/homePage'); // ? 將 API route 整理於 ./routers 個別檔案中
 app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
 
+// 貼文編輯上傳
+
+// const communityPostEditAPI = require('./routers/post');
+// app.use('/api/1.0/post', communityPostEditAPI);
+
 //==== 孝強 ====//
 
 // ----社群luis區
+
 const CommunityTEST = require('./routers/post');
 app.use('/api/1.0/community', CommunityTEST);
 
+const postTEST = require('./routers/post');
+app.use('/api/1.0/post', postTEST);
 const TripTEST = require('./routers/post');
 app.use('/api/1.0/tripfetch', TripTEST);
 

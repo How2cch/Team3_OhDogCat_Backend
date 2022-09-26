@@ -21,7 +21,7 @@ router.get('/kolPost', async (req, res) => {
   console.log(req.query);
   try {
     const [kolPost] = await pool.execute(
-      'SELECT post.* ,user.name AS user_name FROM (post JOIN user ON user.id = user_id) WHERE post.id > 3 AND post.id < 10'
+      'SELECT post.* ,user.social_name FROM (post JOIN user ON user.id = user_id) WHERE post.id > 3 AND post.id < 10'
     );
     console.log(kolPost);
     res.json(kolPost);
@@ -35,7 +35,7 @@ router.get('/hotPost', async (req, res) => {
   console.log(req.query);
   try {
     const [hotPost] = await pool.execute(
-      'SELECT post.* ,user.name AS user_name FROM (post JOIN user ON user.id = user_id) WHERE post.id > 9'
+      'SELECT post.* ,user.social_name FROM (post JOIN user ON user.id = user_id) WHERE post.id > 9'
     );
     console.log(hotPost);
     res.json(hotPost);
@@ -61,7 +61,7 @@ router.get('/testAPI', async (req, res) => {
   console.log(req.query);
   try {
     const [newPost] = await pool.execute(
-      'SELECT post.* ,user.name AS user_name FROM post JOIN user ON user.id = user_id; '
+      'SELECT post.* ,user.social_name FROM post JOIN user ON user.id = user_id; '
     );
     console.log(newPost);
     res.json(newPost);
