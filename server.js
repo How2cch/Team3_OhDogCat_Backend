@@ -50,8 +50,7 @@ app.use('/store/voucher', storeAdmin);
 
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
-const fakeAPI = require('./routers/fake');
-app.use('/api/1.0/fake', fakeAPI);
+
 // =============================================================================================EC穗懷區
 // ----HomePage推薦商品
 const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
