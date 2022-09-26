@@ -2,8 +2,6 @@ const express = require('express');
 const { check } = require('prettier');
 const router = express();
 const pool = require('../utils/db');
-const multer = require('multer');
-const path = require('path');
 
 // 資料庫連接
 
@@ -383,42 +381,42 @@ router.post('/tripPostDetailEdit', async (req, res) => {
 // 行程貼文封面照片上傳--------------------------------------------------------------------------------------
 
 //　1. 圖片設定儲存空間
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(
-      null,
-      path.join(__dirname, '..', '..', '..', 'public', 'tripPost', 'coverPhoto')
-    );
-  },
-  // 圖片名稱
-  filename: function (req, file, cb) {
-    console.log('file', file);
-    const ext = file.originalname.split('.').pop();
-    cb(null, `/travel-${uuidv4()}.${ext}`);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(
+//       null,
+//       path.join(__dirname, '..', '..', '..', 'public', 'tripPost', 'coverPhoto')
+//     );
+//   },
+//   // 圖片名稱
+//   filename: function (req, file, cb) {
+//     console.log('file', file);
+//     const ext = file.originalname.split('.').pop();
+//     cb(null, `/travel-${uuidv4()}.${ext}`);
+//   },
+// });
 
-const uploader = multer({
-  storage: storage,
-  // 過濾圖片的種類
-  fileFilter: function (req, file, cb) {
-    if (
-      file.mimetype !== 'image/jpeg' &&
-      file.mimetype !== 'image/jpg' &&
-      file.mimetype !== 'image/png' &&
-      file.mimetype !== 'image/webp'
-    ) {
-      cb(new Error('上傳的檔案型態不接受'), false);
-    } else {
-      cb(null, true);
-    }
-  },
-  // 過濾檔案的大小
-  limits: {
-    // 1k = 1024 => 200k = 200 * 1024
-    fileSize: 200 * 1024,
-  },
-});
+// const uploader = multer({
+//   storage: storage,
+//   // 過濾圖片的種類
+//   fileFilter: function (req, file, cb) {
+//     if (
+//       file.mimetype !== 'image/jpeg' &&
+//       file.mimetype !== 'image/jpg' &&
+//       file.mimetype !== 'image/png' &&
+//       file.mimetype !== 'image/webp'
+//     ) {
+//       cb(new Error('上傳的檔案型態不接受'), false);
+//     } else {
+//       cb(null, true);
+//     }
+//   },
+//   // 過濾檔案的大小
+//   limits: {
+//     // 1k = 1024 => 200k = 200 * 1024
+//     fileSize: 200 * 1024,
+//   },
+// });
 
 //===============================================================================================
 router.post(
