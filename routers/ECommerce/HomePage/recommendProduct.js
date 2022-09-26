@@ -6,6 +6,7 @@ const pool = require('../../../utils/db');
 // const { registerFormatRules } = require('../middlewares/userAuth.js');
 // const path = require('path');
 
+// /api/1.0/product/recommendProduct
 router.get('/recommendProduct', async (req, res) => {
   console.log(req.query);
   try {

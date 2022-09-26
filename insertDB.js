@@ -147,30 +147,30 @@ let products = [];
 // })();
 
 // = 穗懷修改景點商品
-// (async () => {
-//   let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
-//   let data = JSON.parse(file);
-//   for (const item of data) {
-//     let result = await pool.execute(
-//       'UPDATE product SET name= ? , intro= ? , description = ?, product_tag = ? WHERE id = ?',
-//       [item.name, item.intro, item.description, item.product_tag, item.id]
-//     );
-//     // let [result] = await pool.execute(
-//     //   'SELECT name FROM product WHERE id = ?',
-//     //   [item.id]
-//     // );
-//     console.log('====================================');
-//     console.log(result);
-//     console.log('====================================');
-//   }
-// })();
+(async () => {
+  let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
+  let data = JSON.parse(file);
+  for (const item of data) {
+    let result = await pool.execute(
+      'UPDATE product SET name= ? , intro= ? , description = ?, product_tag = ? WHERE id = ?',
+      [item.name, item.intro, item.description, item.product_tag, item.id]
+    );
+    // let [result] = await pool.execute(
+    //   'SELECT name FROM product WHERE id = ?',
+    //   [item.id]
+    // );
+    console.log('====================================');
+    console.log(result);
+    console.log('====================================');
+  }
+})();
 
 app.get('/', async (req, res) => {
   // = 穗懷修改景點商品
   // let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   // res.send(JSON.parse(file));
-  // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
-  // res.send(JSON.parse(result));
+  let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
+  res.send(JSON.parse(result));
   // data = data;
   // let data = await fs.readFile(`./data/狗-外出用品.json`, 'utf-8');
   // res.json(JSON.parse(data));
