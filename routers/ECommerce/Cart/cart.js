@@ -10,12 +10,12 @@ const authMiddleware = require('../../../middlewares/userAuth');
 // /:productId
 router.post(
   '/postmore/:productId',
-  // authMiddleware.authVerify,
+  authMiddleware.authVerify,
   async (req, res) => {
-    // const user_id = req.session.user.id;
-    // const product_id = req.params.productId;
-    const user_id = 1;
-    const product_id = 520;
+    const user_id = req.session.user.id;
+    const product_id = req.params.productId;
+    // const user_id = 1;
+    // const product_id = 520;
     try {
       // 辨認購物車資料庫裡面有沒有相同的商品
       const [isExist] = await pool.execute(
@@ -36,10 +36,14 @@ router.post(
           [user_id, product_id]
         );
       }
-      res.send(
-        isExist[0] ? { message: '+1' } : { message: '加入購物車' }
-        // { message: '已成功加入購物車' }
+      const isAdd = await pool.execute(
+        'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = `product`.`id`'
       );
+      // res.send(
+      //   isExist[0] ? { message: '+1' } : { message: '加入購物車' }
+      //   // { message: '已成功加入購物車' }
+      // );
+      res.json(isAdd);
     } catch (error) {
       console.error(error);
     }
@@ -55,16 +59,16 @@ router.post(
     const product_id = req.params.productId;
     // const user_id = 1;
     // const product_id = 520;
-    console.log(req.body);
+    // console.log('req.body', req.body);
     try {
       // 辨認購物車資料庫裡面有沒有相同的商品
       const [isExist] = await pool.execute(
-        `SELECT * FROM cart WHERE user_id=? AND product_id = ? AND quantity>0 `,
+        `SELECT * FROM cart WHERE user_id=? AND product_id = ?`,
         [user_id, product_id]
       );
       const quantityNum = isExist[0]['quantity'];
-      console.log(isExist[0]);
-      console.log(quantityNum);
+      // console.log(isExist[0]);
+      // console.log(quantityNum);
       // 加入購物車
       if (isExist[0] && quantityNum > 1) {
         console.log('減一');
@@ -79,14 +83,50 @@ router.post(
           [user_id, product_id]
         );
       }
-      res.send(
-        quantityNum > 1 ? { message: '-1' } : { message: '刪除' }
-        // { message: '已成功加入購物車' }
+      const isMinus = await pool.execute(
+        'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = `product`.`id`'
       );
+      // res.send(
+      //   quantityNum > 1 ? { message: '-1' } : { message: '刪除' }
+      //   // { message: '已成功加入購物車' }
+      // );
+      res.json(isMinus);
+      console.log(isMinus);
     } catch (error) {
       console.error(error);
     }
   }
 );
 
+// TODO:登入驗證？
+router.get('/list', async (req, res) => {
+  // console.log(req.query);
+  try {
+    const [list] = await pool.execute(
+      'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = `product`.`id`'
+      // [req.query.id]
+    );
+    // console.log(comment);
+    res.json(list);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// 購物車流程
+router.get('/showcart', async (req, res) => {
+  // console.log(req.query);
+  const productId = req.query.productId;
+  // console.log('productId', product_id);
+  try {
+    const [showcart] = await pool.execute(
+      'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = `product`.`id` WHERE `cart`.`product_id` = ?',
+      [productId]
+    );
+    // console.log('showcart', showcart);
+    res.json(showcart);
+  } catch (error) {
+    console.error(error);
+  }
+});
 module.exports = router;
