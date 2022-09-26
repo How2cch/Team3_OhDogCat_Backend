@@ -77,12 +77,9 @@ app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔
 //==== 孝強 ====//
 
 // ----社群luis區
+
 const CommunityTEST = require('./routers/post');
 app.use('/api/1.0/community', CommunityTEST);
-
-// 孝強測試用目前關閉，若有影響再打開
-// const recommendProductAPI = require('./routers/postRecommend');
-// app.use('/api/1.0/post', recommendProductAPI);
 
 const postTEST = require('./routers/post');
 app.use('/api/1.0/post', postTEST);

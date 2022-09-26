@@ -54,7 +54,7 @@ const userRegister = async (req, res) => {
     };
     console.log('user register success');
     req.session.user = registerUser;
-    console.log('session ====================', req.session);
+    // console.log('session ====================', req.session);
 
     res.status(201).json({ status: 'ok', message: '註冊成功', user: registerUser });
   } catch (error) {
