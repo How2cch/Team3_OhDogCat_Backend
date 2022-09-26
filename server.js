@@ -83,6 +83,14 @@ app.use('/api/1.0/community', CommunityTEST);
 
 const postTEST = require('./routers/post');
 app.use('/api/1.0/post', postTEST);
+const TripTEST = require('./routers/post');
+app.use('/api/1.0/tripfetch', TripTEST);
+
+const recommendProductAPI = require('./routers/postRecommend');
+app.use('/api/1.0/post', recommendProductAPI);
+
+// const testAPI = require('./routers/haui');
+// app.use('/api/1.0/huai', testAPI);
 
 // ----社群luis區 要比404前面
 
