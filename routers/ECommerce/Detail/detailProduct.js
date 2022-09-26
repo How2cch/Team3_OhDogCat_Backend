@@ -53,7 +53,7 @@ router.get('/recommend', async (req, res) => {
   // console.log(req.query);
   try {
     const [recommend] = await pool.execute(
-      `SELECT name, price,photo_path,main_photo FROM product WHERE product_type_id = 4 ORDER BY RAND() LIMIT ?`,
+      `SELECT id,name, price,photo_path,main_photo FROM product WHERE product_type_id = 4 ORDER BY RAND() LIMIT ?`,
       [2]
     );
     console.log(recommend);
@@ -62,4 +62,22 @@ router.get('/recommend', async (req, res) => {
     console.error(error);
   }
 });
+
+// 評論
+//  ${API_URL}/api/1.0/productdetail/comment
+router.get('/comment', async (req, res) => {
+  // console.log(req.query);
+  try {
+    const [comment] = await pool.execute(
+      `SELECT product_comment.* ,social_name, photo FROM  product_comment JOIN user ON product_comment.product_comment_user_id = user.id WHERE product_id = ?`,
+      // [req.query.id]
+      [519]
+    );
+    // console.log(comment);
+    res.json(comment);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 module.exports = router;
