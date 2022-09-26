@@ -9,6 +9,14 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const sessionConfig = require('./utils/sessionConfig');
 
+const http = require('http');
+const server = http.createServer(app);
+require('./socket').createServer(server);
+
+require('dotenv').config(); // ? 叫出 .env
+
+app.use(cors(corsConfig)); // ? 設定 cors
+
 app.use(
   session({
     key: 'session_cookie_name',
@@ -19,9 +27,6 @@ app.use(
   })
 );
 
-require('dotenv').config(); // ? 叫出 .env
-
-app.use(cors(corsConfig)); // ? 設定 cors
 app.use(express.static(path.join(__dirname, 'public'))); // ? 設定可讀取靜態檔案的路徑
 
 app.set('view engine', 'pug');
@@ -87,6 +92,6 @@ app.use((err, req, res) => {
   res.status(500).json({ message: '請洽系統管理員' });
 });
 
-app.listen(process.env.SERVER_PORT, () => {
+server.listen(process.env.SERVER_PORT, () => {
   console.log(`Server start at ${process.env.SERVER_PORT}`);
 });

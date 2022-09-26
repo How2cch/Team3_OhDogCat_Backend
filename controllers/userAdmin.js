@@ -2,28 +2,52 @@ const adminModel = require('../models/userAdmin');
 const pool = require('../utils/db');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const multer = require('multer');
+
 // const bcrypt = require('bcrypt');
 // const { validationResult } = require('express-validator');
 // const axios = require('axios');
 // const Qs = require('qs');
 // const jwtDecode = require('jwt-decode');
 
-const userEditSocialName = async (req, res) => {
-  console.log('session ====================', req.session);
-  if (req.body.socialName.length > 20 || /\s/.test(req.body.socialName)) {
-    return res
-      .status(400)
-      .json({ message: '無法使用', error: { param: 'socialName', value: req.body.socialName, msg: '暱稱不可包含空格且長度不得超過 20 個字', location: 'body' } });
-  }
-  const isExist = await adminModel.isSocialNameExist(req.body.socialName);
-  if (isExist[0]) {
-    return res.status(400).json({ message: '無法使用', error: { param: 'socialName', value: req.body.socialName, msg: '此暱稱已被使用', location: 'body' } });
-  }
-  await adminModel.updateSocialName(req.session.user.id, req.body.socialName);
-  req.session.user.social_name = req.body.socialName;
-  console.log('session ====================', req.session);
-  res.status(201).json({ status: 'ok', message: '修改成功', user: req.session.user });
-};
+// 自定義存儲設定
+const storage = multer.diskStorage({
+  // 存儲目的地
+  destination: function (req, file, callback) {
+    // ? callback 第一個參數為錯誤時的執行，但目前只是在設定存儲路徑，不會用到，所以設為 null
+    callback(null, path.join(__dirname, '..', 'public', 'user'));
+  },
+  // 檔案名稱
+  filename: function (req, file, callback) {
+    console.log('file', file);
+    // ? 找出副檔名
+    const ext = file.originalname.split('.').pop();
+    // ? 設定即將被存進去的圖片檔名
+    callback(null, `member-${Date.now()}.${ext}`);
+  },
+});
+
+// 上傳器主體
+const uploader = multer({
+  // 選擇存儲的設定
+  storage: storage,
+  // 過濾圖片的種類，目前只接受下列三種
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/jpg' && file.mimetype !== 'image/png') {
+      // ? 圖片無法通過過濾時的處理
+      cb(new Error('只接受 jpeg、jpg，png 的圖片檔案'), false);
+    } else {
+      // ? 圖片過濾沒問題
+      cb(null, true);
+    }
+  },
+  // 過濾檔案的大小
+  limits: {
+    // ? 單位為 byte
+    fileSize: 200 * 1024,
+  },
+});
 
 const userReadVouchers = async (req, res) => {
   console.log('session ====================', req.session);
@@ -75,16 +99,17 @@ const userGetVouchersId = async (req, res) => {
     const [isExist] = await pool.execute('SELECT * FROM voucher_exchange WHERE user_id = ? AND product_id = ? AND status = 1 AND expired_time between NOW() and ?;', [
       req.session.user.id,
       req.params.productId,
-      moment().add(5, 'minute').format('YYYY-MM-DD HH:mm:ss'),
+      moment().add(3, 'minute').format('YYYY-MM-DD HH:mm:ss'),
     ]);
     console.log('有登記核銷紀錄', isExist.length > 0);
 
     const now = moment();
     const isValid = isExist.length > 0 && moment(now).isBefore(isExist[0].expired_time);
     console.log('是否有可用記錄', isValid);
-    const newExpire = moment().add(5, 'minute').format('YYYY-MM-DD HH:mm:ss');
+    const newExpire = moment().add(3, 'minute').format('YYYY-MM-DD HH:mm:ss');
     if (isExist.length !== 0 && isValid) {
       await pool.execute('UPDATE voucher_exchange SET expired_time = ? ,quantity = ?  WHERE id = ?', [newExpire, req.query.quantity, isExist[0].id]);
+      console.log('id = ', isExist[0].id);
       return res.status(200).json({ status: 'ok', data: { id: isExist[0].id, path: `/store/voucher/exchange/${isExist[0].id}` } });
     }
     console.log('創建新核銷 id');
@@ -96,6 +121,7 @@ const userGetVouchersId = async (req, res) => {
       Number(req.query.quantity),
       newExpire,
     ]);
+    console.log('id = ', uuid);
     res.status(200).json({ status: 'ok', data: { id: uuid, path: `/store/voucher/exchange/${uuid}` } });
   } catch (error) {
     console.error(error);
@@ -103,4 +129,80 @@ const userGetVouchersId = async (req, res) => {
   }
 };
 
-module.exports = { userEditSocialName, userReadVouchers, userGetVouchersId };
+const userGetProfile = async (req, res) => {
+  try {
+    console.log('session ====================', req.session);
+    console.log('用戶id' + req.session.user.id + '欲取得個人資料');
+    const userData = await adminModel.getUserProfile(req.session.user.id);
+    res.status(200).json({ status: 'ok', data: userData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userEditSocialName = async (req, res) => {
+  try {
+    console.log('session ====================', req.session);
+    console.log('用戶id' + req.session.user.id + '欲修改社群暱稱');
+
+    if (req.body.socialName.length > 20 || /\s/.test(req.body.socialName)) {
+      return res
+        .status(400)
+        .json({ message: '無法使用', error: { param: 'socialName', value: req.body.socialName, msg: '暱稱不可包含空格且長度不得超過 20 個字', location: 'body' } });
+    }
+    const isExist = await adminModel.isSocialNameExist(req.body.socialName);
+    if (isExist[0]) {
+      return res.status(400).json({ message: '無法使用', error: { param: 'socialName', value: req.body.socialName, msg: '此暱稱已被使用', location: 'body' } });
+    }
+    await adminModel.updateSocialName(req.session.user.id, req.body.socialName);
+    req.session.user.social_name = req.body.socialName;
+    console.log('session ====================', req.session);
+    res.status(201).json({ status: 'ok', message: '修改成功', user: req.session.user, value: req.body.socialName });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userEditName = async (req, res) => {
+  try {
+    console.log('session ====================', req.session);
+    console.log('用戶id' + req.session.user.id + '欲修改真實姓名');
+    await adminModel.updateName(req.session.user.id, req.body.name);
+    req.session.user.name = req.body.name;
+    console.log('session ====================', req.session);
+    res.status(201).json({ status: 'ok', message: '修改成功', value: req.body.name });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userEditPhone = async (req, res) => {
+  try {
+    console.log('session ====================', req.session);
+    console.log('用戶id' + req.session.user.id + '欲修改手機號碼');
+    await adminModel.updatePhone(req.session.user.id, req.body.phone);
+    console.log('session ====================', req.session);
+    res.status(201).json({ status: 'ok', message: '修改成功', value: req.body.phone });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userEditGender = async (req, res) => {
+  try {
+    console.log('session ====================', req.session);
+    console.log('用戶id' + req.session.user.id + '欲修改性別');
+    await adminModel.updateGender(req.session.user.id, req.body.gender);
+    console.log('session ====================', req.session);
+    res.status(201).json({ status: 'ok', message: '修改成功', value: req.body.gender });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+module.exports = { userEditSocialName, userReadVouchers, userGetVouchersId, userGetProfile, userEditName, userEditPhone, userEditGender };

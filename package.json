@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +13,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
+    "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
@@ -21,10 +23,12 @@
     "fs": "^0.0.1-security",
     "jwt-decode": "^3.1.2",
     "moment": "^2.29.4",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^2.3.3",
     "nodemailer": "^6.7.8",
     "pug": "^3.0.2",
     "qs": "^6.11.0",
+    "socket.io": "^4.5.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
