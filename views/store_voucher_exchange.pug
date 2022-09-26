@@ -1,0 +1,65 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  title Oh!DogCat &#x5E97;&#x5BB6;&#x6838;&#x92B7;
+  link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css' integrity='sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I' crossorigin='anonymous')
+  script(src='https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js' integrity='sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo' crossorigin='anonymous')
+  script(src='https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js' integrity='sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/' crossorigin='anonymous')
+  style.
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
+    body {
+    font-family: 'Noto Sans TC', 'Open Sans', sans-serif !important;
+    }
+    body>div {
+    opacity: 0;
+    }
+    body>div.show {
+    animation: fade-in-card .8s ease-in-out 0s 1 forwards;
+    }
+    .btn:active,
+    .btn:focus,
+    input {
+    outline: 0 !important;
+    box-shadow: none !important;
+    }
+    @keyframes fade-in-card {
+    0% {
+    opacity: 0;
+    transform: matrix3d(9, -7, -2, 0, 5, -3, 1, 0, 1, 0, 0, 0, 0, 0, 0, 3) translateY(-100%)
+    }
+    100% {
+    opacity: 1;
+    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+    }
+    }
+  script.
+    window.onload = () => {
+    document.querySelector('body > div').classList.add('show')
+    };
+block  content
+  .text-center.my-5.py-5.px-md-5.px-3(style='width: calc(100% - 32px); max-width:400px; margin: 0 auto; border: 2px solid #f0f0f0; border-radius: 8px; box-shadow: 0px 0px 8px rgba(0, 0, 0, .05);')
+    h2.fw-bold &#x5E97;&#x5BB6;&#x6838;&#x92B7;
+    hr(style='height: 6px; background-color: rgba(255, 194, 0, 1); border-radius: 50px;')
+    div(style='width: 100%; height: 200px;')
+      img(src=`${img}` alt='' style='width: 100%; height:100%; object-fit: cover; border-radius: 8px;')
+    .py-4
+      .d-flex
+        p.flex-shrink-0.font-weight-bold &#x5546;&#x54C1;&#x540D;&#x7A31;&#xFF1A;
+        p.text-left.text-break #{name}
+      .d-flex
+        p.flex-shrink-0.font-weight-bold &#x514C;&#x63DB;&#x6578;&#x91CF;&#xFF1A;
+        p.text-left #{quantity}
+    form.text-left(action=`${submit_url}` method='post')
+      .mb-3
+        select.form-select(name='staff_id' required='true')
+          option(value='') -- &#x9078;&#x64C7;&#x6838;&#x92B7;&#x4EBA;&#x54E1; --
+          each i in staff 
+            option(value=`${i.id}`) #{i.name}
+      .mb-3
+        label.form-label(for='exampleFormControlTextarea1') &#x8ACB;&#x8F38;&#x5165;&#x5BC6;&#x78BC;
+        input.form-control(type='password' name='staff_password' required='true')
+      .mb-3.text-center
+        input(type='hidden' value=`${store_id}` name='store_id' required='true')
+        input(type='hidden' value=`${exchange_id}` name='exchange_id' required='true')
+        button.btn.btn-secondary &#x9001;&#x51FA;

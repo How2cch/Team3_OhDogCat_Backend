@@ -111,6 +111,8 @@ const userLineRegister = async (req, res) => {
 
 const userLineLogin = async (req, res) => {
   console.log('session ====================', req.session);
+  console.log('用戶嘗試使用 LINE 登入');
+
   // = line token API config
   const config = {
     headers: {
