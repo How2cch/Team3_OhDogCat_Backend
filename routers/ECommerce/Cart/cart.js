@@ -10,12 +10,12 @@ const authMiddleware = require('../../../middlewares/userAuth');
 // /:productId
 router.post(
   '/postmore/:productId',
-  authMiddleware.authVerify,
+  // authMiddleware.authVerify,
   async (req, res) => {
-    const user_id = req.session.user.id;
-    const product_id = req.params.productId;
-    // const user_id = 1;
-    // const product_id = 520;
+    // const user_id = req.session.user.id;
+    // const product_id = req.params.productId;
+    const user_id = 1;
+    const product_id = 520;
     try {
       // 辨認購物車資料庫裡面有沒有相同的商品
       const [isExist] = await pool.execute(
@@ -60,7 +60,7 @@ router.post(
       // 辨認購物車資料庫裡面有沒有相同的商品
       const [isExist] = await pool.execute(
         `SELECT * FROM cart WHERE user_id=? AND product_id = ? AND quantity>0 `,
-        [req.body.user_id, req.body.product_id]
+        [user_id, product_id]
       );
       const quantityNum = isExist[0]['quantity'];
       console.log(isExist[0]);
@@ -74,10 +74,10 @@ router.post(
         );
       } else {
         console.log('刪除');
-        // result = await pool.execute(
-        //   ` DELETE FROM cart WHERE user_id=? AND product_id =? `,
-        //   [user_id, product_id]
-        // );
+        result = await pool.execute(
+          ` DELETE FROM cart WHERE user_id=? AND product_id =? `,
+          [user_id, product_id]
+        );
       }
       res.send(
         quantityNum > 1 ? { message: '-1' } : { message: '刪除' }
