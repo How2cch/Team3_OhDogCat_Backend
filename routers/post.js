@@ -2,6 +2,9 @@ const express = require('express');
 const { check } = require('prettier');
 const router = express();
 const pool = require('../utils/db');
+const multer = require('multer');
+const path = require('path');
+
 // 資料庫連接
 
 // const path = require('path');
@@ -27,6 +30,8 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   let deleteID = req.body.myPostID;
   // console.log(deleteID);
+  const userID = req.session.user.id;
+  console.log(userID);
   try {
     let [deleteResult] = await pool.execute(
       ' UPDATE post SET status =0 WHERE id = ?',
@@ -40,17 +45,17 @@ router.post('/', async (req, res) => {
   }
 });
 
-// 按讚數統計：
-
-router.get('/likesStatic', async (req, res) => {
-  const postID = req.body.postID;
-  console.log('查詢該貼文按讚會員數', postID);
+// 發布貼文
+router.post('/release', async (req, res) => {
+  let postID = req.body.postID;
+  let state = req.body.postState;
+  console.log('post', postID);
   try {
     let [result] = await pool.execute(
-      ' SELECT user_id FROM post_like WHERE post_id=?',
-      [postID]
+      ' UPDATE post SET status =? WHERE id = ?',
+      [state, postID]
     );
-    console.log('該貼文的按讚人ＩＤ資訊', result);
+    // console.log(deleteResult);
     res.json(result);
     // 轉換成JSON格式
   } catch (error) {
@@ -58,7 +63,25 @@ router.get('/likesStatic', async (req, res) => {
   }
 });
 
-// 按讚互動
+// 按讚數統計：
+
+router.get('/likesStatic', async (req, res) => {
+  // const userLike = req.session.user;
+  // console.log('查詢使用者按讚文章', userID);
+  try {
+    let [postLikeresult] = await pool.execute(
+      ' SELECT * FROM post_like JOIN post ON post_like.post_id = post.id WHERE post_like.user_id>=? ORDER BY post_id DESC',
+      [1]
+    );
+    console.log('該使用的按讚貼文資訊', postLikeresult);
+    res.json(postLikeresult);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// 按讚互動 luis
 router.post('/likes', async (req, res) => {
   const likesState = req.body.likesState;
   const postID = req.body.postID;
@@ -114,11 +137,10 @@ router.get('/post', async (req, res) => {
 
 // 單獨取行程貼文資料 抬頭 luis
 router.get('/tripPost', async (req, res) => {
-  // console.log(req.query);
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id = ? AND status >= 1 AND post_type_id =2',
-      [postID]
+      'SELECT * FROM post WHERE id >= ? AND status >= 1 AND post_type_id =2',
+      [1]
     );
     // console.log(result);
     res.json(result);
@@ -160,14 +182,14 @@ router.get('/tripDetailImport', async (req, res) => {
   }
 });
 
-// 1 檢查travel id 是否在對應貼文
+// 檢查travel id 是否在對應貼文 luis
 router.post('/tripPostNew', async (req, res) => {
   const tripID = req.body.tripID;
   const createTime = req.body.createTime;
 
   try {
     let [postResult] = await pool.execute(
-      `INSERT INTO post (post_type_id, user_id, post_title, travel_id, status, create_time) VALUES (2,2,'終於新增了',?,2,?)`,
+      `INSERT INTO post (post_type_id, user_id, post_title, travel_id, status, create_time) VALUES (2,2,'請點擊新增貼文標題',?,2,?)`,
       [tripID, createTime]
     );
     // TODO: 一定travel 表裡面的ID欄位和travel days 表裡面的travel_id 有資料才能新增行程貼文
@@ -183,6 +205,7 @@ router.post('/tripPostNew', async (req, res) => {
 
 // 行程貼文 (post)關聯(travel)日程景點明細(travel_days) （匯入景點資訊）可在關聯景點貼文內容 luis
 router.get('/tripPostDetail', async (req, res) => {
+  // const postID = req.query.postID;
   const postID = req.query.postID;
   console.log('lolol', req.query.postID);
   try {
@@ -234,22 +257,69 @@ router.post('/tripPostDetailEdit', async (req, res) => {
   }
 });
 
-// 行程貼文封面照片上傳
-router.post('/tripPostCoverUpload`', async (req, res) => {
-  const postID = req.body.postID;
-  const coverPhoto = req.body.preview;
-  console.log('post, coverphoto', postID, coverPhoto);
-  try {
-    let [coverPhotoUpload] = await pool.execute(
-      ' UPDATE post SET main_photo =? WHERE id = ?',
-      [coverPhoto, postID]
+// 行程貼文封面照片上傳--------------------------------------------------------------------------------------
+
+//　1. 圖片設定儲存空間
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(
+      null,
+      path.join(__dirname, '..', '..', '..', 'public', 'tripPost', 'coverPhoto')
     );
-    // console.log(deleteResult);
-    res.json(coverPhotoUpload);
-    // 轉換成JSON格式
-  } catch (error) {
-    console.error(error);
-  }
+  },
+  // 圖片名稱
+  filename: function (req, file, cb) {
+    console.log('file', file);
+    const ext = file.originalname.split('.').pop();
+    cb(null, `/travel-${uuidv4()}.${ext}`);
+  },
 });
+
+const uploader = multer({
+  storage: storage,
+  // 過濾圖片的種類
+  fileFilter: function (req, file, cb) {
+    if (
+      file.mimetype !== 'image/jpeg' &&
+      file.mimetype !== 'image/jpg' &&
+      file.mimetype !== 'image/png' &&
+      file.mimetype !== 'image/webp'
+    ) {
+      cb(new Error('上傳的檔案型態不接受'), false);
+    } else {
+      cb(null, true);
+    }
+  },
+  // 過濾檔案的大小
+  limits: {
+    // 1k = 1024 => 200k = 200 * 1024
+    fileSize: 200 * 1024,
+  },
+});
+
+//===============================================================================================
+router.post(
+  '/tripPostCoverUpload',
+  uploader.single('photo'),
+  async (req, res) => {
+    const postID = req.body.postID;
+    const coverPhoto = req.body.preview;
+    const coverFile = req.body.coverFile;
+    console.log('post', postID);
+    console.log('preview', coverPhoto);
+    console.log('coverFile', coverFile.photo);
+    try {
+      let [coverPhotoUpload] = await pool.execute(
+        ' UPDATE post SET main_photo =? WHERE id = ?',
+        [coverPhoto, postID]
+      );
+      // console.log(deleteResult);
+      res.json(coverPhotoUpload);
+      // 轉換成JSON格式
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
 
 module.exports = router;

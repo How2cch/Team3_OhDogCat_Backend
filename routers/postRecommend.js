@@ -13,7 +13,7 @@ router.get('/recommendbar', async (req, res) => {
       `SELECT name, intro, price, per_score,photo_path,main_photo FROM product WHERE product_type_id = ? ORDER BY RAND() LIMIT ?`,
       [2, 4]
     );
-    console.log(product);
+    // console.log(product);
     res.json(product);
   } catch (error) {
     console.error(error);
