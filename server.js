@@ -68,8 +68,12 @@ const CartAPI = require('./routers/ECommerce/Cart/cart');
 app.use('/api/1.0/cart', CartAPI);
 
 // ----Ordersteps結帳步驟
-// const CouponAPI = require('./routers/ECommerce/OrderSteps/ordersteps');
-// app.use('/api/1.0/orderSteps', CouponAPI);
+const LineAPI = require('./utils/linePay');
+app.use('/api/1.0/line', LineAPI);
+
+// ----LinePay
+// const CartAPI = require('./routers/ECommerce/Cart/cart');
+// app.use('/api/1.0/cart', CartAPI);
 // ============================================================================================EC穗懷區
 
 // = user 登入註冊相關

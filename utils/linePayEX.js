@@ -15,40 +15,30 @@ const {
   LINEPAY_RETURN_CANCEL_URL,
 } = process.env;
 
-// const sampleData = require('../sample/sampleData');
+const sampleData = require('../sample/sampleData');
 const orders = {};
 /* GET home page. */
-// router
-// .get('/', function (req, res, next) {
-//   res.render('index', { title: 'Express' });
-// })
-// .get('/ec-ordersteps',async (req, res) => {
-//   const { productId } = req.query.productId;
-
-//   const [cart] = await pool.execute(
-// 'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = ?'
-// [productId]
-// );
-// console.log('cart',cart);
-//     const order = cart;
-//     order.orderId = parseInt(new Date().getTime() / 1000);
-//     orders[order.orderId] = order;
-// console.log(order);
-// res.render('checkout', { order });
-// });
+router
+  .get('/', function (req, res, next) {
+    res.render('index', { title: 'Express' });
+  })
+  .get('/checkout/:id', (req, res) => {
+    const { id } = req.params;
+    const order = sampleData[id];
+    // console.log("order", order.orderId);
+    order.orderId = parseInt(new Date().getTime() / 1000);
+    orders[order.orderId] = order;
+    // console.log("HERE",order);
+    res.render('checkout', { order });
+  });
 
 // 跟 linepay 串接的 api
-//=== /api/1.0/line/createOrder/:orderId
 router
-  .post('/createOrder', async (req, res) => {
-    // const { amount, currency, packages } = req.body.order;
-    console.log('req.body.order', req.body.order);
-    // console.log(currency);
-    // console.log(amount);
+  .post('/createOrder/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const order = orders[orderId];
 
-    // const order = orders[orderId];
-
-    const order = req.body.order;
+    // console.log('createOrder', order);
 
     const linePayBody = {
       ...order,
@@ -58,25 +48,22 @@ router
       },
     };
 
-    console.log('linePayBody',linePayBody);
-
     try {
       const uri = '/payments/request';
       const headers = createSignature(uri, linePayBody);
 
-      console.log('headers',headers);
-
+      // console.log(linePayBody, signature);
       const url = `${LINEPAY_SITE}/${LINEPAY_VERSION}${uri}`;
 
       const linePayRes = await axios.post(url, linePayBody, { headers });
 
-      console.log('linePayRes',linePayRes.data);
+      console.log(linePayRes.data.info);
 
       if (linePayRes?.data?.returnCode === '0000') {
-        // 直接轉址會有問題
-        // res.redirect(linePayRes?.data?.info.paymentUrl.web);
-        res.status(200).json({status:'ok', message:'成功生成付款網址', redirect:linePayRes?.data?.info.paymentUrl.web});
+        res.redirect(linePayRes?.data?.info.paymentUrl.web);
       }
+
+      // console.log(linePayRes);
     } catch (error) {
       console.log(error);
       res.end();
@@ -84,7 +71,7 @@ router
   })
   .get('/linePay/confirm', async (req, res) => {
     const { transactionId, orderId } = req.query;
-    // console.log(transactionId, orderId);
+    console.log(transactionId, orderId);
 
     try {
       const order = orders[orderId];
@@ -99,8 +86,7 @@ router
       const url = `${LINEPAY_SITE}/${LINEPAY_VERSION}${uri}`;
       const linePayRes = await axios.post(url, linePayBody, { headers });
 
-      console.log('==============linePayRes=============',linePayRes);
-      res.json(linePayRes);
+      console.log(linePayRes);
     } catch (error) {
       res.end();
     }
