@@ -51,6 +51,20 @@ app.use('/store/voucher', storeAdmin);
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 
+// =============雨信區
+
+//Rain 票卷相關 //userid title 開始時間相關
+
+const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
+app.use('/api/1.0/', TravelGetAPI);
+
+// Rain post更改日期 travel title
+const TraveldetailUpdate = require('./routers/Travel/Travel_post_LocationID/travelLocationID');
+app.use('/api/1.0/', TraveldetailUpdate);
+
+// =============雨信區
+
+// ----EC穗懷區
 // =============================================================================================EC穗懷區
 // ----HomePage推薦商品
 const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
