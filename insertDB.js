@@ -3,6 +3,7 @@ const app = express();
 const fs = require('fs/promises');
 const mysql = require('mysql2');
 const pool = require('./utils/db');
+const moment = require('moment');
 require('dotenv').config();
 let products = [];
 // = 整理 josn
@@ -33,10 +34,12 @@ let products = [];
 
 //   // = 寫入寵物商品假資料
 //   await (async () => {
-//     let result = await fs.readFile(`./json/total.json`, 'utf-8');
-//     result = JSON.parse(result);
+//     let result = await fs.readFile(`./json/total.json`, 'utf-8'); // todo: 讀檔案
+//     result = JSON.parse(result); // todo: 檔案內容轉 JSON
+//     // todo: 針對剛剛的結果跑 for
 //     for (const [index, item] of result.entries()) {
 //       try {
+//         // todo: 寫進資料庫
 //         let r = await pool.execute('INSERT IGNORE INTO product (product_type_id, name, store_id, description, price, product_status, per_score) VALUE (?, ?, ?, ?, ?, ?, ?)', [
 //           4,
 //           item.title,
@@ -124,14 +127,157 @@ let products = [];
 //   }
 // })();
 
+// = 穗懷修改餐廳商品
+(async () => {
+  let file = await fs.readFile(`./json/restaurant_product.json`, 'utf-8');
+  let data = JSON.parse(file);
+  for (const item of data) {
+    let result = await pool.execute(
+      'UPDATE product SET name= ? , intro= ? , description = ?, product_tag = ? WHERE id = ?',
+      [item.name, item.intro, item.description, item.product_tag, item.id]
+    );
+    //     // let [result] = await pool.execute(
+    //     //   'SELECT name FROM product WHERE id = ?',
+    //     //   [item.id]
+    //     // );
+    console.log('====================================');
+    console.log(result);
+    console.log('====================================');
+  }
+})();
+
+// (async () => {
+//   // try {
+//   //   for (let i = 0; i < 10; i++) {
+//   //     if (true) {
+//   //       let file = JSON.parse(await fs.readFile(`./json/pet_product/${i}.json`, 'utf-8')); // ? 單一檔案
+//   //       console.log('讀取第 ' + i + ' 個檔案');
+//   //       console.log('該檔案長度為 ' + file.length);
+//   //       let mainPhotoArr = []; // ? 單一檔案內資料所需要的個別封面圖
+//   //       for (let index = 0; index < file.length; index++) {
+//   //         let photoFolder = await fs.readdir(`./public/product/pet/${i}/${index}`);
+//   //         if (photoFolder.length === 0) mainPhotoArr.push('');
+//   //         if (photoFolder.length > 0) mainPhotoArr.push(photoFolder[0]);
+//   //       }
+//   //       console.log('圖片資料夾數量為 ' + mainPhotoArr.length);
+//   //       console.log('開始寫入資料庫 ...');
+//   //       for (let index = 0; index < file.length; index++) {
+//   //         console.log(`開始寫入第 ${i} 個檔案中的第 ${index} 筆資料`);
+//   //         let data = [
+//   //           4,
+//   //           file[index].title,
+//   //           Number(file[index].store),
+//   //           file[index].desciption,
+//   //           file[index].price,
+//   //           1,
+//   //           4 + (index % 10 === 0 ? 1 : (index % 10) / 10),
+//   //           file[index].tags,
+//   //           mainPhotoArr[index],
+//   //           `/product/pet/${i}/${index}`,
+//   //         ];
+//   //         // console.log('data', data);
+//   //         let [insert] = await pool.execute(
+//   //           'INSERT INTO product (product_type_id, name, store_id, description, price, product_status, per_score, product_tag,main_photo,photo_path) VALUE (?,?,?,?,?,?,?,?,?,?)',
+//   //           data
+//   //         );
+//   //         console.log('insert product success id = ' + insert.insertId);
+//   //         let photoFolder = await fs.readdir(`./public/product/pet/${i}/${index}`);
+//   //         for (let num = 0; num < photoFolder.length; num++) {
+//   //           if (num > 0) {
+//   //             await pool.execute('INSERT INTO product_photo (product_id ,file_name ) VALUE (?,?)', [insert.insertId, photoFolder[num]]);
+//   //           }
+//   //         }
+//   //         console.log('id = ' + insert.insertId + ' 已新增 ' + (photoFolder.length - 1) + ' 照片');
+//   //       }
+//   //     }
+//   //   }
+//   // } catch (error) {
+//   //   console.error(error);
+//   // }
+//   // = 刪除本次資料
+//   // await pool.execute(`DELETE FROM product WHERE id < 519`);
+//   // await pool.execute(`DELETE FROM product_photo WHERE product_id < 519`);
+// })();
+
+// = 寫入用戶假資料
+// (async () => {
+//   let user = [
+//     '貓巷少女萬莉',
+//     'Nicholas Grote',
+//     '貝爾',
+//     '娜娜',
+//     'MIRIAM',
+//     '嚇死人的婉瑄',
+//     '自戀的宛于',
+//     '內向的顯晴',
+//     '熱心的睿余',
+//     '善良的光玉',
+//     'OLIVE',
+//     '善於打架的雷神歌王',
+//     '幽默的定輝',
+//     '溫柔的正全',
+//     '貼心的靚宜',
+//     '玉珊還有玉山高',
+//     'ALAYNA',
+//     '愛吃飯的家寧',
+//     '風景秀麗',
+//     '默默無聞超級無敵海景矮冬瓜',
+//     '小魚',
+//     '溫溫的宥禎',
+//     '竹筍竹筍蹦蹦開',
+//     '精明的靜怡',
+//     'NOELLE',
+//     '可靠的若家',
+//     '熱血沸騰天真可愛十三世',
+//     '帥氣的裕明',
+//     '大寶的娘_采平',
+//     '大寶',
+//     '強效柯',
+//     'Megan Maggie',
+//     '發福的家豪',
+//     '靦腆的少華',
+//     '狂怒修道士',
+//     '暄玲小姐姐',
+//     'JOSHUA',
+//     '效率的中鴻',
+//     '吐了一地的奕祥',
+//     '很高的偉倫',
+//     '聰明的子源',
+//     'RainOuO',
+//     '大哥阿尼基的異想世界',
+//     'MALACHI',
+//     '小好停',
+//     '安靜的家羽',
+//     '唐詩與宋詞',
+//     'ㄎㄧㄤ掉的怡方',
+//     '喝醉的雲登',
+//     '熱情的魚莎',
+//     '吵死人的穗懷',
+//   ];
+//   for (const [index, name] of user.entries()) {
+//     await pool.execute('INSERT INTO user (email, social_name, photo, create_time) VALUE (?, ?, ?, ?)', [
+//       `MFEE27U${index}@gmail.com`,
+//       name,
+//       `/user/px-${index}.jpg`,
+//       moment().format('YYYY-MM-DD HH:mm:ss'),
+//     ]);
+//     console.log(name);
+//   }
+//   // await pool.execute('DELETE FROM user WHERE id > 68');
+// })();
+
 app.get('/', async (req, res) => {
-  // let result = await fs.readFile('./data/qwdm6-qm149.json', 'utf-8');
-  // res.send(JSON.parse(result)[0].desciption);
-  // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
+
+  // = 穗懷修改景點商品
+  // let file = JSON.parse(await fs.readFile(`./json/pet_product/${0}.json`, 'utf-8'));
+  // res.json(file);
+  // let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
+  // res.send(JSON.parse(file));
+]  // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   // res.send(JSON.parse(result));
   // data = data;
-  let data = await fs.readFile(`./data/狗-外出用品.json`, 'utf-8');
-  res.json(JSON.parse(data));
+  // let data = await fs.readFile(`./data/狗-外出用品.json`, 'utf-8');
+  // res.json(JSON.parse(data));
 });
 
 app.listen(process.env.SERVER_PORT, () => {
