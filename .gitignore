@@ -1,7 +1,7 @@
 .env
-
 node_modules/
-
 .eslintrc.json
 .prettierrc
 public/travel/post
+public/community/post
+public/

@@ -16,8 +16,7 @@ const loginRules = [
 
 const authVerify = (req, res, next) => {
   console.log('===嘿嘿===', req.session);
-  if (!req.session.user)
-    return res.status(401).json({ login: false, message: '無登入權限' });
+  if (!req.session.user) return res.status(401).json({ login: false, message: '無登入權限' });
   next();
 };
 

@@ -18,6 +18,33 @@ const updateSocialName = async (id, socialName) => {
   }
 };
 
+const updateName = async (id, name) => {
+  try {
+    let updateResult = await pool.execute('UPDATE user SET name = ?  WHERE id = ?', [name, id]);
+    return updateResult;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const updatePhone = async (id, phone) => {
+  try {
+    let updateResult = await pool.execute('UPDATE user SET phone = ?  WHERE id = ?', [phone, id]);
+    return updateResult;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const updateGender = async (id, gender) => {
+  try {
+    let updateResult = await pool.execute('UPDATE user SET gender = ?  WHERE id = ?', [gender, id]);
+    return updateResult;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const getUserVoucher = async (id) => {
   try {
     const [data] = await pool.execute(
@@ -29,4 +56,14 @@ const getUserVoucher = async (id) => {
     console.error(error);
   }
 };
-module.exports = { isSocialNameExist, updateSocialName, getUserVoucher };
+
+const getUserProfile = async (id) => {
+  try {
+    const [data] = await pool.execute('SELECT name, social_name, email, photo, phone, gender FROM user WHERE id = ?', [id]);
+    console.log(data);
+    return data[0];
+  } catch (error) {
+    console.error(error);
+  }
+};
+module.exports = { isSocialNameExist, updateSocialName, getUserVoucher, getUserProfile, updateName, updatePhone, updateGender };
