@@ -69,10 +69,10 @@ router.get('/products', async (req, res) => {
     let orderType = null;
     switch (order) {
       case '1':
-        orderType = 'price ASC';
+        orderType = 'price DESC';
         break;
       case '2':
-        orderType = 'price DESC';
+        orderType = 'price ASC';
         break;
       case '3':
         orderType = 'per_score DESC';
