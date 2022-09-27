@@ -226,6 +226,7 @@ router.get('/postDetail', async (req, res) => {
     console.error(error);
   }
 });
+
 // 1 檢查travel id 是否在對應貼文
 router.post('/tripPostNew', async (req, res) => {
   const tripID = req.body.tripID;
@@ -283,7 +284,7 @@ const uploader = multer({
   // },
 });
 
-// 所見即所得圖片上傳 //
+// 所見即所得圖片上傳 KE//
 router.post(
   '/uploadImages',
   uploader.single('files'),
@@ -298,7 +299,7 @@ router.post(
   }
 );
 
-// 一般貼文上傳 //
+// 一般貼文上傳 KE//
 router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
   try {
     // 確認資料有沒有收到
@@ -419,6 +420,7 @@ router.post('/tripPostDetailEdit', async (req, res) => {
 // });
 
 //===============================================================================================
+
 router.post(
   '/tripPostCoverUpload',
   uploader.single('photo'),
@@ -442,5 +444,26 @@ router.post(
     }
   }
 );
+
+// 貼文留言區塊  KE//
+router.get('/postComment', async (req, res) => {
+  console.log('postID', req.query.postID);
+  const postID = req.query.postID;
+  // console.log(postID);
+  console.log('===== KEKEKEKE1232131313 =====', req.session);
+  let user_id = req.session.user.id;
+  try {
+    let [result] = await pool.execute(
+      'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
+      [postID, user_id]
+    );
+    console.log('postID====7777777=====', postID);
+    console.log('user_id=====8888888=====', user_id);
+    // console.log(result);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 module.exports = router;
