@@ -1,0 +1,41 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  title Oh!DogCat &#x5E97;&#x5BB6;&#x6838;&#x92B7;
+  link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css' integrity='sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I' crossorigin='anonymous')
+  script(src='https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js' integrity='sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo' crossorigin='anonymous')
+  script(src='https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js' integrity='sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/' crossorigin='anonymous')
+  style.
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
+    body {
+    font-family: 'Noto Sans TC', 'Open Sans', sans-serif !important;
+    }
+    body>div {
+    opacity: 0;
+    }
+    body>div.show {
+    animation: fade-in-card .3s ease-in-out 0s 1 forwards;
+    }
+    .btn:active,
+    .btn:focus,
+    input {
+    outline: 0 !important;
+    box-shadow: none !important;
+    }
+    @keyframes fade-in-card {
+    0% {
+    opacity: 0;
+    transform: translateY(-100%)
+    }
+    100% {
+    opacity: 1;
+    }
+    }
+  script.
+    window.onload = () => {
+    document.querySelector('body > div').classList.add('show')
+    };
+block  content
+  .text-center.my-5.py-3.px-md-5.px-3(style='width: calc(100% - 32px); max-width:400px; margin: 0 auto; border: 2px solid #f0f0f0; border-radius: 8px; box-shadow: 0px 0px 8px rgba(0, 0, 0, .05);')
+    h4.fw-bold.text-left #{text}

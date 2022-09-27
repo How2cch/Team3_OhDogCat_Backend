@@ -54,7 +54,7 @@ const userRegister = async (req, res) => {
     };
     console.log('user register success');
     req.session.user = registerUser;
-    console.log('session ====================', req.session);
+    // console.log('session ====================', req.session);
 
     res.status(201).json({ status: 'ok', message: '註冊成功', user: registerUser });
   } catch (error) {
@@ -111,6 +111,8 @@ const userLineRegister = async (req, res) => {
 
 const userLineLogin = async (req, res) => {
   console.log('session ====================', req.session);
+  console.log('用戶嘗試使用 LINE 登入');
+
   // = line token API config
   const config = {
     headers: {

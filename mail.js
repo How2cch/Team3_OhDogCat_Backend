@@ -1,32 +1,29 @@
 // const express = require('express');
 // const app = express();
 const nodemailer = require('nodemailer');
-const fs = require('fs');
 const mailConfig = require('./utils/mailConfig');
-const mailBodyPath = './system_email.html';
 const pug = require('pug');
 require('dotenv').config();
+const mailTest = () => {
+  let mailOptions = {
+    from: '"OhDogCat! 你和毛小孩的好夥伴" ohdogcat.myfriend@gmail.com',
+    to: 'paul860108@gmail.com',
+    subject: '【註冊認證】 會員註冊',
+  };
 
-let mailOptions = {
-  from: '"OhDogCat! 你和毛小孩的好夥伴" paul860108@gmail.com',
-  to: 'el.huai97@gmail.com',
-  bcc: 'paul860108@gmail.com',
-  subject: '【註冊認證】 會員註冊',
+  const transporter = nodemailer.createTransport(mailConfig);
+
+  mailOptions.html = pug.renderFile(__dirname + '/views/mail_template.pug', { text: '狗王' });
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log('=== error ===', error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
 };
-
-console.log(process.env.MAIL_SERVER_PASSWORD);
-
-const transporter = nodemailer.createTransport(mailConfig);
-
-mailOptions.html = pug.renderFile(__dirname + '/views/mail_template.pug', { text: '狗王' });
-
-transporter.sendMail(mailOptions, function (error, info) {
-  if (error) {
-    console.log('=== error ===', error);
-  } else {
-    console.log('Email sent: ' + info.response);
-  }
-});
+module.exports = mailTest;
 
 // fs.readFile(mailBodyPath, 'utf8', (err, mailBody) => {
 //   if (err) {
