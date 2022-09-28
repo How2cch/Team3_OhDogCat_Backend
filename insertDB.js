@@ -29,8 +29,32 @@ let products = [];
 //       } catch (error) {
 //         console.log('error', error);
 //       }
+// // = 建立寵物商品店家
+// await (async () => {
+//   let storeArr = [
+//     '寵愛一生',
+//     '寵沙啦',
+//     '毛手毛腳',
+//     '毛落趣',
+//     '貓咪加百二',
+//     '米米貓貓',
+//     '躲貓貓',
+//     '汪汪先輩',
+//     '汪東汪西',
+//     '嗷嗚嗚嗚嗚',
+//   ];
+//   for (const item of storeArr) {
+//     try {
+//       let r = await pool.execute(
+//         'INSERT IGNORE INTO store (name) VALUE (?)',
+//         [item]
+//       );
+//       console.log(r);
+//     } catch (error) {
+//       console.log('error', error);
 //     }
-//   })();
+//   }
+// })();
 
 //   // = 寫入寵物商品假資料
 //   await (async () => {
@@ -129,7 +153,7 @@ let products = [];
 
 // = 穗懷修改餐廳商品
 (async () => {
-  let file = await fs.readFile(`./json/restaurant_product.json`, 'utf-8');
+  let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   let data = JSON.parse(file);
   for (const item of data) {
     let result = await pool.execute(
@@ -139,10 +163,10 @@ let products = [];
     //     // let [result] = await pool.execute(
     //     //   'SELECT name FROM product WHERE id = ?',
     //     //   [item.id]
-    //     // );
-    console.log('====================================');
-    console.log(result);
-    console.log('====================================');
+    // //     // );
+    // console.log('====================================');
+    // console.log(result);
+    // console.log('====================================');
   }
 })();
 
@@ -267,13 +291,16 @@ let products = [];
 // })();
 
 app.get('/', async (req, res) => {
-
   // = 穗懷修改景點商品
   // let file = JSON.parse(await fs.readFile(`./json/pet_product/${0}.json`, 'utf-8'));
   // res.json(file);
   // let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   // res.send(JSON.parse(file));
-]  // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
+  // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
+  // = 穗懷修改餐廳商品
+  let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
+  res.json(JSON.parse(file));
+  // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   // res.send(JSON.parse(result));
   // data = data;
   // let data = await fs.readFile(`./data/狗-外出用品.json`, 'utf-8');

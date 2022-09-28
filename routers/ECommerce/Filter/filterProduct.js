@@ -2,7 +2,6 @@ const express = require('express');
 const router = express();
 const pool = require('../../../utils/db');
 
-
 //取得篩選選項
 // = /api/1.0/filter/choices
 router.get('/choices', async (req, res) => {
@@ -32,6 +31,7 @@ router.get('/choices', async (req, res) => {
 });
 
 //取得商品列表
+// >>/filter/products
 router.get('/products', async (req, res) => {
   const { typeId, order, search, page, maxPrice, minPrice, tag } = req.query;
   console.log(req.query);
@@ -69,10 +69,10 @@ router.get('/products', async (req, res) => {
     let orderType = null;
     switch (order) {
       case '1':
-        orderType = 'price ASC';
+        orderType = 'price DESC';
         break;
       case '2':
-        orderType = 'price DESC';
+        orderType = 'price ASC';
         break;
       case '3':
         orderType = 'per_score DESC';
