@@ -15,38 +15,12 @@ const {
   LINEPAY_RETURN_CANCEL_URL,
 } = process.env;
 
-// const sampleData = require('../sample/sampleData');
 const orders = {};
-/* GET home page. */
-// router
-// .get('/', function (req, res, next) {
-//   res.render('index', { title: 'Express' });
-// })
-// .get('/ec-ordersteps',async (req, res) => {
-//   const { productId } = req.query.productId;
-
-//   const [cart] = await pool.execute(
-// 'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = ?'
-// [productId]
-// );
-// console.log('cart',cart);
-//     const order = cart;
-//     order.orderId = parseInt(new Date().getTime() / 1000);
-//     orders[order.orderId] = order;
-// console.log(order);
-// res.render('checkout', { order });
-// });
-
 // 跟 linepay 串接的 api
 //=== /api/1.0/line/createOrder/:orderId
 router
   .post('/createOrder', async (req, res) => {
-    // const { amount, currency, packages } = req.body.order;
-    console.log('req.body.order', req.body.order);
-    // console.log(currency);
-    // console.log(amount);
-
-    // const order = orders[orderId];
+    // console.log('req.body.order', req.body.order);
 
     const order = req.body.order;
 
@@ -58,19 +32,20 @@ router
       },
     };
 
-    console.log('linePayBody',linePayBody);
+    // console.log('linePayBody',linePayBody);
 
     try {
       const uri = '/payments/request';
       const headers = createSignature(uri, linePayBody);
 
-      console.log('headers',headers);
+      // console.log('headers',headers);
 
       const url = `${LINEPAY_SITE}/${LINEPAY_VERSION}${uri}`;
 
       const linePayRes = await axios.post(url, linePayBody, { headers });
 
-      console.log('linePayRes',linePayRes.data);
+      console.log('-----LINEPAY-STATUS-----');
+      console.log(linePayRes.data);
 
       if (linePayRes?.data?.returnCode === '0000') {
         // 直接轉址會有問題
@@ -99,8 +74,8 @@ router
       const url = `${LINEPAY_SITE}/${LINEPAY_VERSION}${uri}`;
       const linePayRes = await axios.post(url, linePayBody, { headers });
 
-      console.log('==============linePayRes=============',linePayRes);
-      res.json(linePayRes);
+      // console.log('==============linePayRes=============',linePayRes);
+      // res.json(linePayRes);
     } catch (error) {
       res.end();
     }
