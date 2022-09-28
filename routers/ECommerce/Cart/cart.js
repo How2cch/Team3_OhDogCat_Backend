@@ -8,6 +8,9 @@ const authMiddleware = require('../../../middlewares/userAuth');
 // TODO記得驗證登入
 // authMiddleware.authVerify,
 // /:productId
+
+// ================側邊購物車用==================
+
 router.post(
   '/postmore/:productId',
   authMiddleware.authVerify,
