@@ -7,11 +7,12 @@ const pool = require('../../../utils/db');
 // const path = require('path');
 
 // 商品細節細項
-//  ${API_URL}/api/1.0/productdetail/item?
+//  ${API_URL}/api/1.0/productdetail/item/
 router.get('/item', async (req, res) => {
-  // console.log(req.query);
+  const product_id = req.query.id;
+  console.log(product_id);
   let [result] = await pool.execute(
-    `SELECT id,product_type_id,name,intro,price,per_score,main_photo,photo_path,product_tag,description,photo.file_name FROM product JOIN product_photo AS photo ON product.id = photo.product_id WHERE product.id = ${req.query.id}`
+    `SELECT id,product_type_id,name,intro,price,per_score,main_photo,photo_path,product_tag,description,photo.file_name FROM product JOIN product_photo AS photo ON product.id = photo.product_id WHERE product.id = ${product_id}`
   );
   let newArr = [];
   result.forEach((data) => {
