@@ -205,7 +205,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 一般貼文內容頁 == /postWYSIWYG
+// 一般貼文內容頁 == /post
 // == /api/1.0/post // KE
 router.get('/postDetail', async (req, res) => {
   console.log('postID', req.query.postID);
