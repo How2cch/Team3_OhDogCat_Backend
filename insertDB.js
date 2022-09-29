@@ -19,8 +19,6 @@ let products = [];
 // })();
 
 // (async () => {
-<<<<<<< HEAD
-=======
   // = 建立寵物商品店家
   await (async () => {
     let storeArr = [
@@ -47,7 +45,6 @@ let products = [];
       }
     }
   })();
->>>>>>> ec-product-detail
 //   // = 建立寵物商品店家
 //   await (async () => {
 //     let storeArr = ['寵愛一生', '寵沙啦', '毛手毛腳', '毛落趣', '貓咪加百二', '米米貓貓', '躲貓貓', '汪汪先輩', '汪東汪西', '嗷嗚嗚嗚嗚'];
@@ -58,11 +55,8 @@ let products = [];
 //       } catch (error) {
 //         console.log('error', error);
 //       }
-<<<<<<< HEAD
-=======
 //     }
 //   })();
->>>>>>> ec-product-detail
 // // = 建立寵物商品店家
 // await (async () => {
 //   let storeArr = [
