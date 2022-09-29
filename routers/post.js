@@ -64,20 +64,32 @@ router.post('/release', async (req, res) => {
   }
 });
 
-// 按讚數統計：會員中心 查單一會員按讚貼文資訊 luis
+// 查詢單一會員是否對單一貼文按讚狀態
+router.post('/unlike', async (req, res) => {
+  let unLikeID = req.body.unLikeID;
 
+  try {
+    let [postunLike] = await pool.execute(
+      'DELETE FROM `post_like` WHERE `post_id`=? AND `user_id` =1',
+      [unLikeID]
+    );
+    // console.log('該使用的按讚貼文資訊', postunLike);
+    res.json(postunLike);
+    console.log(postunLike);
+    // 轉換成JSON格式
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// 按讚數統計：會員中心 查單一會員按讚貼文資訊 luis
 router.get('/likesStatic', async (req, res) => {
-  // const userLike = req.body.userID;
-  // const postID = req.body.myPostID;
-  // const userLike = req.session.user;
-  // TODO: 偵測user ID
-  // console.log('查詢使用者按讚文章', postID);
   try {
     let [postLikeState] = await pool.execute(
       ' SELECT * FROM post_like JOIN post ON post_id=post.id WHERE post_like.user_id=?',
-      [2]
+      [1]
     );
-    console.log('該使用的按讚貼文資訊', postLikeState);
+    // console.log('該使用的按讚貼文資訊', postLikeState);
     res.json(postLikeState);
     // 轉換成JSON格式
   } catch (error) {
@@ -112,8 +124,9 @@ router.post('/likes', async (req, res) => {
     try {
       // console.log(1);
       let [addLike] = await pool.execute(
-        'DELETE FROM `post_like` WHERE post_id=?',
-        [postID]
+        'DELETE FROM `post_like` WHERE post_id=?,user_id=?',
+
+        [postID, 1]
       );
       // console.log(addLike);
       res.json(addLike);
@@ -138,7 +151,7 @@ router.post('/likes', async (req, res) => {
       // console.log(0);
       let [removeLike] = await pool.execute(
         'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, ?)',
-        [postID, 2]
+        [postID, 1]
       );
       console.log(removeLike);
       res.json(removeLike);
@@ -365,6 +378,7 @@ router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
 });
 
 // 行程貼文 (post)關聯(travel)日程景點明細(travel_days) （匯入景點資訊）可在關聯景點貼文內容 luis
+// ？編輯頁面  /community/tripPostDetail
 router.get('/tripPostDetail', async (req, res) => {
   // const postID = req.query.postID;
   const postID = req.query.postID;
@@ -383,7 +397,8 @@ router.get('/tripPostDetail', async (req, res) => {
 
 // 回傳更新資料 luis
 router.post('/tripPostDetailEdit', async (req, res) => {
-  const { travel_id, title, coordinate, tags } = req.body.updateObject;
+  const { travel_id, title, coordinate, tags, updateTime } =
+    req.body.updateObject;
   const { id, locate_context, locate_intro } = req.body.locateDetail;
 
   let newArrID = [];
@@ -406,8 +421,8 @@ router.post('/tripPostDetailEdit', async (req, res) => {
       console.log(resultTravel_days);
     }
     let [resultPost] = await pool.execute(
-      'UPDATE post SET post_title= ?,coordinate=?,tags =? WHERE travel_id = ?',
-      [title, coordinate, tags, travel_id]
+      'UPDATE post SET post_title= ?,coordinate=?,tags =?,update_time=? WHERE travel_id = ?',
+      [title, coordinate, tags, updateTime, travel_id]
     );
     // console.log('result', resultPost);
     return res.json({ message: '更新資料ＯＫ', data: resultPost });
@@ -418,15 +433,12 @@ router.post('/tripPostDetailEdit', async (req, res) => {
   }
 });
 
-// 行程貼文封面照片上傳--------------------------------------------------------------------------------------
+// 行程貼文封面照片上傳 luis--------------------------------------------------------------------------------------
 
-//　1. 圖片設定儲存空間
+//　圖片設定儲存空間
 const storageTripPostCover = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(
-      null,
-      path.join(__dirname, '..', '..', 'public', 'tripPost', 'coverPhoto')
-    );
+    cb(null, path.join(__dirname, '..', 'public', 'tripPost', 'coverPhoto'));
     console.log(__dirname);
     // 確認資料夾位置正確
   },
@@ -470,16 +482,17 @@ router.post(
     // const coverPhoto = req.body.preview;
     // const coverFile = req.body.coverFile;
     //TODO: 偵測userID
-    console.log(req.body);
+    // console.log('貼文ＩＤ', req.body.postID);
 
     try {
-      let filename = req.file ? 'tripPost/coverPhoto/' + req.file.filename : '';
-      console.log(filename);
+      let filename = req.file ? 'tripPost/coverPhoto' + req.file.filename : '';
+      console.log('檔案名稱', filename);
+      // console.log('貼文ＩＤ', postID);
       let [coverPhotoUpload] = await pool.execute(
-        ' UPDATE post SET main_photo =? WHERE id = 38',
-        [filename]
+        ' UPDATE post SET post_main_photo =? WHERE id = ?',
+        [filename, postID]
       );
-      // console.log('jijeijfeijfeijfiwajegpaerg', coverPhotoUpload);
+      console.log('圖片上傳資料庫成功', coverPhotoUpload);
       res.json(coverPhotoUpload);
       // 轉換成JSON格式
     } catch (error) {
@@ -487,5 +500,142 @@ router.post(
     }
   }
 );
+
+// 行程貼文景點照片上傳(單張) luis--------------------------------------------------------------------------------------
+
+//　圖片設定儲存空間
+const storageTripPostLoc = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '..', 'public', 'tripPost', 'locPhoto'));
+    console.log(__dirname);
+    // 確認資料夾位置正確
+  },
+  // 圖片設定名稱
+  filename: function (req, file, cb) {
+    console.log('file', file);
+    const ext = file.originalname.split('.').pop();
+    cb(null, `/travel-${uuidv4()}.${ext}`);
+  },
+});
+
+const uploaderTripPostLoc = multer({
+  storage: storageTripPostLoc,
+  // 過濾圖片的種類
+  fileFilter: function (req, file, cb) {
+    if (
+      file.mimetype !== 'image/jpeg' &&
+      file.mimetype !== 'image/jpg' &&
+      file.mimetype !== 'image/png' &&
+      file.mimetype !== 'image/webp'
+    ) {
+      cb(new Error('上傳的檔案型態不接受'), false);
+    } else {
+      cb(null, true);
+    }
+  },
+  // ,
+  // // 過濾檔案的大小
+  // limits: {
+  //   // 1k = 1024 => 200k = 200 * 1024
+  //   fileSize: 200 * 1024,
+  // },
+});
+
+//===============================================================================================
+router.post(
+  '/tripPostLocUpload',
+  uploaderTripPostLoc.single('photo'),
+  async (req, res) => {
+    const locateID = req.body.locateID;
+    console.log('景點ＩＤ', locateID);
+    // const coverFile = req.body.coverFile;
+    //TODO: 偵測userID
+    // console.log('貼文ＩＤ', req.body.postID);
+
+    try {
+      let filename = req.file ? 'tripPost/locPhoto' + req.file.filename : '';
+      console.log('檔案名稱', filename);
+      // console.log('貼文ＩＤ', postID);
+      let [locPhotoUpload] = await pool.execute(
+        ' UPDATE travel_days SET locate_photo =? WHERE id = ?',
+        [filename, locateID]
+      );
+      console.log('圖片上傳資料庫成功', locPhotoUpload);
+      res.json(locPhotoUpload);
+      // 轉換成JSON格式
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
+
+// 行程景點照片多張上傳 luis--------------------------------------------------------------------------------------
+
+//　圖片設定儲存空間
+// const storageTripPostLoc = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, path.join(__dirname, '..', 'public', 'tripPost', 'locPhoto'));
+//     console.log(__dirname);
+//     // 確認資料夾位置正確
+//   },
+//   // 圖片設定名稱
+//   filename: function (req, file, cb) {
+//     console.log('file', file);
+//     const ext = file.originalname.split('.').pop();
+//     cb(null, `/travel-Loc-${uuidv4()}.${ext}`);
+//   },
+// });
+
+// const uploaderTripPostLoc = multer({
+//   storage: storageTripPostLoc,
+//   // 過濾圖片的種類
+//   fileFilter: function (req, file, cb) {
+//     if (
+//       file.mimetype !== 'image/jpeg' &&
+//       file.mimetype !== 'image/jpg' &&
+//       file.mimetype !== 'image/png' &&
+//       file.mimetype !== 'image/webp'
+//     ) {
+//       cb(new Error('上傳的檔案型態不接受'), false);
+//     } else {
+//       cb(null, true);
+//     }
+//   },
+//   // ,
+//   // // 過濾檔案的大小
+//   // limits: {
+//   //   // 1k = 1024 => 200k = 200 * 1024
+//   //   fileSize: 200 * 1024,
+//   // },
+// });
+
+//===============================================================================================
+// router.post(
+//   '/tripPostLocUpload',
+// uploaderTripPostLoc.array('photos', 8),
+// async (req, res) => {
+//   const locateID = req.body.locateID;
+//   // const coverPhoto = req.body.preview;
+//   // const coverFile = req.body.coverFile;
+//   //TODO: 偵測userID
+//   console.log('貼文ＩＤ', req.body.postID);
+//   console.log('前端傳來檔案');//
+
+// try {
+//   let filename = req.file ? 'tripPost/locPhoto' + req.file.filename : '';
+//   console.log('檔案名稱', filename);
+//   // console.log('貼文ＩＤ', postID);
+//   let [locPhotoUpload] = await pool.execute(
+//     ' UPDATE travel_days SET locate_photo =? WHERE id = ?',
+//     [filename, locateID]
+//   );
+//   console.log('圖片上傳資料庫成功', locPhotoUpload);
+//   res.json(locPhotoUpload);
+//   // 轉換成JSON格式
+// } catch (error) {
+//   console.error(error);
+// }
+//   }
+// );
 
 module.exports = router;
