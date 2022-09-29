@@ -65,7 +65,6 @@ router.post('/release', async (req, res) => {
 });
 
 // 按讚數統計：
-
 router.get('/likesStatic', async (req, res) => {
   // const userLike = req.session.user;
   // console.log('查詢使用者按讚文章', userID);
@@ -157,7 +156,7 @@ router.get('/searchList', async (req, res) => {
   // console.log(req.query);
   try {
     let [result] = await pool.execute(
-      `SELECT * FROM post WHERE (title LIKE '%${search}%') OR (content LIKE '%${search}%') OR (coordinate LIKE '%${search}%') OR (tags LIKE '%${search}%');`
+      `SELECT * FROM post WHERE (post_title LIKE '%${search}%') OR (content LIKE '%${search}%') OR (coordinate LIKE '%${search}%') OR (tags LIKE '%${search}%');`
     );
     // console.log(result);
     res.json(result);
@@ -215,7 +214,8 @@ router.get('/postDetail', async (req, res) => {
   let user_id = req.session.user.id;
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
+      // 'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
+      'SELECT post.*, user.social_name FROM (post JOIN user on post.user_id = user.id) WHERE post.id = ? AND post.user_id = ? AND status >= 1',
       [postID, user_id]
     );
     console.log('postID====7777777=====', postID);
@@ -304,17 +304,19 @@ router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
   try {
     // 確認資料有沒有收到
     console.log('postEdit', req.body);
-
     let filename = req.file ? '/uploads/' + req.file.filename : '';
     let result = await pool.execute(
-      'INSERT INTO post (post_type_id, title, content, main_photo, coordinate, tags) VALUES (?, ?, ?, ?, ?, ?);',
+      'INSERT INTO post (user_id, post_type_id, post_title, content, post_main_photo, create_time, coordinate, tags, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
       [
-        1,
+        req.body.user_id,
+        req.body.post_type_id,
         req.body.title,
         req.body.content,
         filename,
+        req.body.create_time,
         req.body.location,
         req.body.tags,
+        req.body.status,
       ]
     );
     console.log('insert new post', result);
@@ -447,15 +449,14 @@ router.post(
 
 // 貼文留言區塊  KE//
 router.get('/postComment', async (req, res) => {
-  console.log('postID', req.query.postID);
+  console.log('Comment postID', req.query.postID);
   const postID = req.query.postID;
   // console.log(postID);
   console.log('===== KEKEKEKE1232131313 =====', req.session);
   let user_id = req.session.user.id;
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
-      [postID, user_id]
+      'SELECT post_comment.*, user.social_name , user.photo FROM post_comment JOIN user ON post_comment.user_id = user.id where post_id = ?', [postID]
     );
     console.log('postID====7777777=====', postID);
     console.log('user_id=====8888888=====', user_id);
@@ -463,6 +464,29 @@ router.get('/postComment', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error(error);
+  }
+});
+
+// 貼文留言上傳 KE//
+router.post('/postCommentEdit', async (req, res, next) => {
+  console.log('postCommentEdit body', req.body);
+  console.log('user_id', req.session.user.id)
+  try {
+    let user_id = req.session.user.id;
+    let result = await pool.execute(
+      'INSERT INTO post_comment (post_id, user_id, comment, create_time) VALUES (?, ?, ?, ?);',
+      [
+        req.body.postID,
+        user_id,
+        req.body.commentText,
+        req.body.create_time,
+      ]
+    );
+    console.log('insert new postComment', result);
+    // 回覆前端
+    res.json({ message: 'ok' });
+  } catch (err) {
+    console.error(err);
   }
 });
 
