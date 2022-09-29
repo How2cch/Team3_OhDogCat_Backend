@@ -23,7 +23,7 @@ router
     // console.log('req.body.order', req.body.order);
 
     const order = req.body.order;
-
+    console.log('step 1');
     const linePayBody = {
       ...order,
       redirectUrls: {
@@ -31,26 +31,48 @@ router
         cancelUrl: `${LINEPAY_RETURN_HOST}${LINEPAY_RETURN_CANCEL_URL}`,
       },
     };
+    console.log('step 2');
 
     // console.log('linePayBody',linePayBody);
 
     try {
       const uri = '/payments/request';
       const headers = createSignature(uri, linePayBody);
-
+      console.log('step 3');
+      const a = {
+        amount: '600',
+        currency: 'TWD',
+        packages: [
+          {
+            id: '1664430542498_1',
+            amount: '600',
+            products: [{ name: '澎湖水族館', quantity: 1, price: '600', originalPrice: 300 }],
+          },
+        ],
+        orderId: '1664430542498_1',
+        redirectUrls: {
+          confirmUrl: 'http://localhost:3000/linePay/confirm',
+          cancelUrl: 'http://localhost:3000/linePay/cancel',
+        },
+      };
       // console.log('headers',headers);
 
       const url = `${LINEPAY_SITE}/${LINEPAY_VERSION}${uri}`;
 
       const linePayRes = await axios.post(url, linePayBody, { headers });
+      console.log('step 4');
 
       console.log('-----LINEPAY-STATUS-----');
       console.log(linePayRes.data);
 
       if (linePayRes?.data?.returnCode === '0000') {
+        console.log('step 5');
+
         // 直接轉址會有問題
         // res.redirect(linePayRes?.data?.info.paymentUrl.web);
-        res.status(200).json({status:'ok', message:'成功生成付款網址', redirect:linePayRes?.data?.info.paymentUrl.web});
+        res
+          .status(200)
+          .json({ status: 'ok', message: '成功生成付款網址', redirect: linePayRes?.data?.info.paymentUrl.web });
       }
     } catch (error) {
       console.log(error);
