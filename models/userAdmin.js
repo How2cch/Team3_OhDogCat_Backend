@@ -60,10 +60,41 @@ const getUserVoucher = async (id) => {
 const getUserProfile = async (id) => {
   try {
     const [data] = await pool.execute('SELECT name, social_name, email, photo, phone, gender FROM user WHERE id = ?', [id]);
-    console.log(data);
     return data[0];
   } catch (error) {
     console.error(error);
   }
 };
-module.exports = { isSocialNameExist, updateSocialName, getUserVoucher, getUserProfile, updateName, updatePhone, updateGender };
+
+const getUserOrderInfo = async (id) => {
+  try {
+    const [data] = await pool.execute(
+      'SELECT s.name AS store_name, o.product_id, p.name AS product_name, p.photo_path, p.main_photo , o.product_quantity, o.order_no, o.product_price, o.total, o.pay, o.coupon_number, o.coupon_name, o.order_time, o.comment_status FROM (order_buying AS o JOIN product AS p ON o.product_id = p.id) JOIN store AS s ON p.store_id = s.id WHERE o.user_id = ? ORDER BY `o`.`order_time` DESC',
+      [id]
+    );
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const isOrderScored = async (order_no) => {
+  try {
+    const [data] = await pool.execute('SELECT COUNT(*) FROM order_buying WHERE order_no = ? AND comment_status = 1', [order_no]);
+    return data[0]['COUNT(*)'] === 0 ? false : true;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const postScore = async (product, user, comment, score, order_no) => {
+  try {
+    await pool.execute('INSERT INTO product_comment (product_id, product_comment_user_id, comment, product_comment_score) VALUES (?,?,?,?)', [product, user, comment, score]);
+    await pool.execute('UPDATE order_buying SET comment_status = 1  WHERE order_no = ? ', [order_no]);
+    return true;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+module.exports = { isSocialNameExist, updateSocialName, getUserVoucher, getUserProfile, updateName, updatePhone, updateGender, getUserOrderInfo, isOrderScored, postScore };

@@ -266,6 +266,14 @@ let products = [];
 //   // await pool.execute('DELETE FROM user WHERE id > 68');
 // })();
 
+(async () => {
+  let [data] = await pool.execute(
+    'SELECT id, product_type_id, name, intro, price, og_price, product_category_id, valid_time_start, valid_time_end, per_score, product_tag  FROM product'
+  );
+  let fileInfo = JSON.stringify(data);
+  fs.writeFile('./json/product/version_0929.json', fileInfo);
+  console.log(data);
+})();
 app.get('/', async (req, res) => {
   // = 穗懷修改景點商品
   let file = JSON.parse(await fs.readFile(`./json/pet_product/${0}.json`, 'utf-8'));

@@ -5,6 +5,8 @@ const axios = require('axios');
 const Qs = require('qs');
 const jwtDecode = require('jwt-decode');
 const moment = require('moment');
+const { v4: uuidv4 } = require('uuid');
+const sendMail = require('../mail_account_validation');
 
 const userRegister = async (req, res) => {
   console.log('session ====================', req.session);
@@ -24,7 +26,7 @@ const userRegister = async (req, res) => {
   console.log('register 格式無誤');
 
   try {
-    // = 進資料庫驗證信箱 or 暱稱是否已被註冊過，如果有則返回前端已被註冊的欄位是那些
+    // = 進資料庫驗證信箱 or 暱稱是否已被註冊過，如果有則返回前端已被註冊的欄位是哪些
     const existUser = await authModel.isAccountExist(req.body);
     if (existUser.length > 0) {
       console.log('existUser', existUser);
@@ -46,6 +48,7 @@ const userRegister = async (req, res) => {
     const result = await authModel.insertUser(insertInfo);
     const registerUser = {
       id: result.insertId,
+      account_valid: false,
       socialName: req.body.socialName,
       email: req.body.email,
       photo: '',
@@ -88,6 +91,7 @@ const userLogin = async (req, res) => {
     // = 寫進 Session 回給前端
     const loginUser = {
       id: existUser.id,
+      account_valid: existUser.valid === 1 ? true : false,
       name: existUser.name,
       email: existUser.email,
       social_name: existUser.social_name,
@@ -152,6 +156,7 @@ const userLineLogin = async (req, res) => {
     // = 將用戶資料寫進 Session
     const loginUser = {
       id: isExist ? existUser.id : insertResult.insertId,
+      account_valid: isExist ? (existUser.valid === 1 ? true : false) : false,
       name: isExist ? existUser.name : '',
       email: email,
       social_name: isExist ? existUser.social_name : '',
@@ -188,4 +193,30 @@ const userVerifyStatus = async (req, res) => {
   }
 };
 
-module.exports = { userRegister, userLogin, userLogout, userVerifyStatus, userLineLogin, userLineRegister };
+const userAccountValidation = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '欲驗證信箱');
+  try {
+    if (req.body.action === 'mail') {
+      const code = uuidv4();
+      const expired_time = moment().add(5, 'minute').format('YYYY-MM-DD HH:mm:ss');
+      await authModel.creatUserValidationCode(req.session.user.id, code, expired_time);
+      sendMail({ address: req.session.user.email, code: code });
+      return res.status(201).json({ status: 'ok', message: '驗證信已寄發' });
+    }
+    if (req.body.action === 'validation') {
+      console.log(req.body);
+      if (req.session.user.account_valid) return res.status(400).json({ message: '用戶信箱不需再驗證' });
+      const data = await authModel.getValidationInfo(req.session.user.id);
+      const now = moment().format('YYYY-MM-DD HH:mm:ss');
+      if (!data.code === req.body.code || !moment(data.expired_time).isAfter(now)) return res.status(400).json({ message: '驗證失敗，請再試一次' });
+      await authModel.updateAccountValid(req.session.user.id);
+      req.session.user.account_valid = true;
+      res.status(201).json({ status: 'ok', message: '用戶信箱已成功驗證', user: req.session.user });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+module.exports = { userRegister, userLogin, userLogout, userVerifyStatus, userLineLogin, userLineRegister, userAccountValidation };
