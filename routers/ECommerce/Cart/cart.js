@@ -183,11 +183,11 @@ router.post('/orderpostreduce/:productId', authMiddleware.authVerify, async (req
 
 
 // TODO:登入驗證？
-router.get('/list', async (req, res) => {
+router.get('/list',authMiddleware.authVerify, async (req, res) => {
   // console.log(req.query);
   try {
     const [list] = await pool.execute(
-      'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = `product`.`id`'
+      'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = `product`.`id` WHERE `cart`.`user_id` = ?',[req.session.user.id]
       // [req.query.id]
     );
     // console.log(comment);
