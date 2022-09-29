@@ -44,7 +44,6 @@ router.get('/products', async (req, res) => {
 
     const searchWord = search ? `AND name LIKE '%${search}%'` : '';
     // if (tag) {
-    // TODO搜尋
     let tagArray = tag.split(',');
     let tagSelect = 'AND';
     if (tagArray.length === 0) {

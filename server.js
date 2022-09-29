@@ -53,7 +53,7 @@ app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有�
 
 // =============================================================================================EC穗懷區
 // ----HomePage推薦商品
-const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
+const EcHomepagesAPI = require('./routers/ECommerce/Recommend/recommendProduct');
 app.use('/api/1.0/product', EcHomepagesAPI);
 
 // ----Filter篩選商品
