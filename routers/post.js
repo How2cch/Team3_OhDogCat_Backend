@@ -117,8 +117,8 @@ router.post('/likes', async (req, res) => {
     userLike
   );
   likesState
-    ? (newLikeCount = likesCount - 1)
-    : (newLikeCount = likesCount + 1);
+    ? (newLikeCount = likesCount + 1)
+    : (newLikeCount = likesCount - 1);
   console.log('新按讚數', newLikeCount);
 
   if (likesState === 1) {
@@ -127,7 +127,7 @@ router.post('/likes', async (req, res) => {
       let [addLike] = await pool.execute(
         'DELETE FROM `post_like` WHERE post_id=?,user_id=?',
 
-        [postID, 1]
+        [postID, userLike]
       );
       // console.log(addLike);
       res.json(addLike);
@@ -152,7 +152,7 @@ router.post('/likes', async (req, res) => {
       // console.log(0);
       let [removeLike] = await pool.execute(
         'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, ?)',
-        [postID, 1]
+        [postID, userLike]
       );
       console.log(removeLike);
       res.json(removeLike);
@@ -409,15 +409,23 @@ router.post('/tripPostDetailEdit', async (req, res) => {
     req.body.updateObject;
   const { id, locate_context, locate_intro } = req.body.locateDetail;
 
+  console.log('locate context', locate_context);
+
+  console.log('locate intro', locate_intro);
+  console.log('id', id);
+
   let newArrID = [];
   let newArrContext = [];
   let newArrIntro = [];
   for (let i = 0; i < id.length; i++) {
-    newArrID = [...id[0], ...id[i]];
-    newArrContext = [...locate_context[0], ...locate_context[i]];
-    newArrIntro = [...locate_intro[0], ...locate_intro[i]];
+    console.log('tet', id[i]);
+    newArrID.push(...id[i]);
+    newArrContext.push(...locate_context[i]);
+    newArrIntro.push(...locate_intro[i]);
   }
-
+  console.log('newID', newArrID);
+  console.log('newcontext', newArrContext);
+  console.log('newintro', newArrIntro);
   // let newLocatData = {};
   try {
     for (let j = 0; j < newArrID.length; j++) {
@@ -425,7 +433,12 @@ router.post('/tripPostDetailEdit', async (req, res) => {
         `UPDATE travel_days SET locate_intro = ?,locate_context = ? WHERE id = ?`,
         [newArrIntro[j], newArrContext[j], newArrID[j]]
       );
-      // console.log(j);
+      console.log(
+        '傳值到資料庫',
+        newArrIntro[j],
+        newArrContext[j],
+        newArrID[j]
+      );
       console.log(resultTravel_days);
     }
     let [resultPost] = await pool.execute(
