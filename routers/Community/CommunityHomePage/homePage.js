@@ -2,12 +2,14 @@ const express = require('express');
 const router = express();
 const pool = require('../../../utils/db');
 
+
+// TODO: 首頁搜尋跳轉要改寫
 router.get('/', async (req, res) => {
   console.log(req.query);
   try {
     const { search } = req.query;
     const [searchResult] = await pool.execute(
-      `SELECT * FROM post WHERE (title LIKE '%${search}%') OR (content LIKE '%${search}%') OR (coordinate LIKE '%${search}%') OR (tags LIKE '%${search}%');`
+      `SELECT * FROM post WHERE (post_title LIKE '%${search}%') OR (content LIKE '%${search}%') OR (coordinate LIKE '%${search}%') OR (tags LIKE '%${search}%');`
     );
     console.log('searchResult', searchResult);
     res.json(searchResult);
@@ -62,7 +64,7 @@ router.get('/hotPost', async (req, res) => {
 router.get('/newPost', async (req, res) => {
   console.log(req.query);
   try {
-    const [newPost] = await pool.execute('SELECT id, title, main_photo, likes');
+    const [newPost] = await pool.execute('SELECT id, post_title, post_main_photo, likes');
     console.log(newPost);
     res.json(newPost);
   } catch (error) {
