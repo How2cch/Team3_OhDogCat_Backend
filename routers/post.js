@@ -10,23 +10,6 @@ const authMiddleware = require('../middlewares/userAuth');
 
 const path = require('path');
 
-// 取全部貼文資料 首頁查詢用luis
-// 會員中心社群設定 所有發布中的貼文
-router.get('/', async (req, res) => {
-  console.log(req.query);
-  try {
-    let [resulta] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status = 1  ',
-      [1]
-    );
-    // console.log(resulta);
-    res.json(resulta);
-    // 轉換成JSON格式
-  } catch (error) {
-    console.error(error);
-  }
-});
-
 // 通知資料庫刪除貼文（軟刪除） luis
 router.post('/', async (req, res) => {
   let deleteID = req.body.myPostID;
@@ -242,9 +225,9 @@ router.get('/tripDetailImport', async (req, res) => {
 });
 
 // 取全部貼文資料 首頁查詢用
-// 會員中心社群設定 /community 孝強 （TODO:是否重複？
+// 會員中心社群設定 /community 孝強 （TODO:這邊再看一下
 router.get('/', async (req, res) => {
-  console.log(req.query);
+  console.log('req.query', req.query);
   console.log('===== KEKEKEKE 44444444444444=====', req.session);
   let user_id = req.session.user.id;
   console.log(user_id);
@@ -253,7 +236,7 @@ router.get('/', async (req, res) => {
       'SELECT * FROM post WHERE user_id = ? AND status >= 1',
       [user_id]
     );
-    console.log(resulta);
+    console.log('一般貼文', resulta);
     res.json(resulta);
     // 轉換成JSON格式
   } catch (error) {
@@ -261,8 +244,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 一般貼文內容頁 == /postWYSIWYG
-// == /api/1.0/post // KE （TODO:？？
+// 一般貼文內容頁 == KE//postDetail
 router.get('/postDetail', async (req, res) => {
   console.log('postID', req.query.postID);
   const postID = req.query.postID;
@@ -341,7 +323,6 @@ const uploader = multer({
 });
 
 // 所見即所得圖片上傳 KE//
-// 所見即所得圖片上傳 // 孝強
 router.post(
   '/uploadImages',
   uploader.single('files'),
@@ -356,7 +337,7 @@ router.post(
   }
 );
 
-// 一般貼文上傳 KE//
+// 一般貼文上傳、更新 KE//
 // 一般貼文上傳 // 孝強
 router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
   try {
@@ -642,6 +623,7 @@ router.post(
     }
   }
 );
+
 // router.post(
 //   '/tripPostLocUpload',
 // uploaderTripPostLoc.array('photos', 8),
@@ -669,6 +651,7 @@ router.post(
 // }
 //   }
 // );
+
 
 // 貼文留言區塊  KE//
 router.get('/postComment', async (req, res) => {
