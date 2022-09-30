@@ -2,6 +2,9 @@ const adminModel = require('../models/userAdmin');
 const pool = require('../utils/db');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
+const sendMail = require('../mail_password_reset');
+const { validationResult } = require('express-validator');
+const bcrypt = require('bcrypt');
 
 const userReadVouchers = async (req, res) => {
   console.log('session ====================', req.session);
@@ -201,6 +204,54 @@ const userPostScore = async (req, res) => {
   }
 };
 
+const userResetPassword = async (req, res) => {
+  try {
+    if (req.body.action === 'mail') {
+      const isEmailExist = await adminModel.isEmailExist(req.body.email);
+      console.log('step', 1);
+
+      console.log(isEmailExist);
+      if (!isEmailExist) return res.status(200).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
+      console.log('step', 2);
+
+      const code = uuidv4();
+      const expired_time = moment().add(5, 'minute').format('YYYY-MM-DD HH:mm:ss');
+      await adminModel.createPwdResetCode(code, isEmailExist.id, expired_time);
+      console.log('step', 3);
+      sendMail({ address: req.body.email, code: code });
+      return res.status(201).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
+    }
+    if (req.body.action === 'reset') {
+      const validation = validationResult(req);
+      const result = await adminModel.pwdResetCodeValidation(req.body.code);
+      const now = moment().format('YYYY-MM-DD HH:mm:ss');
+      if (!result || moment(now).isAfter(result.expired_time) || result.status != 1) return res.status(400).json({ message: '密碼重設憑證已無效，需重新申請' });
+      let error = validation.array();
+      if (error[0]) {
+        console.log('error', error);
+        return res.status(400).json({ message: '密碼格式錯誤', error: error });
+      }
+      const newPassword = await bcrypt.hash(req.body.password, 10);
+      await adminModel.resetPassword(req.body.code, result.user_id, newPassword);
+      return res.status(201).json({ status: 'ok', action: 'reset', message: '密碼重設成功' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userGetCollectionInfo = async (req, res) => {
+  try {
+    console.log('用戶id' + req.session.user.id + '欲查看收藏列表');
+    const data = await adminModel.getUserCollectionInfo(req.session.user.id);
+    res.status(200).json({ status: 'ok', data: data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
 module.exports = {
   userEditSocialName,
   userReadVouchers,
@@ -212,4 +263,6 @@ module.exports = {
   userEditPhoto,
   userGetOrderInfo,
   userPostScore,
+  userResetPassword,
+  userGetCollectionInfo,
 };

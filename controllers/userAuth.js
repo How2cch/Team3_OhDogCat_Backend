@@ -81,7 +81,7 @@ const userRegister = async (req, res) => {
     const registerUser = {
       id: result.insertId,
       account_valid: false,
-      socialName: req.body.socialName,
+      social_name: req.body.socialName,
       email: req.body.email,
       photo: '',
       name: '',
@@ -287,19 +287,18 @@ const userAccountValidation = async (req, res) => {
       const data = await authModel.getValidationInfo(req.session.user.id);
       const now = moment().format('YYYY-MM-DD HH:mm:ss');
       if (
+        !data ||
         !data.code === req.body.code ||
         !moment(data.expired_time).isAfter(now)
       )
         return res.status(400).json({ message: '驗證失敗，請再試一次' });
       await authModel.updateAccountValid(req.session.user.id);
       req.session.user.account_valid = true;
-      res
-        .status(201)
-        .json({
-          status: 'ok',
-          message: '用戶信箱已成功驗證',
-          user: req.session.user,
-        });
+      res.status(201).json({
+        status: 'ok',
+        message: '用戶信箱已成功驗證',
+        user: req.session.user,
+      });
     }
   } catch (error) {
     console.log(error);

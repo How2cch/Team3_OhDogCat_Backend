@@ -14,6 +14,7 @@ router.get('/exchange/:exchangeId', async (req, res) => {
       'SELECT v.quantity, p.photo_path, p.main_photo, p.name, p.store_id FROM voucher_exchange AS v JOIN product AS p ON v.product_id = p.id WHERE v.id = ? AND v.status = 1 AND expired_time >= ?',
       [req.params.exchangeId, moment().format('YYYY-MM-DD HH:mm;ss')]
     );
+    console.log(productResult);
     if (productResult.length === 0) return res.render('store_voucher_exchange--result', { text: '該核銷代碼已失效，請重新兌換' });
     const [staffResult] = await pool.execute('SELECT id, name FROM store_staff WHERE store_id = ?', [productResult[0].store_id]);
     const data = {

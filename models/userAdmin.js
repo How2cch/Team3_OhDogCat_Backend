@@ -97,4 +97,69 @@ const postScore = async (product, user, comment, score, order_no) => {
   }
 };
 
-module.exports = { isSocialNameExist, updateSocialName, getUserVoucher, getUserProfile, updateName, updatePhone, updateGender, getUserOrderInfo, isOrderScored, postScore };
+const isEmailExist = async (email) => {
+  try {
+    const [data] = await pool.execute('SELECT id  FROM user WHERE email = ?', [email]);
+    return data[0] ? data[0] : false;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const createPwdResetCode = async (code, user, expired_time) => {
+  try {
+    await pool.execute('REPLACE INTO password_reset (code, user_id, expired_time) VALUES (?,?,?) ', [code, user, expired_time]);
+    return true;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const pwdResetCodeValidation = async (code) => {
+  try {
+    const [data] = await pool.execute('SELECT * FROM password_reset WHERE code = ?', [code]);
+    return data[0];
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const resetPassword = async (code, user, newPassword) => {
+  try {
+    await pool.execute('UPDATE password_reset SET status = 0  WHERE code = ?', [code]);
+    await pool.execute('UPDATE user SET password = ?  WHERE id = ?', [newPassword, user]);
+    return true;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const getUserCollectionInfo = async (user) => {
+  try {
+    const [data] = await pool.execute(
+      'SELECT s.name AS store_name, f.product_id, p.name AS product_name, p.photo_path, p.main_photo, p.og_price, p.price FROM (favorite AS f JOIN product AS p ON f.product_id = p.id) JOIN store AS s ON p.store_id = s.id WHERE f.user_id = ?',
+      [user]
+    );
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+module.exports = {
+  isSocialNameExist,
+  updateSocialName,
+  getUserVoucher,
+  getUserProfile,
+  updateName,
+  updatePhone,
+  updateGender,
+  getUserOrderInfo,
+  isOrderScored,
+  postScore,
+  isEmailExist,
+  createPwdResetCode,
+  pwdResetCodeValidation,
+  resetPassword,
+  getUserCollectionInfo,
+};
