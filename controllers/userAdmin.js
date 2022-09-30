@@ -2,14 +2,6 @@ const adminModel = require('../models/userAdmin');
 const pool = require('../utils/db');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
-const path = require('path');
-const multer = require('multer');
-
-// const bcrypt = require('bcrypt');
-// const { validationResult } = require('express-validator');
-// const axios = require('axios');
-// const Qs = require('qs');
-// const jwtDecode = require('jwt-decode');
 
 const userReadVouchers = async (req, res) => {
   console.log('session ====================', req.session);
