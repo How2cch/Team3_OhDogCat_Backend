@@ -52,7 +52,7 @@ app.use('/store/voucher', storeAdmin);
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 
 // =============================================================================================EC區
-// ----HomePage推薦商品
+// ----HomePage & ECHomepage 推薦商品
 const EcHomepagesAPI = require('./routers/ECommerce/Recommend/recommendProduct');
 app.use('/api/1.0/product', EcHomepagesAPI);
 
