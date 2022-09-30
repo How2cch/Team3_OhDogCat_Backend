@@ -418,7 +418,7 @@ router.post('/tripPostDetailEdit', async (req, res) => {
   let newArrContext = [];
   let newArrIntro = [];
   for (let i = 0; i < id.length; i++) {
-    console.log('tet', id[i]);
+    // console.log('tet', id[i]);
     newArrID.push(...id[i]);
     newArrContext.push(...locate_context[i]);
     newArrIntro.push(...locate_intro[i]);
