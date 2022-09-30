@@ -46,15 +46,15 @@ router.get('/kolPost', async (req, res) => {
 
 // 瀑布流資料(post資料表全部展示)
 
-// router.get('/allPost', async (req, res) => {
-//   try {
-//     const [allPost] = await pool.execute('SELECT * FROM post');
-//   } catch (error) {
-//     console.error('抓取社群瀑布流貼文失敗', error);
-//   }
-//   console.log(allPost);
-//   res.json(allPost);
-// });
+router.get('/allPost', async (req, res) => {
+  try {
+    const [allPost] = await pool.execute('SELECT * FROM post');
+    // console.log('================allPost=================',allPost);
+    res.json(allPost);
+  } catch (error) {
+    console.error('抓取社群瀑布流貼文失敗', error);
+  }
+});
 
 // ==============================采平===================================
 
