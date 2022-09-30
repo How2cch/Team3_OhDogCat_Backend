@@ -5,6 +5,7 @@ const pool = require('../../../utils/db');
 const authMiddleware = require('../../../middlewares/userAuth');
 
 //  /api/1.0/collect/product/:productId
+// authMiddleware.authVerify,
 // TODO記得驗證登入
 router.post(
   '/product/:productId',
@@ -12,7 +13,10 @@ router.post(
   async (req, res) => {
     const product_id = req.params.productId;
     const user_id = req.session.user.id;
-    console.log('user', user_id);
+
+    // const product_id = 519;
+    // const user_id = 1;
+    // console.log('user', user_id);
     try {
       const [isExist] = await pool.execute(
         `SELECT * FROM favorite WHERE product_id = ? `,

@@ -51,23 +51,26 @@ app.use('/store/voucher', storeAdmin);
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 
-// =============雨信區
+// // =============雨信區
 
-//Rain 票卷相關 //userid title 開始時間相關
+// //Rain 票卷相關 //userid title 開始時間相關
 
-const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
-app.use('/api/1.0/', TravelGetAPI);
+// const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
+// app.use('/api/1.0/', TravelGetAPI);
 
-// Rain post更改日期 travel title
-const TraveldetailUpdate = require('./routers/Travel/Travel_post_LocationID/travelLocationID');
-app.use('/api/1.0/', TraveldetailUpdate);
+// // Rain post更改日期 travel title
+// const TraveldetailUpdate = require('./routers/Travel/Travel_post_LocationID/travelLocationID');
+// app.use('/api/1.0/', TraveldetailUpdate);
 
-// =============雨信區
+// // =============雨信區
 
-// ----EC穗懷區
-// =============================================================================================EC穗懷區
-// ----HomePage推薦商品
-const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
+// // ----EC穗懷區
+// // =============================================================================================EC穗懷區
+// // ----HomePage推薦商品
+// const EcHomepagesAPI = require('./routers/ECommerce/HomePage/recommendProduct');
+// =============================================================================================EC區
+// ----HomePage & ECHomepage 推薦商品
+const EcHomepagesAPI = require('./routers/ECommerce/Recommend/recommendProduct');
 app.use('/api/1.0/product', EcHomepagesAPI);
 
 // ----Filter篩選商品
@@ -86,7 +89,22 @@ app.use('/api/1.0/productdetail', DetailAPI);
 const CartAPI = require('./routers/ECommerce/Cart/cart');
 app.use('/api/1.0/cart', CartAPI);
 
-// ============================================================================================EC穗懷區
+// ----LinePay結帳
+const LineAPI = require('./utils/linePay');
+app.use('/api/1.0/line', LineAPI);
+
+// ----建立訂單
+const createOrderAPI = require('./routers/ECommerce/CreateOrder/createOrder');
+app.use('/api/1.0/createorder', createOrderAPI);
+
+// ----刪除購物車
+const deleteCartAPI = require('./routers/ECommerce/DeleteCart/deleteCart');
+app.use('/api/1.0/deletecart', deleteCartAPI);
+
+// ----LinePay
+// const CartAPI = require('./routers/ECommerce/Cart/cart');
+// app.use('/api/1.0/cart', CartAPI);
+// ============================================================================================EC區
 
 // = user 登入註冊相關
 const userAuthAPI = require('./routers/userAuth'); // ? 將 API route 整理於 ./routers 個別檔案中
