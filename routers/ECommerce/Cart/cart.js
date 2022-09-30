@@ -90,6 +90,7 @@ router.post('/orderpostmore/:productId', authMiddleware.authVerify, async (req, 
     // 辨認購物車資料庫裡面有沒有相同的商品
     const [isExist] = await pool.execute(`SELECT * FROM cart WHERE user_id=? AND product_id = ? `, [user_id, product_id]);
     // 加入購物車
+    let result;
     if (!isExist[0]) {
       console.log('新增');
       result = await pool.execute(`INSERT INTO cart (user_id, product_id, quantity) VALUE (?,?,1)`, [user_id, product_id]);
