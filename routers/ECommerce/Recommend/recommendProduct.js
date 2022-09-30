@@ -19,12 +19,6 @@ router.get('/recommendProduct', async (req, res) => {
 
 // ---- /api/1.0/product/news
 router.get('/news', async (req, res) => {
-  // console.log(req.query);
-  // const typeId= req.query.typeId
-  // const keyword = req.query.keyword
-  // const typeId = 3;
-  // const keyword = '咖啡';
-  // console.log('====================================');
   try {
     const arrStr = [
       { id: '2', keyword: '室內景點' },
