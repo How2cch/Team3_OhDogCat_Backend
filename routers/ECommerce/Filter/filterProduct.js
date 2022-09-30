@@ -10,8 +10,10 @@ router.get('/choices', async (req, res) => {
 
   try {
     let [result] = await pool.execute(
-      `SELECT cate.id as cate_id, cate.name AS cate_name, tag.name AS tag_name, tag.id AS tag_id FROM product_tag as tag JOIN product_tag_category AS cate ON tag.tag_category_id = cate.id WHERE tag.product_type_id = ${typeId} ORDER BY tag_id ASC`
+      `SELECT cate.id as cate_id, cate.name AS cate_name, tag.name AS tag_name, tag.id AS tag_id FROM product_tag as tag JOIN product_tag_category AS cate ON tag.tag_category_id = cate.id WHERE tag.product_type_id = ${typeId}  ORDER BY tag_id ASC`
     );
+    
+    // `SELECT cate.id as cate_id, cate.name AS cate_name, tag.name AS tag_name, tag.id AS tag_id FROM product_tag as tag JOIN product_tag_category AS cate ON tag.product_type_id = cate.product_type_id WHERE tag.product_type_id = ${typeId} AND  cate.product_type_id = ${typeId} ORDER BY cate_name ASC`
     let newArr = [];
     result.forEach((data) => {
       const { cate_id, cate_name, ...newObject } = data;
@@ -42,7 +44,7 @@ router.get('/products', async (req, res) => {
     const page = req.query.page || 1;
     const typeId = req.query.typeId || 2;
 
-    const searchWord = search ? `AND name LIKE '%${search}%'` : '';
+    const searchWord = search ? `AND (name LIKE '%${search}%' OR description LIKE '%${search}%')` : '';
     // if (tag) {
     let tagArray = tag.split(',');
     let tagSelect = 'AND';

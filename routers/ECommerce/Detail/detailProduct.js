@@ -71,10 +71,9 @@ router.get('/comment', async (req, res) => {
   try {
     const [comment] = await pool.execute(
       `SELECT product_comment.* ,social_name, photo FROM  product_comment JOIN user ON product_comment.product_comment_user_id = user.id WHERE product_id = ?`,
-      // [req.query.id]
-      [519]
+      [req.query.id]
     );
-    // console.log(comment);
+    console.log(comment);
     res.json(comment);
   } catch (error) {
     console.error(error);
