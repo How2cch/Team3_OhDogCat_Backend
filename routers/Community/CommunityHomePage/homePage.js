@@ -30,19 +30,33 @@ router.get('/', async (req, res) => {
 //   }
 // });
 
-// 寵物網美  采平假資料版
+// ==============================采平===================================
+
+// 寵物網美假資料版
 router.get('/kolPost', async (req, res) => {
   console.log(req.query);
   try {
-    const [kolPost] = await pool.execute(
-      'SELECT * FROM post WHERE post.id > 1 AND post.id < 22'
-    );
+    const [kolPost] = await pool.execute('SELECT * FROM post WHERE post.id > 1 AND post.id < 22');
     // console.log(kolPost);
     res.json(kolPost);
   } catch (error) {
     console.error(error);
   }
 });
+
+// 瀑布流資料(post資料表全部展示)
+
+router.get('/allPost', async (req, res) => {
+  try {
+    const [allPost] = await pool.execute('SELECT * FROM post');
+    // console.log('================allPost=================',allPost);
+    res.json(allPost);
+  } catch (error) {
+    console.error('抓取社群瀑布流貼文失敗', error);
+  }
+});
+
+// ==============================采平===================================
 
 // NOTE: 熱門貼文，條件應為按讚數，目前暫用id 9 以上
 router.get('/hotPost', async (req, res) => {
@@ -74,9 +88,7 @@ router.get('/newPost', async (req, res) => {
 router.get('/testAPI', async (req, res) => {
   console.log(req.query);
   try {
-    const [newPost] = await pool.execute(
-      'SELECT post.* ,user.social_name FROM post JOIN user ON user.id = user_id; '
-    );
+    const [newPost] = await pool.execute('SELECT post.* ,user.social_name FROM post JOIN user ON user.id = user_id; ');
     console.log(newPost);
     res.json(newPost);
   } catch (error) {
