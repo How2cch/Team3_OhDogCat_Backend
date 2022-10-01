@@ -10,7 +10,7 @@ router.get('/coupon', async (req, res) => {
   let [result] = await pool.execute('SELECT * FROM coupon WHERE id < ?', [3]);
   console.log(result);
   res.json(result);
-})
+});
 // router.get('/all', async (req, res) => {
 //   let [result] = await pool.execute('SELECT name FROM product WHERE id < ?', [11]);
 //   console.log(result);
