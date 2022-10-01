@@ -12,20 +12,20 @@ const path = require('path');
 
 // 取全部貼文資料 首頁查詢用luis
 // 會員中心社群設定 所有發布中的貼文
-router.get('/', async (req, res) => {
-  console.log(req.query);
-  try {
-    let [resulta] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status = 1  ',
-      [1]
-    );
-    // console.log(resulta);
-    res.json(resulta);
-    // 轉換成JSON格式
-  } catch (error) {
-    console.error(error);
-  }
-});
+// router.get('/', async (req, res) => {
+//   console.log(req.query);
+//   try {
+//     let [resulta] = await pool.execute(
+//       'SELECT * FROM post WHERE id >= ? AND status = 1  ',
+//       [1]
+//     );
+//     // console.log(resulta);
+//     res.json(resulta);
+//     // 轉換成JSON格式
+//   } catch (error) {
+//     console.error(error);
+//   }
+// });
 
 // 通知資料庫刪除貼文（軟刪除） luis
 router.post('/', async (req, res) => {
@@ -178,12 +178,12 @@ router.post('/likes', async (req, res) => {
 
 // 單獨取一般貼文資料 抬頭 luis
 router.get('/post', async (req, res) => {
-  // console.log(req.query);
-  // TODO:偵測userID
+  let user_id = req.body.user_id;
+  console.log('req.body.user_id', req.body.user_id);
   try {
     let [result] = await pool.execute(
       'SELECT * FROM post WHERE id >= ? AND status =1 AND post_type_id =1',
-      [1]
+      [user_id]
     );
     // console.log(result);
     res.json(result);
@@ -242,41 +242,42 @@ router.get('/tripDetailImport', async (req, res) => {
 });
 
 // 取全部貼文資料 首頁查詢用
-// 會員中心社群設定 /community 孝強 （TODO:是否重複？
-router.get('/', async (req, res) => {
+// 會員中心社群設定 /community 孝強
+router.get('/postAll', async (req, res) => {
   console.log(req.query);
   console.log('===== KEKEKEKE 44444444444444=====', req.session);
   let user_id = req.session.user.id;
   console.log(user_id);
   try {
-    let [resulta] = await pool.execute(
+    let [result] = await pool.execute(
       'SELECT * FROM post WHERE user_id = ? AND status >= 1',
       [user_id]
     );
-    console.log(resulta);
-    res.json(resulta);
+    console.log(result);
+    res.json(result);
     // 轉換成JSON格式
   } catch (error) {
     console.error(error);
   }
 });
 
-// 一般貼文內容頁 == /postWYSIWYG
-// == /api/1.0/post // KE （TODO:？？
+// 一般貼文內容頁 ==
+// == /api/1.0/post // KE
 router.get('/postDetail', async (req, res) => {
   console.log('postID', req.query.postID);
   const postID = req.query.postID;
+  // const user_id = req.body.user_id
   // console.log(postID);
-  console.log('===== KEKEKEKE1232131313 =====', req.session);
-  let user_id = req.session.user.id;
+  // console.log('===== KEKEKEKE1232131313 =====', req.session);
+  // let user_id = req.session.user.id;
   try {
     let [result] = await pool.execute(
       // 'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
-      'SELECT post.*, user.social_name FROM (post JOIN user on post.user_id = user.id) WHERE post.id = ? AND post.user_id = ? AND status >= 1',
-      [postID, user_id]
+      'SELECT post.*, user.social_name FROM (post JOIN user on post.user_id = user.id) WHERE post.id = ? AND status = ?',
+      [postID, 1]
     );
     console.log('postID====7777777=====', postID);
-    console.log('user_id=====8888888=====', user_id);
+    // console.log('user_id=====8888888=====', user_id);
     // console.log(result);
     res.json(result);
   } catch (error) {
@@ -361,23 +362,43 @@ router.post(
 router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
   try {
     // 確認資料有沒有收到
-    console.log('postEdit', req.body);
-    let filename = req.file ? '/uploads/' + req.file.filename : '';
-    let result = await pool.execute(
-      'INSERT INTO post (user_id, post_type_id, post_title, content, post_main_photo, create_time, coordinate, tags, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
-      [
-        req.body.user_id,
-        req.body.post_type_id,
-        req.body.title,
-        req.body.content,
-        filename,
-        req.body.create_time,
-        req.body.location,
-        req.body.tags,
-        req.body.status,
-      ]
+    console.log(
+      '----------------------------postEdit----------------------------',
+      req.body
     );
-    console.log('insert new post', result);
+    let filename = req.file ? '/uploads/' + req.file.filename : '';
+    if (req.body.post_id === 'null') {
+      let result = await pool.execute(
+        'INSERT INTO post (user_id, post_type_id, post_title, content, post_main_photo, create_time, coordinate, tags, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
+        [
+          req.body.user_id,
+          req.body.post_type_id,
+          req.body.title,
+          req.body.content,
+          filename,
+          req.body.create_time,
+          req.body.location,
+          req.body.tags,
+          req.body.status,
+        ]
+      );
+    } else {
+      let result = await pool.execute(
+        'UPDATE post SET user_id = ?, post_title = ?, content = ?, post_main_photo=?, update_time = ?, coordinate= ?, tags = ?, status=? WHERE id = ?;',
+        [
+          req.body.user_id,
+          req.body.title,
+          req.body.content,
+          filename,
+          req.body.create_time,
+          req.body.location,
+          req.body.tags,
+          req.body.status,
+          req.body.post_id,
+        ]
+      );
+    }
+    // console.log('insert new post', result);
     // // 回覆前端
     res.json({ message: 'ok' });
   } catch (err) {
@@ -675,15 +696,15 @@ router.get('/postComment', async (req, res) => {
   console.log('Comment postID', req.query.postID);
   const postID = req.query.postID;
   // console.log(postID);
-  console.log('===== KEKEKEKE1232131313 =====', req.session);
-  let user_id = req.session.user.id;
+  // console.log('===== KEKEKEKE1232131313 =====', req.session);
+  // let user_id = req.session.user.id;
   try {
     let [result] = await pool.execute(
       'SELECT post_comment.*, user.social_name , user.photo FROM post_comment JOIN user ON post_comment.user_id = user.id where post_id = ?',
       [postID]
     );
     console.log('postID====7777777=====', postID);
-    console.log('user_id=====8888888=====', user_id);
+    // console.log('user_id=====8888888=====', user_id);
     // console.log(result);
     res.json(result);
   } catch (error) {
