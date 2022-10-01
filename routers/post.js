@@ -91,11 +91,6 @@ router.get('/likesStatic', async (req, res) => {
       [1]
     );
     // console.log('該使用的按讚貼文資訊', postLikeState);
-    res.json(postLikeState);
-    let [postLikeresult] = await pool.execute(
-      ' SELECT * FROM post_like JOIN post ON post_like.post_id = post.id WHERE post_like.user_id>=? ORDER BY post_id DESC',
-      [1]
-    );
     console.log('該使用的按讚貼文資訊', postLikeresult);
     res.json(postLikeresult);
     // 轉換成JSON格式
@@ -156,7 +151,7 @@ router.post('/likes', async (req, res) => {
     try {
       // console.log(0);
       let [removeLike] = await pool.execute(
-        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 2)',
+        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 1)',
         [postID]
       );
 
@@ -188,11 +183,8 @@ router.get('/post', async (req, res) => {
   console.log('user_id', user_id);
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >=1 AND post_type_id =1',
-      [
-        1,
-        //  'SELECT cate.id as cate_id, cate.name AS cate_name, tag.name AS tag_name, tag.id AS tag_id FROM product_tag as tag JOIN product_tag_category AS cate ON tag.tag_category_id = cate.id WHERE tag.product_type_id = 2 ORDER BY `tag_id` ASC'
-      ]
+      'SELECT * FROM post WHERE id >= ? AND status >=1 AND post_type_id =1 ORDER BY id ASC',
+      [1]
     );
     // console.log(result);
     res.json(result);
@@ -207,7 +199,7 @@ router.get('/tripPost', async (req, res) => {
   // TODO:偵測userID
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >= 1 AND post_type_id =2',
+      'SELECT * FROM post WHERE id >= ? AND status >= 1 AND post_type_id =2 ORDER BY id ASC',
       [1]
     );
     // console.log(result);
@@ -253,9 +245,9 @@ router.get('/tripDetailImport', async (req, res) => {
 // 取全部貼文資料 首頁查詢用
 // 會員中心社群設定 /community 孝強
 router.get('/postAll', async (req, res) => {
-
   try {
-    let [resulta] = await pool.execute(
+    // const user_id = req.body.user_id
+    let [result] = await pool.execute(
       'SELECT * FROM post WHERE user_id = ? AND status >= 1',
       [1]
     );
@@ -296,11 +288,12 @@ router.get('/postDetail', async (req, res) => {
 router.post('/tripPostNew', async (req, res) => {
   const tripID = req.body.tripID;
   const createTime = req.body.createTime;
+  const tripTitle = req.body.tripPostTitleDefault;
   // TODO:偵測userID
   try {
     let [postResult] = await pool.execute(
-      `INSERT INTO post (post_type_id, user_id, post_title, travel_id, status, create_time) VALUES (2,2,'請點擊新增貼文標題',?,2,?)`,
-      [tripID, createTime]
+      `INSERT INTO post (post_type_id, user_id, post_title, travel_id, status, create_time) VALUES (2,1,?,?,2,?)`,
+      [tripTitle, tripID, createTime]
     );
     // TODO: 一定travel 表裡面的ID欄位和travel days 表裡面的travel_id 有資料才能新增行程貼文
 
