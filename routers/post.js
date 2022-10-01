@@ -11,24 +11,23 @@ const authMiddleware = require('../middlewares/userAuth');
 const path = require('path');
 
 // 取全部貼文資料 首頁查詢用luis
-// 會員中心社群設定
-// NOTE:
-router.get('/', async (req, res) => {
-  console.log(req.query);
-  try {
-    let [resulta] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >= 1  ',
-      [1]
-    );
-    // console.log(resulta);
-    res.json(resulta);
-    // 轉換成JSON格式
-  } catch (error) {
-    console.error(error);
-  }
-});
+// 會員中心社群設定 所有發布中的貼文
+// router.get('/', async (req, res) => {
+//   console.log(req.query);
+//   try {
+//     let [resulta] = await pool.execute(
+//       'SELECT * FROM post WHERE id >= ? AND status = 1  ',
+//       [1]
+//     );
+//     // console.log(resulta);
+//     res.json(resulta);
+//     // 轉換成JSON格式
+//   } catch (error) {
+//     console.error(error);
+//   }
+// });
 
-// 通知資料庫刪除貼文（軟刪除）
+// 通知資料庫刪除貼文（軟刪除） luis
 router.post('/', async (req, res) => {
   let deleteID = req.body.myPostID;
   //TODO:偵測userID
@@ -51,8 +50,7 @@ router.post('/', async (req, res) => {
 router.post('/release', async (req, res) => {
   let postID = req.body.postID;
   let state = req.body.postState;
-  console.log('post', postID);
-  console.log('post', state);
+  // console.log('post', postID);
   try {
     let [result] = await pool.execute(
       ' UPDATE post SET status =1 WHERE id = ?',
@@ -88,6 +86,12 @@ router.post('/unlike', async (req, res) => {
 // 按讚數統計：會員中心 查單一會員按讚貼文資訊 luis
 router.get('/likesStatic', async (req, res) => {
   try {
+    let [postLikeresult] = await pool.execute(
+      ' SELECT * FROM post_like JOIN post ON post_like.post_id = post.id WHERE post_like.user_id>=? ORDER BY post_id DESC',
+      [1]
+    );
+    // console.log('該使用的按讚貼文資訊', postLikeState);
+    res.json(postLikeState);
     let [postLikeresult] = await pool.execute(
       ' SELECT * FROM post_like JOIN post ON post_like.post_id = post.id WHERE post_like.user_id>=? ORDER BY post_id DESC',
       [1]
@@ -155,6 +159,7 @@ router.post('/likes', async (req, res) => {
         'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 2)',
         [postID]
       );
+
       console.log(removeLike);
       res.json(removeLike);
       // 轉換成JSON格式
@@ -179,8 +184,8 @@ router.post('/likes', async (req, res) => {
 
 // 單獨取一般貼文資料 抬頭 luis
 router.get('/post', async (req, res) => {
-  // console.log(req.query);
-  // TODO:偵測userID
+  let user_id = req.body.user_id;
+  console.log('user_id', user_id);
   try {
     let [result] = await pool.execute(
       'SELECT * FROM post WHERE id >= ? AND status >=1 AND post_type_id =1',
@@ -246,39 +251,39 @@ router.get('/tripDetailImport', async (req, res) => {
 });
 
 // 取全部貼文資料 首頁查詢用
-// 會員中心社群設定 /community 孝強 （TODO:這邊再看一下
-router.get('/', async (req, res) => {
-  console.log('req.query', req.query);
-  console.log('===== KEKEKEKE 44444444444444=====', req.session);
-  let user_id = req.session.user.id;
-  console.log(user_id);
+// 會員中心社群設定 /community 孝強
+router.get('/postAll', async (req, res) => {
+
   try {
     let [resulta] = await pool.execute(
       'SELECT * FROM post WHERE user_id = ? AND status >= 1',
-      [user_id]
+      [1]
     );
-    console.log(resulta);
-    res.json(resulta);
+    console.log(result);
+    res.json(result);
     // 轉換成JSON格式
   } catch (error) {
     console.error(error);
   }
 });
 
-// 一般貼文內容頁 == KE//postDetail
+// 一般貼文內容頁 ==
+// == /api/1.0/post // KE
 router.get('/postDetail', async (req, res) => {
   console.log('postID', req.query.postID);
   const postID = req.query.postID;
+  // const user_id = req.body.user_id
   // console.log(postID);
-  console.log('===== KEKEKEKE1232131313 =====', req.session);
-  let user_id = req.session.user.id;
+  // console.log('===== KEKEKEKE1232131313 =====', req.session);
+  // let user_id = req.session.user.id;
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
-      [postID, user_id]
+      // 'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
+      'SELECT post.*, user.social_name FROM (post JOIN user on post.user_id = user.id) WHERE post.id = ? AND status >=1',
+      [postID]
     );
-    console.log('postID====7777777=====', postID);
-    console.log('user_id=====8888888=====', user_id);
+    // console.log('postID====7777777=====', postID);
+    // console.log('user_id=====8888888=====', user_id);
     // console.log(result);
     res.json(result);
   } catch (error) {
@@ -344,7 +349,8 @@ const uploader = multer({
   // },
 });
 
-// 所見即所得圖片上傳 //
+// 所見即所得圖片上傳 KE//
+// 所見即所得圖片上傳 // 孝強
 router.post(
   '/uploadImages',
   uploader.single('files'),
@@ -366,18 +372,38 @@ router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
     // 確認資料有沒有收到
     console.log('postEdit', req.body);
     let filename = req.file ? '/uploads/' + req.file.filename : '';
-    let result = await pool.execute(
-      'INSERT INTO post (post_type_id, title, content, main_photo, coordinate, tags) VALUES (?, ?, ?, ?, ?, ?);',
-      [
-        1,
-        req.body.title,
-        req.body.content,
-        filename,
-        req.body.location,
-        req.body.tags,
-      ]
-    );
-    console.log('insert new post', result);
+    if (req.body.post_id === 'null') {
+      let result = await pool.execute(
+        'INSERT INTO post (user_id, post_type_id, post_title, content, post_main_photo, create_time, coordinate, tags, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
+        [
+          req.body.user_id,
+          req.body.post_type_id,
+          req.body.title,
+          req.body.content,
+          filename,
+          req.body.create_time,
+          req.body.location,
+          req.body.tags,
+          req.body.status,
+        ]
+      );
+    } else {
+      let result = await pool.execute(
+        'UPDATE post SET user_id = ?, post_title = ?, content = ?, post_main_photo=?, update_time = ?, coordinate= ?, tags = ?, status=? WHERE id = ?;',
+        [
+          req.body.user_id,
+          req.body.title,
+          req.body.content,
+          filename,
+          req.body.create_time,
+          req.body.location,
+          req.body.tags,
+          req.body.status,
+          req.body.post_id,
+        ]
+      );
+    }
+    // console.log('insert new post', result);
     // // 回覆前端
     res.json({ message: 'ok' });
   } catch (err) {
@@ -683,15 +709,15 @@ router.get('/postComment', async (req, res) => {
   console.log('Comment postID', req.query.postID);
   const postID = req.query.postID;
   // console.log(postID);
-  console.log('===== KEKEKEKE1232131313 =====', req.session);
-  let user_id = req.session.user.id;
+  // console.log('===== KEKEKEKE1232131313 =====', req.session);
+  // let user_id = req.session.user.id;
   try {
     let [result] = await pool.execute(
       'SELECT post_comment.*, user.social_name , user.photo FROM post_comment JOIN user ON post_comment.user_id = user.id where post_id = ?',
       [postID]
     );
     console.log('postID====7777777=====', postID);
-    console.log('user_id=====8888888=====', user_id);
+    // console.log('user_id=====8888888=====', user_id);
     // console.log(result);
     res.json(result);
   } catch (error) {
