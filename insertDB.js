@@ -328,13 +328,13 @@ let products = [];
 // })();
 
 (async () => {
-  let file = await fs.readFile(`./json/community_homePage.json`, 'utf-8');
+  let file = await fs.readFile(`./json/community_homePage2.json`, 'utf-8');
   let data = JSON.parse(file);
   // console.log(data);
   for (const item of data) {
     let result = await pool.execute(
-      'INSERT INTO post (post_type_id,user_id, post_title,  main_photo, status, likes) VALUES (1,1, ? , ?,1, ?)',
-      [item.post_title, item.post_main_photo, item.likes]
+      'INSERT INTO post (post_type_id,user_id, post_title,  main_photo, status,coordinate, likes) VALUES (2,1, ? , ?,1, ?,?)',
+      [item.post_title, item.post_main_photo,item.coordinate, item.likes]
 
       // 'UPDATE product SET name= ? , intro= ? , description = ?, product_tag = ? WHERE id = ?',
       // [item.name, item.intro, item.description, item.product_tag, item.id]
