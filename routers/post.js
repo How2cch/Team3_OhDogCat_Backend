@@ -51,11 +51,12 @@ router.post('/', async (req, res) => {
 router.post('/release', async (req, res) => {
   let postID = req.body.postID;
   let state = req.body.postState;
-  // console.log('post', postID);
+  console.log('post', postID);
+  console.log('post', state);
   try {
     let [result] = await pool.execute(
-      ' UPDATE post SET status =? WHERE id = ?',
-      [state, postID]
+      ' UPDATE post SET status =1 WHERE id = ?',
+      [postID]
     );
     // console.log(deleteResult);
     res.json(result);
