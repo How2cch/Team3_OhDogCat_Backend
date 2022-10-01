@@ -92,6 +92,12 @@ router.get('/likesStatic', async (req, res) => {
     );
     // console.log('該使用的按讚貼文資訊', postLikeState);
     res.json(postLikeState);
+    let [postLikeresult] = await pool.execute(
+      ' SELECT * FROM post_like JOIN post ON post_like.post_id = post.id WHERE post_like.user_id>=? ORDER BY post_id DESC',
+      [1]
+    );
+    console.log('該使用的按讚貼文資訊', postLikeresult);
+    res.json(postLikeresult);
     // 轉換成JSON格式
   } catch (error) {
     console.error(error);
@@ -117,19 +123,18 @@ router.post('/likes', async (req, res) => {
     userLike
   );
   likesState
-    ? (newLikeCount = likesCount - 1)
-    : (newLikeCount = likesCount + 1);
+    ? (newLikeCount = likesCount + 1)
+    : (newLikeCount = likesCount - 1);
   console.log('新按讚數', newLikeCount);
 
   if (likesState === 1) {
     try {
       // console.log(1);
       let [addLike] = await pool.execute(
-        'DELETE FROM `post_like` WHERE post_id=?,user_id=?',
-
-        [postID, 1]
+        'DELETE FROM `post_like` WHERE post_id=?',
+        [postID]
       );
-      // console.log(addLike);
+      console.log(addLike);
       res.json(addLike);
       // 轉換成JSON格式
     } catch (error) {
@@ -151,9 +156,10 @@ router.post('/likes', async (req, res) => {
     try {
       // console.log(0);
       let [removeLike] = await pool.execute(
-        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, ?)',
-        [postID, 1]
+        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 2)',
+        [postID]
       );
+
       console.log(removeLike);
       res.json(removeLike);
       // 轉換成JSON格式
@@ -179,11 +185,11 @@ router.post('/likes', async (req, res) => {
 // 單獨取一般貼文資料 抬頭 luis
 router.get('/post', async (req, res) => {
   let user_id = req.body.user_id;
-  console.log('req.body.user_id', req.body.user_id);
+  console.log('user_id', user_id);
   try {
     let [result] = await pool.execute(
       'SELECT * FROM post WHERE id >= ? AND status =1 AND post_type_id =1',
-      [user_id]
+      [1]
     );
     // console.log(result);
     res.json(result);
@@ -244,14 +250,12 @@ router.get('/tripDetailImport', async (req, res) => {
 // 取全部貼文資料 首頁查詢用
 // 會員中心社群設定 /community 孝強
 router.get('/postAll', async (req, res) => {
-  console.log(req.query);
-  console.log('===== KEKEKEKE 44444444444444=====', req.session);
-  let user_id = req.session.user.id;
-  console.log(user_id);
+
   try {
+    // const user_id = req.body.user_id
     let [result] = await pool.execute(
       'SELECT * FROM post WHERE user_id = ? AND status >= 1',
-      [user_id]
+      [1]
     );
     console.log(result);
     res.json(result);
@@ -273,10 +277,10 @@ router.get('/postDetail', async (req, res) => {
   try {
     let [result] = await pool.execute(
       // 'SELECT * FROM post WHERE id = ? AND user_id = ? AND status >= 1',
-      'SELECT post.*, user.social_name FROM (post JOIN user on post.user_id = user.id) WHERE post.id = ? AND status = ?',
-      [postID, 1]
+      'SELECT post.*, user.social_name FROM (post JOIN user on post.user_id = user.id) WHERE post.id = ? AND status >=1',
+      [postID]
     );
-    console.log('postID====7777777=====', postID);
+    // console.log('postID====7777777=====', postID);
     // console.log('user_id=====8888888=====', user_id);
     // console.log(result);
     res.json(result);
@@ -296,6 +300,8 @@ router.post('/tripPostNew', async (req, res) => {
       `INSERT INTO post (post_type_id, user_id, post_title, travel_id, status, create_time) VALUES (2,2,'請點擊新增貼文標題',?,2,?)`,
       [tripID, createTime]
     );
+    // TODO: 一定travel 表裡面的ID欄位和travel days 表裡面的travel_id 有資料才能新增行程貼文
+
     // console.log(postResult);
     res.json(postResult);
     return res.json({ message: '新增貼文ＯＫ', data: postResult });
@@ -357,15 +363,12 @@ router.post(
   }
 );
 
-// 一般貼文上傳 KE//
+// 一般貼文上傳、更新 KE//
 // 一般貼文上傳 // 孝強
 router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
   try {
     // 確認資料有沒有收到
-    console.log(
-      '----------------------------postEdit----------------------------',
-      req.body
-    );
+    console.log('postEdit', req.body);
     let filename = req.file ? '/uploads/' + req.file.filename : '';
     if (req.body.post_id === 'null') {
       let result = await pool.execute(
@@ -430,15 +433,23 @@ router.post('/tripPostDetailEdit', async (req, res) => {
     req.body.updateObject;
   const { id, locate_context, locate_intro } = req.body.locateDetail;
 
+  console.log('locate context', locate_context);
+
+  console.log('locate intro', locate_intro);
+  console.log('id', id);
+
   let newArrID = [];
   let newArrContext = [];
   let newArrIntro = [];
   for (let i = 0; i < id.length; i++) {
-    newArrID = [...id[0], ...id[i]];
-    newArrContext = [...locate_context[0], ...locate_context[i]];
-    newArrIntro = [...locate_intro[0], ...locate_intro[i]];
+    // console.log('tet', id[i]);
+    newArrID.push(...id[i]);
+    newArrContext.push(...locate_context[i]);
+    newArrIntro.push(...locate_intro[i]);
   }
-
+  console.log('newID', newArrID);
+  console.log('newcontext', newArrContext);
+  console.log('newintro', newArrIntro);
   // let newLocatData = {};
   try {
     for (let j = 0; j < newArrID.length; j++) {
@@ -446,13 +457,19 @@ router.post('/tripPostDetailEdit', async (req, res) => {
         `UPDATE travel_days SET locate_intro = ?,locate_context = ? WHERE id = ?`,
         [newArrIntro[j], newArrContext[j], newArrID[j]]
       );
-      // console.log(j);
+      console.log(
+        '傳值到資料庫',
+        newArrIntro[j],
+        newArrContext[j],
+        newArrID[j]
+      );
       console.log(resultTravel_days);
     }
     let [resultPost] = await pool.execute(
       'UPDATE post SET post_title= ?,coordinate=?,tags =?,update_time=? WHERE travel_id = ?',
       [title, coordinate, tags, updateTime, travel_id]
     );
+
     // console.log('result', resultPost);
     return res.json({ message: '更新資料ＯＫ', data: resultPost });
     // 轉換成JSON格式
@@ -639,6 +656,29 @@ router.post(
 // });
 
 //===============================================================================================
+router.post(
+  '/tripPostCoverUpload',
+  uploader.single('photo'),
+  async (req, res) => {
+    const postID = req.body.postID;
+    const coverPhoto = req.body.preview;
+    const coverFile = req.body.coverFile;
+    console.log('post', postID);
+    console.log('preview', coverPhoto);
+    console.log('coverFile', coverFile.photo);
+    try {
+      let [coverPhotoUpload] = await pool.execute(
+        ' UPDATE post SET main_photo =? WHERE id = ?',
+        [coverPhoto, postID]
+      );
+      // console.log(deleteResult);
+      res.json(coverPhotoUpload);
+      // 轉換成JSON格式
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
 
 router.post(
   '/tripPostCoverUpload',
@@ -690,6 +730,7 @@ router.post(
 // }
 //   }
 // );
+
 
 // 貼文留言區塊  KE//
 router.get('/postComment', async (req, res) => {

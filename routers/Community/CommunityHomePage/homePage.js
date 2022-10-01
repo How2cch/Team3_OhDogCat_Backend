@@ -19,13 +19,27 @@ router.get('/', async (req, res) => {
 });
 
 // NOTE: 網美貼文，條件應為追蹤數，目前暫定 id 10 以下
+// router.get('/kolPost', async (req, res) => {
+//   console.log(req.query);
+//   try {
+//     const [kolPost] = await pool.execute(
+//       'SELECT post.* ,user.social_name FROM (post JOIN user ON user.id = user_id) WHERE post.id > 3 AND post.id < 10'
+//     );
+//     console.log(kolPost);
+//     res.json(kolPost);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// });
+
+// 寵物網美  采平假資料版
 router.get('/kolPost', async (req, res) => {
   console.log(req.query);
   try {
     const [kolPost] = await pool.execute(
-      'SELECT post.* ,user.social_name FROM (post JOIN user ON user.id = user_id) WHERE post.id > 3 AND post.id < 10'
+      'SELECT * FROM post WHERE post.id > 1 AND post.id < 22'
     );
-    console.log(kolPost);
+    // console.log(kolPost);
     res.json(kolPost);
   } catch (error) {
     console.error(error);

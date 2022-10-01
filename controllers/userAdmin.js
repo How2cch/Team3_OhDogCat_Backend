@@ -2,52 +2,9 @@ const adminModel = require('../models/userAdmin');
 const pool = require('../utils/db');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
-const path = require('path');
-const multer = require('multer');
-
-// const bcrypt = require('bcrypt');
-// const { validationResult } = require('express-validator');
-// const axios = require('axios');
-// const Qs = require('qs');
-// const jwtDecode = require('jwt-decode');
-
-// 自定義存儲設定
-const storage = multer.diskStorage({
-  // 存儲目的地
-  destination: function (req, file, callback) {
-    // ? callback 第一個參數為錯誤時的執行，但目前只是在設定存儲路徑，不會用到，所以設為 null
-    callback(null, path.join(__dirname, '..', 'public', 'user'));
-  },
-  // 檔案名稱
-  filename: function (req, file, callback) {
-    console.log('file', file);
-    // ? 找出副檔名
-    const ext = file.originalname.split('.').pop();
-    // ? 設定即將被存進去的圖片檔名
-    callback(null, `member-${Date.now()}.${ext}`);
-  },
-});
-
-// 上傳器主體
-const uploader = multer({
-  // 選擇存儲的設定
-  storage: storage,
-  // 過濾圖片的種類，目前只接受下列三種
-  fileFilter: function (req, file, cb) {
-    if (file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/jpg' && file.mimetype !== 'image/png') {
-      // ? 圖片無法通過過濾時的處理
-      cb(new Error('只接受 jpeg、jpg，png 的圖片檔案'), false);
-    } else {
-      // ? 圖片過濾沒問題
-      cb(null, true);
-    }
-  },
-  // 過濾檔案的大小
-  limits: {
-    // ? 單位為 byte
-    fileSize: 200 * 1024,
-  },
-});
+const sendMail = require('../mail_password_reset');
+const { validationResult } = require('express-validator');
+const bcrypt = require('bcrypt');
 
 const userReadVouchers = async (req, res) => {
   console.log('session ====================', req.session);
@@ -55,6 +12,7 @@ const userReadVouchers = async (req, res) => {
   try {
     const data = await adminModel.getUserVoucher(req.session.user.id);
     let result = [];
+    console.log(data);
     data.forEach((item) => {
       const { product_id } = item;
       if (result.length === 0 || product_id !== result[result.length - 1].product_id) return result.push({ ...item, photos: [item.photos] });
@@ -205,4 +163,106 @@ const userEditGender = async (req, res) => {
   }
 };
 
-module.exports = { userEditSocialName, userReadVouchers, userGetVouchersId, userGetProfile, userEditName, userEditPhone, userEditGender };
+const userEditPhoto = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '欲更改照片');
+  console.log(req.file);
+  try {
+    let filePath = req.file ? '/user/uploads/' + req.file.filename : '';
+    console.log('圖片路徑', filePath);
+    await pool.execute('UPDATE user SET photo = ? WHERE id = ?', [filePath, req.session.user.id]);
+    req.session.user.photo = filePath;
+    res.status(201).json({ status: 'ok', message: '修改成功', user: req.session.user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userGetOrderInfo = async (req, res) => {
+  try {
+    console.log('用戶id' + req.session.user.id + '欲查看訂單');
+    const data = await adminModel.getUserOrderInfo(req.session.user.id);
+    res.status(200).json({ status: 'ok', data: data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userPostScore = async (req, res) => {
+  try {
+    console.log('用戶id' + req.session.user.id + '欲評價商品');
+    let isScored = await adminModel.isOrderScored(req.body.order_no);
+    console.log('isScored', isScored);
+    if (isScored) return res.status(400).json({ message: '該筆訂單已評價' });
+    await adminModel.postScore(req.params.productId, req.session.user.id, req.body.comment, req.body.score, req.body.order_no);
+    let updateData = await adminModel.getUserOrderInfo(req.session.user.id);
+    res.status(200).json({ status: 'ok', updateData: updateData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userResetPassword = async (req, res) => {
+  try {
+    if (req.body.action === 'mail') {
+      const isEmailExist = await adminModel.isEmailExist(req.body.email);
+      console.log('step', 1);
+
+      console.log(isEmailExist);
+      if (!isEmailExist) return res.status(200).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
+      console.log('step', 2);
+
+      const code = uuidv4();
+      const expired_time = moment().add(5, 'minute').format('YYYY-MM-DD HH:mm:ss');
+      await adminModel.createPwdResetCode(code, isEmailExist.id, expired_time);
+      console.log('step', 3);
+      sendMail({ address: req.body.email, code: code });
+      return res.status(201).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
+    }
+    if (req.body.action === 'reset') {
+      const validation = validationResult(req);
+      const result = await adminModel.pwdResetCodeValidation(req.body.code);
+      const now = moment().format('YYYY-MM-DD HH:mm:ss');
+      if (!result || moment(now).isAfter(result.expired_time) || result.status != 1) return res.status(400).json({ message: '密碼重設憑證已無效，需重新申請' });
+      let error = validation.array();
+      if (error[0]) {
+        console.log('error', error);
+        return res.status(400).json({ message: '密碼格式錯誤', error: error });
+      }
+      const newPassword = await bcrypt.hash(req.body.password, 10);
+      await adminModel.resetPassword(req.body.code, result.user_id, newPassword);
+      return res.status(201).json({ status: 'ok', action: 'reset', message: '密碼重設成功' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userGetCollectionInfo = async (req, res) => {
+  try {
+    console.log('用戶id' + req.session.user.id + '欲查看收藏列表');
+    const data = await adminModel.getUserCollectionInfo(req.session.user.id);
+    res.status(200).json({ status: 'ok', data: data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+module.exports = {
+  userEditSocialName,
+  userReadVouchers,
+  userGetVouchersId,
+  userGetProfile,
+  userEditName,
+  userEditPhone,
+  userEditGender,
+  userEditPhoto,
+  userGetOrderInfo,
+  userPostScore,
+  userResetPassword,
+  userGetCollectionInfo,
+};
