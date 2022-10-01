@@ -1,5 +1,3 @@
-// const express = require('express');
-// const app = express();
 const nodeMailer = require('nodemailer');
 const mailConfig = require('./utils/mailConfig');
 const pug = require('pug');
