@@ -7,7 +7,7 @@ const pool = require('../../../utils/db');
 // const path = require('path');
 
 // 商品細節細項
-//  ${API_URL}/api/1.0/productdetail/item/
+//  ${API_URL}/api/1.0/productdetail/item?
 router.get('/item', async (req, res) => {
   const product_id = req.query.id;
   console.log(product_id);
