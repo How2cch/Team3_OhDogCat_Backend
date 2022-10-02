@@ -36,7 +36,9 @@ router.get('/', async (req, res) => {
 router.get('/kolPost', async (req, res) => {
   console.log(req.query);
   try {
-    const [kolPost] = await pool.execute('SELECT * FROM post WHERE post.id > 1 AND post.id < 22');
+    const [kolPost] = await pool.execute(
+      'SELECT * FROM post WHERE post.id > 1 AND post.id < 22'
+    );
     // console.log(kolPost);
     res.json(kolPost);
   } catch (error) {
@@ -49,7 +51,7 @@ router.get('/kolPost', async (req, res) => {
 router.get('/allPost', async (req, res) => {
   try {
     const [allPost] = await pool.execute(
-      'SELECT `post`.`id`,`post`.`user_id`, `post`.`post_title`, `post`.`main_photo`, `post`.`coordinate`, `post`.`likes`, `user`.`id`, `user`.`social_name`, `user`.`photo` FROM `post` JOIN `user` ON `post`.`user_id` = `user`.`id`'
+      'SELECT `post`.`id`,`post`.`user_id`, `post`.`post_title`, `post`.`post_main_photo`, `post`.`coordinate`, `post`.`likes`, `user`.`id`, `user`.`social_name`, `user`.`photo` FROM `post` JOIN `user` ON `post`.`user_id` = `user`.`id`'
     );
     // console.log('================allPost=================', allPost);
     res.json(allPost);
@@ -119,7 +121,9 @@ router.get('/newPost', async (req, res) => {
 router.get('/testAPI', async (req, res) => {
   console.log(req.query);
   try {
-    const [newPost] = await pool.execute('SELECT post.* ,user.social_name FROM post JOIN user ON user.id = user_id; ');
+    const [newPost] = await pool.execute(
+      'SELECT post.* ,user.social_name FROM post JOIN user ON user.id = user_id; '
+    );
     // console.log(newPost);
     res.json(newPost);
   } catch (error) {
