@@ -49,6 +49,7 @@ router.post('/order', async (req, res) => {
         orderBuying.product_id,
       ]);
       sendMail(mailData);
+
       return res.status(201).json({ status: 'ok', message: '成功建立訂單' });
     }
   } catch (error) {
