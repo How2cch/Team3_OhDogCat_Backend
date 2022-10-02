@@ -68,7 +68,7 @@ router.post('/submit/tripdetail', async (req, res) => {
     const mapsphoto = req.body.mapPhoto.toString();
     // FLOOR(RAND() * 15 + 2) 是隨機參數
     let [result] = await pool.execute(
-      'INSERT INTO travel_days(travel_id ,days,sort,locate_name,google_photo ,latitude ,	longitude,valid) VALUES (?,?,FLOOR(RAND() * 15 + 2),?,?,?,?,?)',
+      'INSERT INTO travel_days(travel_id ,days,sort,locate_name,google_photo ,latitude ,	longitude,valid) VALUES (?,?,FLOOR(RAND() * 10 + 2),?,?,?,?,?)',
       [
         req.body.gettravelid,
         req.body.getDays,

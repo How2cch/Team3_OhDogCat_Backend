@@ -7,8 +7,8 @@ router.get('/travelTicket/title', async (req, res) => {
   const userID = req.session.user.id;
   // console.log('Ticket的userSessionID', userID);
   let [result] = await pool.execute(
-    'SELECT * FROM ((favorite JOIN product ON favorite.product_id = product.id) JOIN store ON product.store_id = store.id) WHERE user_id =? LIMIT 2',
-    [userID]
+    'SELECT * FROM ((favorite JOIN product ON favorite.product_id = product.id) JOIN store ON product.store_id = store.id) WHERE user_id =? AND product.id = ? LIMIT 2',
+    [userID, 558]
   );
   res.json(result);
 });
