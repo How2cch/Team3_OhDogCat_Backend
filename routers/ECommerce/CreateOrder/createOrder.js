@@ -7,7 +7,7 @@ router.post('/order', async (req, res) => {
   try {
     const orderBuying = req.body.orderBuying;
     console.log(`-----用戶:${orderBuying.user_id}商品編號:${orderBuying.product_id}的訂單已新增資料庫!-----`);
-    console.log(orderBuying);
+    // console.log(orderBuying);
 
     await pool.execute(
       `INSERT INTO order_buying (user_id,product_id, product_quantity, product_price, order_no, total, pay, coupon_number, coupon_name
@@ -29,7 +29,7 @@ router.post('/order', async (req, res) => {
     const [result] = await pool.execute('SELECT quantity FROM voucher WHERE user_id = ? AND product_id = ?', [req.session.user.id, orderBuying.product_id]);
     // TODO: 獲取需要的資訊 from 資料庫
 
-    console.log('---------------req.session-----------',req.session);
+    // console.log('---------------req.session-----------',req.session);
     const mailData = {
       address: req.session.user.email,
       user_name: req.session.user.name,
@@ -50,7 +50,7 @@ router.post('/order', async (req, res) => {
         orderBuying.user_id,
         orderBuying.product_id,
       ]);
-      console.log('------------mailData-----------',mailData);
+      // console.log('------------mailData-----------',mailData);
       sendMail(mailData);
 
       return res.status(201).json({ status: 'ok', message: '成功建立訂單' });

@@ -174,7 +174,7 @@ router.get('/showcart', async (req, res) => {
       "SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`store_id`, `product`.`main_photo`, `product`.`photo_path`,`store`.`name` AS `store_name`  FROM (`cart` INNER JOIN `product` ON `cart`.`product_id` = `product`.`id`) INNER JOIN `store` ON `product`.`store_id` = `store`.`id` WHERE `cart`.`product_id` = ?",
       [productId]
     );
-    console.log('------showcart-----', showcart);
+    // console.log('------showcart-----', showcart);
     res.json(showcart);
   } catch (error) {
     console.error(error);
