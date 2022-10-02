@@ -154,7 +154,6 @@ router.post('/likes', async (req, res) => {
         'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 1)',
         [postID]
       );
-
       console.log(removeLike);
       res.json(removeLike);
       // 轉換成JSON格式
