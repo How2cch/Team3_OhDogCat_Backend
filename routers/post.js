@@ -183,7 +183,7 @@ router.get('/post', async (req, res) => {
   console.log('user_id', user_id);
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >=1 AND post_type_id =1 ORDER BY id ASC',
+      'SELECT * FROM post WHERE id >= ? AND status >=1 AND post_type_id =1 ORDER BY id DESC',
       [1]
     );
     // console.log(result);
@@ -199,7 +199,7 @@ router.get('/tripPost', async (req, res) => {
   // TODO:偵測userID
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND status >= 1 AND post_type_id =2 ORDER BY id ASC',
+      'SELECT * FROM post WHERE id >= ? AND status >= 1 AND post_type_id =2 ORDER BY id DESC',
       [1]
     );
     // console.log(result);
@@ -232,7 +232,7 @@ router.get('/tripDetailImport', async (req, res) => {
   // TODO: 偵測userID
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM travel WHERE travel.valid =1 AND user_id >=1 AND valid=1 ORDER BY id ASC'
+      'SELECT * FROM travel WHERE travel.valid =1 AND user_id =1 AND valid=1 ORDER BY id ASC'
     );
     // console.log(result);
     res.json(result);
