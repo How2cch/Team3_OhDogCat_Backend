@@ -15,7 +15,12 @@ const userRegister = async (req, res) => {
   const validation = validationResult(req);
   let error = validation.array();
   if (req.body.socialName.length > 20 || /\s/.test(req.body.socialName)) {
-    error.push({ param: 'socialName', value: req.body.socialName, msg: '暱稱不可包含空格且長度不得超過 20 個字', location: 'body' });
+    error.push({
+      param: 'socialName',
+      value: req.body.socialName,
+      msg: '暱稱不可包含空格且長度不得超過 20 個字',
+      location: 'body',
+    });
   }
 
   // = 如果有任一驗證出現 Error 紀錄，則中斷，返回前端驗證結果
@@ -30,8 +35,18 @@ const userRegister = async (req, res) => {
     const existUser = await authModel.isAccountExist(req.body);
     if (existUser.length > 0) {
       console.log('existUser', existUser);
-      const emailError = { param: 'email', value: req.body.socialName, msg: '這個 Email 已被註冊', location: 'body' };
-      const socialNameError = { param: 'socialName', value: req.body.socialName, msg: '這個暱稱已被使用', location: 'body' };
+      const emailError = {
+        param: 'email',
+        value: req.body.socialName,
+        msg: '這個 Email 已被註冊',
+        location: 'body',
+      };
+      const socialNameError = {
+        param: 'socialName',
+        value: req.body.socialName,
+        msg: '這個暱稱已被使用',
+        location: 'body',
+      };
       if (existUser[0].email === req.body.email && existUser[0].social_name === req.body.socialName)
         return res.status(400).json({ message: '註冊失敗', error: [emailError, socialNameError] });
       if (existUser[0].email === req.body.email) return res.status(400).json({ message: '註冊失敗', error: [emailError] });
@@ -42,7 +57,13 @@ const userRegister = async (req, res) => {
     const hashPassword = await bcrypt.hash(req.body.password, 10);
     console.log('雜湊密碼', hashPassword);
     const now = moment().format('YYYY-MM-DD hh:mm:ss');
-    const insertInfo = { email: req.body.email, password: hashPassword, social_name: req.body.socialName, photo: '', create_time: now };
+    const insertInfo = {
+      email: req.body.email,
+      password: hashPassword,
+      social_name: req.body.socialName,
+      photo: '',
+      create_time: now,
+    };
 
     // = 寫進資料庫，回傳結果給前端
     const result = await authModel.insertUser(insertInfo);
@@ -149,7 +170,13 @@ const userLineLogin = async (req, res) => {
     const isExist = existUser ? existUser.email === email : false;
     console.log('isExist=', isExist);
     const now = moment().format('YYYY-MM-DD hh:mm:ss');
-    const insertInfo = { email: email, social_name: '', password: '', photo: picture, create_time: now };
+    const insertInfo = {
+      email: email,
+      social_name: '',
+      password: '',
+      photo: picture,
+      create_time: now,
+    };
     console.log('insertInfo=', insertInfo);
     const insertResult = isExist ? false : await authModel.insertUser(insertInfo);
     console.log(isExist ? '該信箱已有註冊紀錄' : '用戶成功使用 line 註冊');
@@ -192,7 +219,12 @@ const userVerifyStatus = async (req, res) => {
     return res.status(200).json({ status: 'ok', isLogin: false, message: '此用戶無登入權限' });
   } else {
     console.log('用戶登入驗證成功');
-    return res.status(200).json({ status: 'ok', isLogin: true, message: '此用戶處於登入狀態', user: req.session.user });
+    return res.status(200).json({
+      status: 'ok',
+      isLogin: true,
+      message: '此用戶處於登入狀態',
+      user: req.session.user,
+    });
   }
 };
 
@@ -214,7 +246,11 @@ const userAccountValidation = async (req, res) => {
       if (!data || !data.code === req.body.code || !moment(data.expired_time).isAfter(now)) return res.status(400).json({ message: '驗證失敗，請再試一次' });
       await authModel.updateAccountValid(req.session.user.id);
       req.session.user.account_valid = true;
-      res.status(201).json({ status: 'ok', message: '用戶信箱已成功驗證', user: req.session.user });
+      res.status(201).json({
+        status: 'ok',
+        message: '用戶信箱已成功驗證',
+        user: req.session.user,
+      });
     }
   } catch (error) {
     console.log(error);
@@ -222,4 +258,12 @@ const userAccountValidation = async (req, res) => {
   }
 };
 
-module.exports = { userRegister, userLogin, userLogout, userVerifyStatus, userLineLogin, userLineRegister, userAccountValidation };
+module.exports = {
+  userRegister,
+  userLogin,
+  userLogout,
+  userVerifyStatus,
+  userLineLogin,
+  userLineRegister,
+  userAccountValidation,
+};

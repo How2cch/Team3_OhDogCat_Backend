@@ -307,6 +307,70 @@ const userCreatePassword = async (req, res) => {
   }
 };
 
+const userGetConversationList = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '獲取聊天室清單');
+  try {
+    let listData = await adminModel.getConversationList(req.session.user.id);
+    const messageData = await adminModel.getConversationDetail(listData.map((item) => item.id));
+    for (const item of messageData) {
+      const i = listData.findIndex((data) => data.id === item.conversation_id);
+      if (listData[i]['messages']) listData[i]['messages'].push(item);
+      if (!listData[i]['messages']) listData[i]['messages'] = [item];
+    }
+    for (const item of listData) {
+      // eslint-disable-next-line no-prototype-builtins
+      if (item.hasOwnProperty('messages')) item['messages'] = [];
+    }
+
+    return res.status(200).json({ status: 'ok', message: '成功', data: listData });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userPostTextMessage = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '新增文字訊息');
+  try {
+    console.log('req.body.content', req.body.content);
+    const now = moment().format('YYYY-MM-DD HH:mm:ss');
+    const result = await adminModel.postTextMessage(req.params.id, req.body.content, now);
+    console.log(result);
+    return res.status(201).json({ status: 'ok', message: '成功', result: result.insertId, create_time: now });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userPostStickerMessage = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '新增貼圖訊息');
+  try {
+    console.log('req.body.content', req.body.sticker);
+    const now = moment().format('YYYY-MM-DD HH:mm:ss');
+    const result = await adminModel.postStickerMessage(req.params.id, req.body.sticker, now);
+    console.log(result);
+    return res.status(201).json({ status: 'ok', message: '成功', result: result.insertId, create_time: now });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userPostPhotoMessage = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '新增貼圖訊息');
+  try {
+    console.log('req.body.content', req.body.photo);
+    const now = moment().format('YYYY-MM-DD HH:mm:ss');
+    let filePath = req.file ? '/conversation/uploads/' + req.file.filename : '';
+    const result = await adminModel.postPhotoMessage(req.params.id, filePath, now);
+    return res.status(201).json({ status: 'ok', message: '成功', result: result.insertId, photoPath: filePath, create_time: now });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
 module.exports = {
   userEditSocialName,
   userReadVouchers,
@@ -322,4 +386,8 @@ module.exports = {
   userGetCollectionInfo,
   userEditPassword,
   userCreatePassword,
+  userGetConversationList,
+  userPostTextMessage,
+  userPostStickerMessage,
+  userPostPhotoMessage,
 };

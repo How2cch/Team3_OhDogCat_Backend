@@ -46,7 +46,14 @@ router
           {
             id: '1664430542498_1',
             amount: '600',
-            products: [{ name: '澎湖水族館', quantity: 1, price: '600', originalPrice: 300 }],
+            products: [
+              {
+                name: '澎湖水族館',
+                quantity: 1,
+                price: '600',
+                originalPrice: 300,
+              },
+            ],
           },
         ],
         orderId: '1664430542498_1',
@@ -72,7 +79,11 @@ router
         // res.redirect(linePayRes?.data?.info.paymentUrl.web);
         res
           .status(200)
-          .json({ status: 'ok', message: '成功生成付款網址', redirect: linePayRes?.data?.info.paymentUrl.web });
+          .json({
+            status: 'ok',
+            message: '成功生成付款網址',
+            redirect: linePayRes?.data?.info.paymentUrl.web,
+          });
       }
     } catch (error) {
       console.log(error);
@@ -105,8 +116,12 @@ router
 
 function createSignature(uri, linePayBody) {
   const nonce = parseInt(new Date().getTime() / 1000);
-  const string = `${LINEPAY_CHANNEL_SECRET_KEY}/${LINEPAY_VERSION}${uri}${JSON.stringify(linePayBody)}${nonce}`;
-  const signature = Base64.stringify(HmacSHA256(string, LINEPAY_CHANNEL_SECRET_KEY));
+  const string = `${LINEPAY_CHANNEL_SECRET_KEY}/${LINEPAY_VERSION}${uri}${JSON.stringify(
+    linePayBody
+  )}${nonce}`;
+  const signature = Base64.stringify(
+    HmacSHA256(string, LINEPAY_CHANNEL_SECRET_KEY)
+  );
 
   const headers = {
     'Content-Type': 'application/json',
