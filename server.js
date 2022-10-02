@@ -46,7 +46,7 @@ app.get('/register-vetify', (req, res) => {
 
 // = 核銷假後台頁面
 const storeAdmin = require('./routers/storeAdmin');
-app.use('/store/voucher', storeAdmin);
+app.use('/store', storeAdmin);
 
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求

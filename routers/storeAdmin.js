@@ -8,7 +8,7 @@ const sendMail = require('../mail_voucher_exchenge');
 
 router.use(bodyParser.urlencoded());
 
-router.get('/exchange/:exchangeId', async (req, res) => {
+router.get('/voucher/exchange/:exchangeId', async (req, res) => {
   try {
     const [productResult] = await pool.execute(
       'SELECT v.quantity, p.photo_path, p.main_photo, p.name, p.store_id FROM voucher_exchange AS v JOIN product AS p ON v.product_id = p.id WHERE v.id = ? AND v.status = 1 AND expired_time >= ?',
@@ -33,7 +33,7 @@ router.get('/exchange/:exchangeId', async (req, res) => {
   }
 });
 
-router.post('/exchange', async (req, res) => {
+router.post('/voucher/exchange', async (req, res) => {
   try {
     console.log(req.body);
     const now = moment();
@@ -82,4 +82,68 @@ router.post('/exchange', async (req, res) => {
     res.render('store_voucher_exchange--result', { text: '系統異常，請洽平台管理員' });
   }
 });
+
+router.get('/message/:id', async (req, res) => {
+  try {
+    return res.render('store_admin_conversation', { id: req.params.id });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.get('/message', async (req, res) => {
+  console.log(req.body);
+  try {
+    const [conversation] = await pool.execute('SELECT c.*, u.name AS user_name, u.photo AS user_photo FROM `conversation` AS c JOIN user AS u ON c.user_id = u.id WHERE c.id = ?', [
+      req.query.id,
+    ]);
+    const [data] = await pool.execute('SELECT * FROM `conversation_detail` WHERE conversation_id = ?', [req.query.id]);
+    conversation[0]['messages'] = data;
+    return res.status(200).json({ data: conversation[0] });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.use(express.json());
+
+router.post('/message', async (req, res) => {
+  const { conversation_id, content } = req.body;
+  const time = moment().format('YYYY-MM-DD HH:mm:ss');
+  try {
+    if (req.body.type === 1) {
+      const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
+        conversation_id,
+        1,
+        content,
+        2,
+        time,
+      ]);
+      return res.status(201).json(data);
+    }
+    if (req.body.type === 2) {
+      const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
+        conversation_id,
+        2,
+        content,
+        2,
+        time,
+      ]);
+      return res.status(201).json(data);
+    }
+    if (req.body.type === 3) {
+      const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, sticker, sender, create_time) VALUES (?,?,?,?,?)  ', [
+        conversation_id,
+        3,
+        content,
+        2,
+        time,
+      ]);
+      return res.status(201).json(data);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 module.exports = router;

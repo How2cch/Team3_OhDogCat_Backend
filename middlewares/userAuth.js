@@ -29,7 +29,7 @@ const resetPasswordRules = [
 ];
 
 const authVerify = (req, res, next) => {
-  console.log('===嘿嘿===', req.session);
+  console.log('=== 用戶狀態驗證 ===', req.session.user?.id);
   if (!req.session.user) return res.status(401).json({ login: false, message: '無登入權限' });
   next();
 };
