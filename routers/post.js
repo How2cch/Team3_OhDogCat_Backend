@@ -157,14 +157,10 @@ router.post('/likes', async (req, res) => {
   } else {
     try {
       // console.log(0);
-<<<<<<< HEAD
       let [removeLike] = await pool.execute(
         'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, ?)',
         [postID, userLike]
       );
-=======
-      let [removeLike] = await pool.execute('INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 2)', [postID]);
->>>>>>> 5bbf51030ebb11f06af7c58b98bad8892cc31dd7
       console.log(removeLike);
       res.json(removeLike);
       // 轉換成JSON格式
