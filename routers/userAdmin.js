@@ -48,8 +48,9 @@ router.post('/edit/name', authMiddleware.authVerify, adminController.userEditNam
 router.post('/edit/phone', authMiddleware.authVerify, adminController.userEditPhone);
 router.post('/edit/gender', authMiddleware.authVerify, adminController.userEditGender);
 router.post('/edit/photo', uploader.single('photo'), authMiddleware.authVerify, adminController.userEditPhoto);
-router.post('/edit/password', authMiddleware.authVerify, adminController.userEditGender);
-router.post('/reset/password', adminController.userResetPassword);
+router.post('/edit/password', authMiddleware.authVerify, authMiddleware.resetPasswordRules, adminController.userEditPassword);
+router.post('/password', authMiddleware.authVerify, authMiddleware.resetPasswordRules, adminController.userCreatePassword);
+router.post('/reset/password', authMiddleware.resetPasswordRules, adminController.userResetPassword);
 router.get('/voucher', authMiddleware.authVerify, adminController.userReadVouchers);
 router.get('/voucher/exchange/:productId', authMiddleware.authVerify, adminController.userGetVouchersId);
 router.get('/order', authMiddleware.authVerify, adminController.userGetOrderInfo);

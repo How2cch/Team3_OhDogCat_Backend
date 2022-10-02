@@ -83,6 +83,7 @@ const userRegister = async (req, res) => {
       account_valid: false,
       social_name: req.body.socialName,
       email: req.body.email,
+      password: true,
       photo: '',
       name: '',
       loginDt: now,
@@ -139,6 +140,7 @@ const userLogin = async (req, res) => {
       account_valid: existUser.valid === 1 ? true : false,
       name: existUser.name,
       email: existUser.email,
+      password: true,
       social_name: existUser.social_name,
       photo: existUser.photo,
       loginDt: moment().format('YYYY-MM-DD hh:mm:ss'),
@@ -221,6 +223,7 @@ const userLineLogin = async (req, res) => {
       account_valid: isExist ? (existUser.valid === 1 ? true : false) : false,
       name: isExist ? existUser.name : '',
       email: email,
+      password: isExist ? (existUser.password ? true : false) : false,
       social_name: isExist ? existUser.social_name : '',
       photo: isExist && existUser.photo[0] === '/' ? existUser.photo : picture,
       loginDt: now,
@@ -294,6 +297,7 @@ const userAccountValidation = async (req, res) => {
         return res.status(400).json({ message: '驗證失敗，請再試一次' });
       await authModel.updateAccountValid(req.session.user.id);
       req.session.user.account_valid = true;
+<<<<<<< HEAD
       res
         .status(201)
         .json({
@@ -301,6 +305,13 @@ const userAccountValidation = async (req, res) => {
           message: '用戶信箱已成功驗證',
           user: req.session.user,
         });
+=======
+      res.status(201).json({
+        status: 'ok',
+        message: '用戶信箱已成功驗證',
+        user: req.session.user,
+      });
+>>>>>>> develop
     }
   } catch (error) {
     console.log(error);
