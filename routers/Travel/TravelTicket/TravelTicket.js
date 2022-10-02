@@ -7,7 +7,7 @@ router.get('/travelTicket/title', async (req, res) => {
   const userID = req.session.user.id;
   // console.log('Ticket的userSessionID', userID);
   let [result] = await pool.execute(
-    'SELECT * FROM ((favorite JOIN product ON favorite.product_id = product.id) JOIN store ON product.store_id = store.id) WHERE user_id =? LIMIT 1',
+    'SELECT * FROM ((favorite JOIN product ON favorite.product_id = product.id) JOIN store ON product.store_id = store.id) WHERE user_id =? LIMIT 2',
     [userID]
   );
   res.json(result);
@@ -30,7 +30,7 @@ router.get('/travelCommunity', async (req, res) => {
   let [result] = await pool.execute(
     // 'SELECT * FROM (travel JOIN user ON travel.user_id = user.id ) ;'
     // '    SELECT * FROM (travel JOIN user ON travel.user_id = user.id ) WHERE travel.id >2 AND travel.id < 150  LIMIT 5 '
-    '       SELECT *, travel.id AS travelId FROM (travel JOIN user ON travel.user_id = user.id ) WHERE travel.id >2 AND travel.id < 150  LIMIT 5'
+    '       SELECT *, travel.id AS travelId FROM (travel JOIN user ON travel.user_id = user.id ) WHERE travel.id >6 AND travel.id < 25  LIMIT 20'
     // 'SELECT id, title, start_time,end_time , user_id ,main_photo  FROM travel WHERE id >2 AND id < 150  LIMIT 4'
   );
 
