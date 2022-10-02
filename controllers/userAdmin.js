@@ -219,13 +219,13 @@ const userResetPassword = async (req, res) => {
       await adminModel.createPwdResetCode(code, isEmailExist.id, expired_time);
       console.log('step', 3);
       sendMail({ address: req.body.email, code: code });
-      return res.status(201).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
+      return res.status(200).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
     }
     if (req.body.action === 'reset') {
-      const validation = validationResult(req);
       const result = await adminModel.pwdResetCodeValidation(req.body.code);
       const now = moment().format('YYYY-MM-DD HH:mm:ss');
       if (!result || moment(now).isAfter(result.expired_time) || result.status != 1) return res.status(400).json({ message: '密碼重設憑證已無效，需重新申請' });
+      const validation = validationResult(req);
       let error = validation.array();
       if (error[0]) {
         console.log('error', error);
@@ -233,7 +233,7 @@ const userResetPassword = async (req, res) => {
       }
       const newPassword = await bcrypt.hash(req.body.password, 10);
       await adminModel.resetPassword(req.body.code, result.user_id, newPassword);
-      return res.status(201).json({ status: 'ok', action: 'reset', message: '密碼重設成功' });
+      return res.status(204).json({ status: 'ok', action: 'reset', message: '密碼重設成功' });
     }
   } catch (error) {
     console.log(error);
@@ -252,6 +252,61 @@ const userGetCollectionInfo = async (req, res) => {
   }
 };
 
+const userEditPassword = async (req, res) => {
+  try {
+    console.log('用戶id' + req.session.user.id + '欲修改密碼');
+
+    const oldPassword = await adminModel.getUserPassword(req.session.user.id);
+    if (!oldPassword.password) return res.status(400).json({ message: '無效操作' });
+
+    const validation = validationResult(req);
+    const error = validation.array();
+    if (error[0]) {
+      console.log('error', error);
+      return res.status(400).json({ message: '密碼格式錯誤', error: error });
+    }
+
+    const checkPassword = await bcrypt.compare(req.body.oldPassword, oldPassword.password);
+    if (!checkPassword) return res.status(400).json({ message: '舊密碼輸入錯誤' });
+
+    const newPasswordValid = await bcrypt.compare(req.body.password, oldPassword.password);
+    if (newPasswordValid) return res.status(400).json({ message: '請輸入與舊密碼不同的新密碼' });
+
+    const newPassword = await bcrypt.hash(req.body.password, 10);
+    await adminModel.updateUserPassword(newPassword, req.session.user.id);
+    req.session.user = null;
+    return res.status(204).json({ status: 'ok', message: '密碼重設成功' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userCreatePassword = async (req, res) => {
+  try {
+    console.log('用戶id' + req.session.user.id + '欲新增密碼');
+
+    const oldPassword = await adminModel.getUserPassword(req.session.user.id);
+    if (oldPassword.password) return res.status(400).json({ message: '無效操作' });
+
+    const validation = validationResult(req);
+    const error = validation.array();
+    if (error[0]) {
+      console.log('error', error);
+      return res.status(400).json({ message: '密碼格式錯誤', error: error });
+    }
+
+    const newPassword = await bcrypt.hash(req.body.password, 10);
+    await adminModel.updateUserPassword(newPassword, req.session.user.id);
+
+    req.session.user.password = false;
+    return res.status(201).json({ status: 'ok', message: '新增密碼成功' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
 module.exports = {
   userEditSocialName,
   userReadVouchers,
@@ -265,4 +320,6 @@ module.exports = {
   userPostScore,
   userResetPassword,
   userGetCollectionInfo,
+  userEditPassword,
+  userCreatePassword,
 };
