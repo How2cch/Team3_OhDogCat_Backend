@@ -51,7 +51,7 @@ router.get('/kolPost', async (req, res) => {
 router.get('/allPost', async (req, res) => {
   try {
     const [allPost] = await pool.execute(
-      'SELECT `post`.`id`,`post`.`user_id`, `post`.`post_title`, `post`.`main_photo`, `post`.`coordinate`, `post`.`likes`, `user`.`id`, `user`.`social_name`, `user`.`photo` FROM `post` JOIN `user` ON `post`.`user_id` = `user`.`id`'
+      'SELECT `post`.`id`,`post`.`user_id`, `post`.`post_title`, `post`.`post_main_photo`, `post`.`coordinate`, `post`.`likes`, `user`.`id`, `user`.`social_name`, `user`.`photo` FROM `post` JOIN `user` ON `post`.`user_id` = `user`.`id`'
     );
     // console.log('================allPost=================', allPost);
     res.json(allPost);
