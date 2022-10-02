@@ -3,6 +3,7 @@ const { check } = require('prettier');
 const router = express();
 const pool = require('../utils/db');
 const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
 
 // 資料庫連接
 
@@ -192,7 +193,6 @@ router.get('/tripPost', async (req, res) => {
   }
 });
 
-
 // 匯入行程(travel)用 luis
 router.get('/tripDetailImport', async (req, res) => {
   // console.log(req.query);
@@ -230,7 +230,6 @@ router.post('/tripPostNew', async (req, res) => {
     console.error(error);
   }
 });
-
 
 // 行程貼文 (post)關聯(travel)日程景點明細(travel_days) （匯入景點資訊）可在關聯景點貼文內容 luis
 // ？編輯頁面  /community/tripPostDetail
@@ -341,7 +340,6 @@ const uploaderTripPostCover = multer({
   // },
 });
 
-//==luis=============================================================================================
 router.post(
   '/tripPostCoverUpload',
   uploaderTripPostCover.single('photo'),
@@ -409,7 +407,7 @@ const uploaderTripPostLoc = multer({
   // },
 });
 
-//===============================================================================================
+//====luis=封面照上傳==========================================================================================
 router.post(
   '/tripPostLocUpload',
   uploaderTripPostLoc.single('photo'),
@@ -430,31 +428,6 @@ router.post(
       );
       console.log('圖片上傳資料庫成功', locPhotoUpload);
       res.json(locPhotoUpload);
-      // 轉換成JSON格式
-    } catch (error) {
-      console.error(error);
-    }
-  }
-);
-
-
-router.post(
-  '/tripPostCoverUpload',
-  uploader.single('photo'),
-  async (req, res) => {
-    const postID = req.body.postID;
-    const coverPhoto = req.body.preview;
-    const coverFile = req.body.coverFile;
-    console.log('post', postID);
-    console.log('preview', coverPhoto);
-    console.log('coverFile', coverFile.photo);
-    try {
-      let [coverPhotoUpload] = await pool.execute(
-        ' UPDATE post SET main_photo =? WHERE id = ?',
-        [coverPhoto, postID]
-      );
-      // console.log(deleteResult);
-      res.json(coverPhotoUpload);
       // 轉換成JSON格式
     } catch (error) {
       console.error(error);
@@ -514,7 +487,7 @@ router.get('/postDetail', async (req, res) => {
 });
 
 // 封面照片上傳 // 孝強
-const multer = require('multer');
+
 //  圖片存法
 const storage = multer.diskStorage({
   // 設定存擋資料夾 /public/uploads
