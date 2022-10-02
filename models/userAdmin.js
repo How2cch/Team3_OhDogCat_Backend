@@ -164,6 +164,82 @@ const updateUserPassword = async (password, user) => {
   }
 };
 
+const getConversationList = async (user) => {
+  try {
+    const [data] = await pool.execute(
+      'SELECT c.*, s.name AS store_name, s.photo AS store_photo FROM `conversation` AS c JOIN store AS s ON c.store_id = s.id WHERE c.user_id = ?',
+      [user]
+    );
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const getConversationDetail = async (ids) => {
+  try {
+    let sqlWHERE = '';
+    for (const [index, item] of ids.entries()) {
+      if (index === ids.length - 1) {
+        sqlWHERE += `conversation_id = ${item}`;
+      } else {
+        sqlWHERE += `conversation_id = ${item} OR `;
+      }
+    }
+    if (sqlWHERE === '') sqlWHERE = 'conversation_id = 0';
+    const [data] = await pool.execute('SELECT * FROM `conversation_detail` WHERE ' + sqlWHERE);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const postTextMessage = async (conversation_id, content, time) => {
+  try {
+    const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
+      conversation_id,
+      1,
+      content,
+      1,
+      time,
+    ]);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const postStickerMessage = async (conversation_id, sticker, time) => {
+  try {
+    const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, sticker, sender, create_time) VALUES (?,?,?,?,?)  ', [
+      conversation_id,
+      3,
+      sticker,
+      1,
+      time,
+    ]);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const postPhotoMessage = async (conversation_id, photoPath, time) => {
+  console.log(conversation_id, photoPath, time);
+  try {
+    const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
+      conversation_id,
+      2,
+      photoPath,
+      1,
+      time,
+    ]);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 module.exports = {
   isSocialNameExist,
   updateSocialName,
@@ -182,4 +258,9 @@ module.exports = {
   getUserCollectionInfo,
   getUserPassword,
   updateUserPassword,
+  getConversationList,
+  getConversationDetail,
+  postTextMessage,
+  postStickerMessage,
+  postPhotoMessage,
 };

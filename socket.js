@@ -13,15 +13,42 @@ function createServer(server) {
     },
   });
 
+  let onlineStore = [];
+  let onlineUser = [];
+
   io.on('connection', async (socket) => {
-    console.log(`user connect socket ...`, socket.id);
-    socket.on('text', (msg) => {
-      socket.emit('reply', { status: 'ok', msg: '成功' });
-      socket.broadcast.emit('otherOne', msg);
+    socket.on('addUser', (user) => {
+      console.log(`user id = ${user} connect socket ...`, socket.id);
+      if (!onlineUser.some((user) => user.id === user)) onlineUser.push({ id: user, socket_id: socket.id });
+      console.log('onlineStore', onlineStore);
+      console.log('onlineUser', onlineUser);
+    });
+    socket.on('addStore', (store) => {
+      console.log(`store id = ${store} connect socket ...`, socket.id);
+      if (!onlineStore.some((store) => store.id === store)) onlineStore.push({ id: store, socket_id: socket.id });
+      console.log('onlineStore', onlineStore);
+      console.log('onlineUser', onlineUser);
+    });
+    socket.on('sendMassage', ({ sender, receiverId, message }) => {
+      if (sender === 1) {
+        const receiver = onlineStore.find((store) => store.id === receiverId);
+        console.log('receiver', receiver);
+        if (receiver) io.to(receiver.socket_id).emit('receiveMessage', message);
+      }
+      if (sender === 2) {
+        const receiver = onlineUser.find((user) => user.id === receiverId);
+        console.log('receiver', receiver);
+        if (receiver) io.to(receiver.socket_id).emit('receiveMessage', message);
+      }
     });
 
     socket.on('disconnect', (reason) => {
       console.log(reason);
+      console.log(`user disconnect socket ...`, socket.id);
+      onlineStore = onlineStore.filter((store) => store.socket_id !== socket.id);
+      onlineUser = onlineUser.filter((user) => user.socket_id !== socket.id);
+      console.log('onlineStore', onlineStore);
+      console.log('onlineUser', onlineUser);
     });
   });
   return io;
