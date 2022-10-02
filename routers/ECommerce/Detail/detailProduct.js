@@ -10,7 +10,7 @@ const pool = require('../../../utils/db');
 //  ${API_URL}/api/1.0/productdetail/item/
 router.get('/item', async (req, res) => {
   const product_id = req.query.id;
-  console.log(product_id);
+  // console.log(product_id);
   let [result] = await pool.execute(
     `SELECT id,product_type_id,name,intro,price,per_score,main_photo,photo_path,product_tag,description,photo.file_name FROM product JOIN product_photo AS photo ON product.id = photo.product_id WHERE product.id = ${product_id}`
   );
@@ -53,12 +53,10 @@ router.get('/recommend', async (req, res) => {
 // 評論
 //  ${API_URL}/api/1.0/productdetail/comment
 router.get('/comment', async (req, res) => {
-  // console.log(req.query);
   try {
     const [comment] = await pool.execute(
       `SELECT product_comment.* ,social_name, photo FROM  product_comment JOIN user ON product_comment.product_comment_user_id = user.id WHERE product_id = ?`,
       [req.query.id]
-      // [519]
     );
     // console.log(comment);
     res.json(comment);
