@@ -17,7 +17,10 @@ router.post('/', async (req, res) => {
   // const userID = req.session.user.id;
   // console.log(userID);
   try {
-    let [deleteResult] = await pool.execute(' UPDATE post SET status =0 WHERE id = ?', [deleteID]);
+    let [deleteResult] = await pool.execute(
+      ' UPDATE post SET status =0 WHERE id = ?',
+      [deleteID]
+    );
     // console.log(deleteResult);
     res.json(deleteResult);
     // 轉換成JSON格式
@@ -32,7 +35,10 @@ router.post('/release', async (req, res) => {
   let state = req.body.postState;
   // console.log('post', postID);
   try {
-    let [result] = await pool.execute(' UPDATE post SET status =? WHERE id = ?', [state, postID]);
+    let [result] = await pool.execute(
+      ' UPDATE post SET status =? WHERE id = ?',
+      [state, postID]
+    );
     // console.log(deleteResult);
     res.json(result);
     // 轉換成JSON格式
@@ -63,7 +69,10 @@ router.post('/unlike', async (req, res) => {
 // 按讚數統計：會員中心 查單一會員按讚貼文資訊 luis
 router.get('/likesStatic', async (req, res) => {
   try {
-    let [postLikeresult] = await pool.execute(' SELECT * FROM post_like JOIN post ON post_like.post_id = post.id WHERE post_like.user_id>=? ORDER BY post_id DESC', [1]);
+    let [postLikeresult] = await pool.execute(
+      ' SELECT * FROM post_like JOIN post ON post_like.post_id = post.id WHERE post_like.user_id>=? ORDER BY post_id DESC',
+      [1]
+    );
     console.log('該使用的按讚貼文資訊', postLikeresult);
     res.json(postLikeresult);
     // 轉換成JSON格式
@@ -157,7 +166,7 @@ router.get('/post', async (req, res) => {
   try {
     let [result] = await pool.execute(
       'SELECT * FROM post WHERE id >= ? AND user_id = ? AND status =1 AND post_type_id =1 ORDER BY id DESC',
-      [1,1]
+      [1, 1]
     );
     // console.log(result);
     res.json(result);
@@ -171,7 +180,10 @@ router.get('/post', async (req, res) => {
 router.get('/tripPost', async (req, res) => {
   // TODO:偵測userID
   try {
-    let [result] = await pool.execute('SELECT * FROM post WHERE id >= ? AND user_id = ? AND status >= 1 AND post_type_id =2 ORDER BY id DESC', [1,1]);
+    let [result] = await pool.execute(
+      'SELECT * FROM post WHERE id >= ? AND user_id = ? AND status >= 1 AND post_type_id =2 ORDER BY id DESC',
+      [1, 1]
+    );
     // console.log(result);
     res.json(result);
     // 轉換成JSON格式
@@ -202,7 +214,7 @@ router.get('/tripDetailImport', async (req, res) => {
   // TODO: 偵測userID
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM travel WHERE travel.valid =1 AND user_id >=1 AND valid=1 ORDER BY id ASC'
+      'SELECT * FROM travel WHERE travel.valid =1 AND user_id =1 AND valid=1 ORDER BY id ASC'
     );
     // console.log(result);
     res.json(result);
@@ -294,7 +306,12 @@ const storage = multer.diskStorage({
 const uploader = multer({
   storage: storage,
   fileFilter: function (req, file, cb) {
-    if (file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/jpg' && file.mimetype !== 'image/png' && file.mimetype !== 'image/webp') {
+    if (
+      file.mimetype !== 'image/jpeg' &&
+      file.mimetype !== 'image/jpg' &&
+      file.mimetype !== 'image/png' &&
+      file.mimetype !== 'image/webp'
+    ) {
       cb(new Error('上傳的檔案型態不接受'), false);
     } else {
       cb(null, true);
@@ -320,7 +337,7 @@ router.post(
       console.error(err);
     }
   }
-});
+);
 
 // 一般貼文上傳、更新 KE//
 // 一般貼文上傳 // 孝強
@@ -620,7 +637,7 @@ router.post(
       console.error(error);
     }
   }
-});
+);
 
 // router.post(
 //   '/tripPostLocUpload',
@@ -649,7 +666,6 @@ router.post(
 // }
 //   }
 // );
-
 
 // 貼文留言區塊  KE//
 router.get('/postComment', async (req, res) => {
