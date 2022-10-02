@@ -137,10 +137,28 @@ const resetPassword = async (code, user, newPassword) => {
 const getUserCollectionInfo = async (user) => {
   try {
     const [data] = await pool.execute(
-      'SELECT s.name AS store_name, f.product_id, p.name AS product_name, p.photo_path, p.main_photo, p.og_price, p.price FROM (favorite AS f JOIN product AS p ON f.product_id = p.id) JOIN store AS s ON p.store_id = s.id WHERE f.user_id = ?',
+      'SELECT s.name AS store_name, f.product_id, p.name AS product_name, p.photo_path, p.main_photo, p.og_price, p.price, p.intro FROM (favorite AS f JOIN product AS p ON f.product_id = p.id) JOIN store AS s ON p.store_id = s.id WHERE f.user_id = ?',
       [user]
     );
     return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const getUserPassword = async (user) => {
+  try {
+    const [data] = await pool.execute('SELECT password FROM user WHERE id = ?', [user]);
+    return data[0];
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const updateUserPassword = async (password, user) => {
+  try {
+    await pool.execute('UPDATE user SET password = ? WHERE id = ?', [password, user]);
+    return true;
   } catch (error) {
     console.error(error);
   }
@@ -162,4 +180,6 @@ module.exports = {
   pwdResetCodeValidation,
   resetPassword,
   getUserCollectionInfo,
+  getUserPassword,
+  updateUserPassword,
 };

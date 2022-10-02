@@ -25,7 +25,7 @@ router.post('/product/:productId', authMiddleware.authVerify, async (req, res) =
       console.log('刪除');
       result = await pool.execute(`DELETE FROM favorite WHERE  product_id = ? AND user_id = ?`, [product_id, user_id]);
     }
-    res.json(isExist[0] ? { message: '已成功移除收藏' } : { message: '已成功收藏' });
+    res.json(isExist[0] ? { action: 'delete', message: '已成功移除收藏' } : { action: 'add', message: '已成功收藏' });
   } catch (error) {
     console.error(error);
   }
