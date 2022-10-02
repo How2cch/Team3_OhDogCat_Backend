@@ -10,23 +10,6 @@ const authMiddleware = require('../middlewares/userAuth');
 
 const path = require('path');
 
-// 取全部貼文資料 首頁查詢用luis
-// 會員中心社群設定 所有發布中的貼文
-// router.get('/', async (req, res) => {
-//   console.log(req.query);
-//   try {
-//     let [resulta] = await pool.execute(
-//       'SELECT * FROM post WHERE id >= ? AND status = 1  ',
-//       [1]
-//     );
-//     // console.log(resulta);
-//     res.json(resulta);
-//     // 轉換成JSON格式
-//   } catch (error) {
-//     console.error(error);
-//   }
-// });
-
 // 通知資料庫刪除貼文（軟刪除） luis
 router.post('/', async (req, res) => {
   let deleteID = req.body.myPostID;
@@ -231,7 +214,7 @@ router.get('/tripDetailImport', async (req, res) => {
   // TODO: 偵測userID
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM travel WHERE travel.valid =1 AND user_id =1 AND valid=1 ORDER BY id ASC'
+      'SELECT * FROM travel WHERE travel.valid =1 AND user_id =1 AND valid=1 ORDER BY id DESC'
     );
     // console.log(result);
     res.json(result);
