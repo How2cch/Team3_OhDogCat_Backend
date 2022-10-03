@@ -2,10 +2,9 @@
 node_modules/
 .eslintrc.json
 .prettierrc
-<<<<<<< HEAD
-=======
+
 # public/travel/post
 public/community/post
 public/tripPost
 public/uploads
->>>>>>> feature-travel
+public/ 
