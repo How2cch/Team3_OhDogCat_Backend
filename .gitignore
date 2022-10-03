@@ -5,3 +5,8 @@ node_modules/
 
 # public/travel/post
 public/
+public/community/post
+.DS_Store
+**/.DS_Store
+.DS_Store?
+._post

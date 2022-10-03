@@ -254,7 +254,8 @@ router.get('/mapLocate', async (req, res) => {
   // console.log(req.query);
   try {
     let [result] = await pool.execute(
-      `SELECT * FROM travel_days WHERE id =?, valid=1`,{locateID}
+      `SELECT * FROM travel_days WHERE id =?, valid=1`,
+      { locateID }
     );
     console.log(result);
     res.json(result);
