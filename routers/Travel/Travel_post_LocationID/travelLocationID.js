@@ -36,10 +36,10 @@ const uploader = multer({
     }
   },
   // 過濾檔案的大小
-  limits: {
-    // 1k = 1024 => 200k = 200 * 1024
-    fileSize: 300 * 2024,
-  },
+  // limits: {
+  //   // 1k = 1024 => 200k = 200 * 1024
+  //   fileSize: 300 * 2024,
+  // },
 });
 router.post(
   '/post/datelocationId',
@@ -108,12 +108,13 @@ router.post('/submit/addDate', async (req, res) => {
 router.post('/post/locationSort', async (req, res) => {
   const travelid = req.query.travelid;
 
-  // console.log('reqbody', req.body);
+  console.log('reqbody', req.body);
   try {
     let [result] = await pool.execute(
       'DELETE FROM travel_days WHERE 	travel_id=?',
       [travelid]
     );
+    console.log('del result == ', result);
   } catch (e) {
     console.log('更改景點錯誤', e);
   }
@@ -140,16 +141,16 @@ router.post('/post/addlocationSort', async (req, res) => {
   } = req.body.editPlanning;
   for (let i = 0; i < req.body.editPlanning.length; i++) {
     newReqBody = req.body.editPlanning[i];
-    // console.log('id', newReqBody.id);
-    // console.log('travel_id', newReqBody.travel_id);
-    // console.log('days', newReqBody.days);
-    // console.log('sort', newReqBody.sort);
-    // console.log('locate_name', newReqBody.locate_name);
-    // console.log('google_photo', newReqBody.google_photo);
-    // console.log('經度', newReqBody.latitude);
-    // console.log('緯度', newReqBody.longitude);
-    // console.log('daysort', newReqBody.daysort);
-    // console.log('valid', newReqBody.valid);
+    console.log('id', newReqBody.id);
+    console.log('travel_id', newReqBody.travel_id);
+    console.log('days', newReqBody.days);
+    console.log('sort', newReqBody.sort);
+    console.log('locate_name', newReqBody.locate_name);
+    console.log('google_photo', newReqBody.google_photo);
+    console.log('經度', newReqBody.latitude);
+    console.log('緯度', newReqBody.longitude);
+    console.log('daysort', newReqBody.daysort);
+    console.log('valid', newReqBody.valid);
 
     try {
       let result = await pool.execute(
@@ -166,7 +167,7 @@ router.post('/post/addlocationSort', async (req, res) => {
           newReqBody.valid,
         ]
       );
-      console.log('刪除變更順序成功~', result);
+      console.log('刪除變更順序成功~', result[0]);
     } catch (e) {
       console.log('新增行程錯誤', e);
     }

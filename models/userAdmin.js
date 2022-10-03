@@ -2,7 +2,10 @@ const pool = require('../utils/db');
 
 const isSocialNameExist = async (socialName) => {
   try {
-    let [userResult] = await pool.execute('SELECT social_name FROM user WHERE social_name = ?', [socialName]);
+    let [userResult] = await pool.execute(
+      'SELECT social_name FROM user WHERE social_name = ?',
+      [socialName]
+    );
     return userResult;
   } catch (error) {
     console.error(error);
@@ -11,7 +14,10 @@ const isSocialNameExist = async (socialName) => {
 
 const updateSocialName = async (id, socialName) => {
   try {
-    let updateResult = await pool.execute('UPDATE user SET social_name = ?  WHERE id = ?', [socialName, id]);
+    let updateResult = await pool.execute(
+      'UPDATE user SET social_name = ?  WHERE id = ?',
+      [socialName, id]
+    );
     return updateResult;
   } catch (error) {
     console.error(error);
@@ -20,7 +26,10 @@ const updateSocialName = async (id, socialName) => {
 
 const updateName = async (id, name) => {
   try {
-    let updateResult = await pool.execute('UPDATE user SET name = ?  WHERE id = ?', [name, id]);
+    let updateResult = await pool.execute(
+      'UPDATE user SET name = ?  WHERE id = ?',
+      [name, id]
+    );
     return updateResult;
   } catch (error) {
     console.error(error);
@@ -29,7 +38,10 @@ const updateName = async (id, name) => {
 
 const updatePhone = async (id, phone) => {
   try {
-    let updateResult = await pool.execute('UPDATE user SET phone = ?  WHERE id = ?', [phone, id]);
+    let updateResult = await pool.execute(
+      'UPDATE user SET phone = ?  WHERE id = ?',
+      [phone, id]
+    );
     return updateResult;
   } catch (error) {
     console.error(error);
@@ -38,7 +50,10 @@ const updatePhone = async (id, phone) => {
 
 const updateGender = async (id, gender) => {
   try {
-    let updateResult = await pool.execute('UPDATE user SET gender = ?  WHERE id = ?', [gender, id]);
+    let updateResult = await pool.execute(
+      'UPDATE user SET gender = ?  WHERE id = ?',
+      [gender, id]
+    );
     return updateResult;
   } catch (error) {
     console.error(error);
@@ -59,7 +74,10 @@ const getUserVoucher = async (id) => {
 
 const getUserProfile = async (id) => {
   try {
-    const [data] = await pool.execute('SELECT name, social_name, email, photo, phone, gender FROM user WHERE id = ?', [id]);
+    const [data] = await pool.execute(
+      'SELECT name, social_name, email, photo, phone, gender FROM user WHERE id = ?',
+      [id]
+    );
     return data[0];
   } catch (error) {
     console.error(error);
@@ -80,7 +98,10 @@ const getUserOrderInfo = async (id) => {
 
 const isOrderScored = async (order_no) => {
   try {
-    const [data] = await pool.execute('SELECT COUNT(*) FROM order_buying WHERE order_no = ? AND comment_status = 1', [order_no]);
+    const [data] = await pool.execute(
+      'SELECT COUNT(*) FROM order_buying WHERE order_no = ? AND comment_status = 1',
+      [order_no]
+    );
     return data[0]['COUNT(*)'] === 0 ? false : true;
   } catch (error) {
     console.error(error);
@@ -89,8 +110,14 @@ const isOrderScored = async (order_no) => {
 
 const postScore = async (product, user, comment, score, order_no) => {
   try {
-    await pool.execute('INSERT INTO product_comment (product_id, product_comment_user_id, comment, product_comment_score) VALUES (?,?,?,?)', [product, user, comment, score]);
-    await pool.execute('UPDATE order_buying SET comment_status = 1  WHERE order_no = ? ', [order_no]);
+    await pool.execute(
+      'INSERT INTO product_comment (product_id, product_comment_user_id, comment, product_comment_score) VALUES (?,?,?,?)',
+      [product, user, comment, score]
+    );
+    await pool.execute(
+      'UPDATE order_buying SET comment_status = 1  WHERE order_no = ? ',
+      [order_no]
+    );
     return true;
   } catch (error) {
     console.error(error);
@@ -99,7 +126,9 @@ const postScore = async (product, user, comment, score, order_no) => {
 
 const isEmailExist = async (email) => {
   try {
-    const [data] = await pool.execute('SELECT id  FROM user WHERE email = ?', [email]);
+    const [data] = await pool.execute('SELECT id  FROM user WHERE email = ?', [
+      email,
+    ]);
     return data[0] ? data[0] : false;
   } catch (error) {
     console.error(error);
@@ -108,7 +137,11 @@ const isEmailExist = async (email) => {
 
 const createPwdResetCode = async (code, user, expired_time) => {
   try {
-    await pool.execute('REPLACE INTO password_reset (code, user_id, expired_time) VALUES (?,?,?) ', [code, user, expired_time]);
+    let [result] = await pool.execute(
+      'REPLACE INTO password_reset (code, user_id, expired_time) VALUES (?,?,?) ',
+      [code, user, expired_time]
+    );
+    console.log(result);
     return true;
   } catch (error) {
     console.error(error);
@@ -117,7 +150,10 @@ const createPwdResetCode = async (code, user, expired_time) => {
 
 const pwdResetCodeValidation = async (code) => {
   try {
-    const [data] = await pool.execute('SELECT * FROM password_reset WHERE code = ?', [code]);
+    const [data] = await pool.execute(
+      'SELECT * FROM password_reset WHERE code = ?',
+      [code]
+    );
     return data[0];
   } catch (error) {
     console.error(error);
@@ -126,8 +162,13 @@ const pwdResetCodeValidation = async (code) => {
 
 const resetPassword = async (code, user, newPassword) => {
   try {
-    await pool.execute('UPDATE password_reset SET status = 0  WHERE code = ?', [code]);
-    await pool.execute('UPDATE user SET password = ?  WHERE id = ?', [newPassword, user]);
+    await pool.execute('UPDATE password_reset SET status = 0  WHERE code = ?', [
+      code,
+    ]);
+    await pool.execute('UPDATE user SET password = ?  WHERE id = ?', [
+      newPassword,
+      user,
+    ]);
     return true;
   } catch (error) {
     console.error(error);
@@ -148,7 +189,10 @@ const getUserCollectionInfo = async (user) => {
 
 const getUserPassword = async (user) => {
   try {
-    const [data] = await pool.execute('SELECT password FROM user WHERE id = ?', [user]);
+    const [data] = await pool.execute(
+      'SELECT password FROM user WHERE id = ?',
+      [user]
+    );
     return data[0];
   } catch (error) {
     console.error(error);
@@ -157,7 +201,10 @@ const getUserPassword = async (user) => {
 
 const updateUserPassword = async (password, user) => {
   try {
-    await pool.execute('UPDATE user SET password = ? WHERE id = ?', [password, user]);
+    await pool.execute('UPDATE user SET password = ? WHERE id = ?', [
+      password,
+      user,
+    ]);
     return true;
   } catch (error) {
     console.error(error);
@@ -187,7 +234,9 @@ const getConversationDetail = async (ids) => {
       }
     }
     if (sqlWHERE === '') sqlWHERE = 'conversation_id = 0';
-    const [data] = await pool.execute('SELECT * FROM `conversation_detail` WHERE ' + sqlWHERE);
+    const [data] = await pool.execute(
+      'SELECT * FROM `conversation_detail` WHERE ' + sqlWHERE
+    );
     return data;
   } catch (error) {
     console.error(error);
@@ -196,13 +245,10 @@ const getConversationDetail = async (ids) => {
 
 const postTextMessage = async (conversation_id, content, time) => {
   try {
-    const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
-      conversation_id,
-      1,
-      content,
-      1,
-      time,
-    ]);
+    const [data] = await pool.execute(
+      'INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ',
+      [conversation_id, 1, content, 1, time]
+    );
     return data;
   } catch (error) {
     console.error(error);
@@ -211,13 +257,10 @@ const postTextMessage = async (conversation_id, content, time) => {
 
 const postStickerMessage = async (conversation_id, sticker, time) => {
   try {
-    const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, sticker, sender, create_time) VALUES (?,?,?,?,?)  ', [
-      conversation_id,
-      3,
-      sticker,
-      1,
-      time,
-    ]);
+    const [data] = await pool.execute(
+      'INSERT INTO conversation_detail (conversation_id, type, sticker, sender, create_time) VALUES (?,?,?,?,?)  ',
+      [conversation_id, 3, sticker, 1, time]
+    );
     return data;
   } catch (error) {
     console.error(error);
@@ -227,13 +270,10 @@ const postStickerMessage = async (conversation_id, sticker, time) => {
 const postPhotoMessage = async (conversation_id, photoPath, time) => {
   console.log(conversation_id, photoPath, time);
   try {
-    const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
-      conversation_id,
-      2,
-      photoPath,
-      1,
-      time,
-    ]);
+    const [data] = await pool.execute(
+      'INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ',
+      [conversation_id, 2, photoPath, 1, time]
+    );
     return data;
   } catch (error) {
     console.error(error);

@@ -475,7 +475,7 @@ router.get('/postAll', async (req, res) => {
     console.log('user_id', user_id);
     // const user_id = req.body.user_id
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE user_id = ? AND status >= 1',
+      'SELECT * FROM post WHERE user_id = ? AND post_type_id = 1 AND status >= 1',
       [1]
     );
     console.log(result);

@@ -5,8 +5,11 @@ const sendMail = require('../../../mail_order_create');
 
 router.post('/order', async (req, res) => {
   try {
+    console.log('req.body家豪家豪家豪', req.body);
     const orderBuying = req.body.orderBuying;
-    console.log(`-----用戶:${orderBuying.user_id}商品編號:${orderBuying.product_id}的訂單已新增資料庫!-----`);
+    console.log(
+      `-----用戶:${orderBuying.user_id}商品編號:${orderBuying.product_id}的訂單已新增資料庫!-----`
+    );
     console.log(orderBuying);
 
     await pool.execute(
@@ -26,7 +29,10 @@ router.post('/order', async (req, res) => {
       ]
     );
 
-    const [result] = await pool.execute('SELECT quantity FROM voucher WHERE user_id = ? AND product_id = ?', [req.session.user.id, orderBuying.product_id]);
+    const [result] = await pool.execute(
+      'SELECT quantity FROM voucher WHERE user_id = ? AND product_id = ?',
+      [req.session.user.id, orderBuying.product_id]
+    );
     // TODO: 獲取需要的資訊 from 資料庫
 
     // console.log('---------------req.session-----------',req.session);
@@ -41,15 +47,25 @@ router.post('/order', async (req, res) => {
     };
     if (result.length === 0) {
       // = voucher add
-      await pool.execute(`INSERT INTO voucher (user_id,product_id, quantity) VALUE (?, ?,?)`, [orderBuying.user_id, orderBuying.product_id, orderBuying.product_quantity]);
+      await pool.execute(
+        `INSERT INTO voucher (user_id,product_id, quantity) VALUE (?, ?,?)`,
+        [
+          orderBuying.user_id,
+          orderBuying.product_id,
+          orderBuying.product_quantity,
+        ]
+      );
       sendMail(mailData);
       return res.status(201).json({ status: 'ok', message: '成功建立訂單' });
     } else {
-      await pool.execute(`UPDATE voucher SET quantity=? WHERE user_id = ? AND product_id = ?`, [
-        result[0]['quantity'] + orderBuying.product_quantity,
-        orderBuying.user_id,
-        orderBuying.product_id,
-      ]);
+      await pool.execute(
+        `UPDATE voucher SET quantity=? WHERE user_id = ? AND product_id = ?`,
+        [
+          result[0]['quantity'] + orderBuying.product_quantity,
+          orderBuying.user_id,
+          orderBuying.product_id,
+        ]
+      );
       // console.log('------------mailData-----------',mailData);
       sendMail(mailData);
 
