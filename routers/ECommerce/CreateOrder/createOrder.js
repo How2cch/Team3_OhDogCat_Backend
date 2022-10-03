@@ -7,7 +7,7 @@ router.post('/order', async (req, res) => {
   try {
     const orderBuying = req.body.orderBuying;
     console.log(`-----用戶:${orderBuying.user_id}商品編號:${orderBuying.product_id}的訂單已新增資料庫!-----`);
-    // console.log(orderBuying);
+    console.log(orderBuying);
 
     await pool.execute(
       `INSERT INTO order_buying (user_id,product_id, product_quantity, product_price, order_no, total, pay, coupon_number, coupon_name
@@ -36,7 +36,7 @@ router.post('/order', async (req, res) => {
       product_name: orderBuying.product_name,
       product_quantity: orderBuying.product_quantity,
       payment_type: orderBuying.pay,
-      store_name: '測試店家',
+      store_name: orderBuying.store_name,
       total: orderBuying.total,
     };
     if (result.length === 0) {

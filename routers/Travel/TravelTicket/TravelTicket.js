@@ -66,10 +66,10 @@ router.get('/travelUserplanning/get', async (req, res) => {
   const userID = req.session.user.id;
 
   let [user] = await pool.execute(
-    'SELECT * FROM travel WHERE user_id = ?  AND valid = 1 ORDER BY  id  DESC ',
+    'SELECT * FROM travel WHERE user_id = ?  AND valid = 1 ORDER BY id DESC ',
     [userID]
   );
-  // console.log('user', user);
+  console.log('user', user);
   res.json(user);
 });
 module.exports = router;
