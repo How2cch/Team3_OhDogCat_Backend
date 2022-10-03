@@ -19,32 +19,32 @@ let products = [];
 // })();
 
 // (async () => {
-  // = 建立寵物商品店家
-  await (async () => {
-    let storeArr = [
-      '寵愛一生',
-      '寵沙啦',
-      '毛手毛腳',
-      '毛落趣',
-      '貓咪加百二',
-      '米米貓貓',
-      '躲貓貓',
-      '汪汪先輩',
-      '汪東汪西',
-      '嗷嗚嗚嗚嗚',
-    ];
-    for (const item of storeArr) {
-      try {
-        let r = await pool.execute(
-          'INSERT IGNORE INTO store (name) VALUE (?)',
-          [item]
-        );
-        console.log(r);
-      } catch (error) {
-        console.log('error', error);
-      }
-    }
-  })();
+// = 建立寵物商品店家
+// await (async () => {
+//   let storeArr = [
+//     '寵愛一生',
+//     '寵沙啦',
+//     '毛手毛腳',
+//     '毛落趣',
+//     '貓咪加百二',
+//     '米米貓貓',
+//     '躲貓貓',
+//     '汪汪先輩',
+//     '汪東汪西',
+//     '嗷嗚嗚嗚嗚',
+//   ];
+//   for (const item of storeArr) {
+//     try {
+//       let r = await pool.execute(
+//         'INSERT IGNORE INTO store (name) VALUE (?)',
+//         [item]
+//       );
+//       console.log(r);
+//     } catch (error) {
+//       console.log('error', error);
+//     }
+//   }
+// })();
 //   // = 建立寵物商品店家
 //   await (async () => {
 //     let storeArr = ['寵愛一生', '寵沙啦', '毛手毛腳', '毛落趣', '貓咪加百二', '米米貓貓', '躲貓貓', '汪汪先輩', '汪東汪西', '嗷嗚嗚嗚嗚'];
@@ -179,15 +179,15 @@ let products = [];
 //   }
 // })();
 
-// = 穗懷修改餐廳商品
-(async () => {
-  let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
-  let data = JSON.parse(file);
-  for (const item of data) {
-    let result = await pool.execute(
-      'UPDATE product SET name= ? , intro= ? , description = ?, product_tag = ? WHERE id = ?',
-      [item.name, item.intro, item.description, item.product_tag, item.id]
-    );
+// // = 穗懷修改餐廳商品
+// (async () => {
+//   let file = await fs.readFile(`./json/community_homePage.json`, 'utf-8');
+//   let data = JSON.parse(file);
+//   for (const item of data) {
+//     let result = await pool.execute(
+//       'UPDATE product SET name= ? , intro= ? , description = ?, product_tag = ? WHERE id = ?',
+//       [item.name, item.intro, item.description, item.product_tag, item.id]
+//     );
     //     // let [result] = await pool.execute(
     //     //   'SELECT name FROM product WHERE id = ?',
     //     //   [item.id]
@@ -195,8 +195,8 @@ let products = [];
     // console.log('====================================');
     // console.log(result);
     // console.log('====================================');
-  }
-})();
+//   }
+// })();
 
 // (async () => {
 //   // try {
@@ -318,25 +318,51 @@ let products = [];
 //   // await pool.execute('DELETE FROM user WHERE id > 68');
 // })();
 
-(async () => {
-  let [data] = await pool.execute(
-    'SELECT id, product_type_id, name, intro, price, og_price, product_category_id, valid_time_start, valid_time_end, per_score, product_tag  FROM product'
-  );
-  let fileInfo = JSON.stringify(data);
-  fs.writeFile('./json/product/version_0929.json', fileInfo);
-  console.log(data);
-})();
-app.get('/', async (req, res) => {
+// (async () => {
+//   let [data] = await pool.execute(
+//     'SELECT id, product_type_id, name, intro, price, og_price, product_category_id, valid_time_start, valid_time_end, per_score, product_tag  FROM product'
+//   );
+//   let fileInfo = JSON.stringify(data);
+//   fs.writeFile('./json/product/version_0929.json', fileInfo);
+//   console.log(data);
+// })();
 
+(async () => {
+  let file = await fs.readFile(`./json/community_homePage2.json`, 'utf-8');
+  let data = JSON.parse(file);
+  // console.log(data);
+  for (const item of data) {
+    let result = await pool.execute(
+      'INSERT INTO post (post_type_id,user_id, post_title,  main_photo, status,coordinate, likes) VALUES (2,1, ? , ?,1, ?,?)',
+      [item.post_title, item.post_main_photo,item.coordinate, item.likes]
+
+      // 'UPDATE product SET name= ? , intro= ? , description = ?, product_tag = ? WHERE id = ?',
+      // [item.name, item.intro, item.description, item.product_tag, item.id]
+    );
+    //     // let [result] = await pool.execute(
+    //     //   'SELECT name FROM product WHERE id = ?',
+    //     //   [item.id]
+    // //     // );
+    // console.log('====================================');
+    // console.log(result);
+    // console.log('====================================');
+  // }
+}})();
+
+app.get('/', async (req, res) => {
   // = 穗懷修改景點商品
-  // let file = JSON.parse(await fs.readFile(`./json/pet_product/${0}.json`, 'utf-8'));
-  // res.json(file);
+  let file = JSON.parse(
+    await fs.readFile(`./json/community_homePage.json`, 'utf-8')
+  );
+  res.json(file);
+
+  // = 穗懷修改餐廳商品
   // let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   // res.send(JSON.parse(file));
-  // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
-  // = 穗懷修改餐廳商品
-  let file = await fs.readFile(`./json/fun_product.json`, 'utf-8');
-  res.json(JSON.parse(file));
+  // let file = await fs.readFile(`./json/community_homePage.json`, 'utf-8');
+  // console.log(file);
+  // res.json(JSON.parse(file));
+
   // let result = await fs.readFile(`./json/fun_product.json`, 'utf-8');
   // res.send(JSON.parse(result));
   // data = data;
