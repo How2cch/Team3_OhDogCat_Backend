@@ -246,11 +246,13 @@ const userAccountValidation = async (req, res) => {
       if (!data || !data.code === req.body.code || !moment(data.expired_time).isAfter(now)) return res.status(400).json({ message: '驗證失敗，請再試一次' });
       await authModel.updateAccountValid(req.session.user.id);
       req.session.user.account_valid = true;
-      res.status(201).json({
-        status: 'ok',
-        message: '用戶信箱已成功驗證',
-        user: req.session.user,
-      });
+      res
+        .status(201)
+        .json({
+          status: 'ok',
+          message: '用戶信箱已成功驗證',
+          user: req.session.user,
+        });
     }
   } catch (error) {
     console.log(error);

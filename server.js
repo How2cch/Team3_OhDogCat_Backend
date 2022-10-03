@@ -51,7 +51,9 @@ app.use('/store', storeAdmin);
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 
-// Rain 票卷相關 //userid title 開始時間相關
+// // =============雨信區
+
+// //Rain 票卷相關 //userid title 開始時間相關
 
 const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
 app.use('/api/1.0/', TravelGetAPI);
