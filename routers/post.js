@@ -37,8 +37,8 @@ router.post('/release', async (req, res) => {
   // console.log('post', postID);
   try {
     let [result] = await pool.execute(
-      ' UPDATE post SET status =? WHERE id = ?',
-      [state, postID]
+      ' UPDATE post SET status =1 WHERE id = ?',
+      [postID]
     );
     // console.log(deleteResult);
     res.json(result);
@@ -109,9 +109,8 @@ router.post('/likes', async (req, res) => {
     try {
       // console.log(1);
       let [addLike] = await pool.execute(
-        'DELETE FROM `post_like` WHERE post_id=?,user_id=?',
-
-        [postID, userLike]
+        'DELETE FROM `post_like` WHERE post_id=?',
+        [postID]
       );
       // console.log(addLike);
       res.json(addLike);
@@ -135,8 +134,8 @@ router.post('/likes', async (req, res) => {
     try {
       // console.log(0);
       let [removeLike] = await pool.execute(
-        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, ?)',
-        [postID, userLike]
+        'INSERT INTO `post_like` (`post_id`, `user_id`) VALUES (?, 1)',
+        [postID]
       );
       console.log(removeLike);
       res.json(removeLike);
@@ -162,8 +161,8 @@ router.post('/likes', async (req, res) => {
 
 // 單獨取一般貼文資料 抬頭 luis
 router.get('/post', async (req, res) => {
-  // console.log(req.query);
-  // TODO:偵測userID
+  let user_id = req.body.user_id;
+  console.log('user_id', user_id);
   try {
     let [result] = await pool.execute(
       'SELECT * FROM post WHERE id >= ? AND user_id = ? AND status =1 AND post_type_id =1 ORDER BY id DESC',
@@ -182,8 +181,8 @@ router.get('/tripPost', async (req, res) => {
   // TODO:偵測userID
   try {
     let [result] = await pool.execute(
-      'SELECT * FROM post WHERE id >= ? AND user_id = ? AND status >= 1 AND post_type_id =2 ORDER BY id DESC',
-      [1, 1]
+      'SELECT * FROM post WHERE id >= ? AND user_id = 1 AND status >= 1 AND post_type_id =2 ORDER BY id DESC',
+      [1]
     );
     // console.log(result);
     res.json(result);
@@ -217,7 +216,7 @@ router.post('/tripPostNew', async (req, res) => {
   // TODO:偵測userID
   try {
     let [postResult] = await pool.execute(
-      `INSERT INTO post (post_type_id, user_id, post_title, travel_id, status, create_time) VALUES (2,1,?,?,2,?)`,
+      `INSERT INTO post (post_type_id, user_id, post_title, travel_id, status, create_time, tags ) VALUES (2,1,?,?,2,?,'#')`,
       [tripTitle, tripID, createTime]
     );
     // TODO: 一定travel 表裡面的ID欄位和travel days 表裡面的travel_id 有資料才能新增行程貼文
@@ -244,6 +243,22 @@ router.get('/tripPostDetail', async (req, res) => {
     );
     // console.log(checkPostData, 'checkPodstData');
     res.json(checkPostData);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// 地圖地點
+router.get('/mapLocate', async (req, res) => {
+  const { locateID } = req.query.locateID;
+  // console.log(req.query);
+  try {
+    let [result] = await pool.execute(
+      `SELECT * FROM travel_days WHERE id =?, valid=1`,{locateID}
+    );
+    console.log(result);
+    res.json(result);
+    // 轉換成JSON格式
   } catch (error) {
     console.error(error);
   }
@@ -305,7 +320,7 @@ router.post('/tripPostDetailEdit', async (req, res) => {
 //　圖片設定儲存空間
 const storageTripPostCover = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'public', 'tripPost', 'coverPhoto'));
+    cb(null, path.join(__dirname, '..', 'public', 'post'));
     console.log(__dirname);
     // 確認資料夾位置正確
   },
@@ -313,7 +328,7 @@ const storageTripPostCover = multer.diskStorage({
   filename: function (req, file, cb) {
     console.log('file', file);
     const ext = file.originalname.split('.').pop();
-    cb(null, `/travel-${uuidv4()}.${ext}`);
+    cb(null, `travel-${uuidv4()}.${ext}`);
   },
 });
 
@@ -351,7 +366,7 @@ router.post(
     // console.log('貼文ＩＤ', req.body.postID);
 
     try {
-      let filename = req.file ? 'tripPost/coverPhoto' + req.file.filename : '';
+      let filename = req.file ? req.file.filename : '';
       console.log('檔案名稱', filename);
       // console.log('貼文ＩＤ', postID);
       let [coverPhotoUpload] = await pool.execute(
@@ -372,7 +387,7 @@ router.post(
 //　圖片設定儲存空間
 const storageTripPostLoc = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'public', 'tripPost', 'locPhoto'));
+    cb(null, path.join(__dirname, '..', 'public', 'tripPost'));
     console.log(__dirname);
     // 確認資料夾位置正確
   },
@@ -380,7 +395,7 @@ const storageTripPostLoc = multer.diskStorage({
   filename: function (req, file, cb) {
     console.log('file', file);
     const ext = file.originalname.split('.').pop();
-    cb(null, `/travel-${uuidv4()}.${ext}`);
+    cb(null, `travel-${uuidv4()}.${ext}`);
   },
 });
 
@@ -419,7 +434,7 @@ router.post(
     // console.log('貼文ＩＤ', req.body.postID);
 
     try {
-      let filename = req.file ? 'tripPost/locPhoto' + req.file.filename : '';
+      let filename = req.file ? req.file.filename : '';
       console.log('檔案名稱', filename);
       // console.log('貼文ＩＤ', postID);
       let [locPhotoUpload] = await pool.execute(
@@ -492,7 +507,7 @@ router.get('/postDetail', async (req, res) => {
 const storage = multer.diskStorage({
   // 設定存擋資料夾 /public/uploads
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname + '..', '..', 'public', 'uploads'));
+    cb(null, path.join(__dirname + '..', '..', 'public', 'post'));
   },
   filename: function (req, file, cb) {
     console.log('file=========', file);
@@ -542,7 +557,7 @@ router.post('/postEdit', uploader.single('photo'), async (req, res, next) => {
   try {
     // 確認資料有沒有收到
     console.log('postEdit', req.body);
-    let filename = req.file ? '/uploads/' + req.file.filename : '';
+    let filename = req.file ? req.file.filename : '';
     if (req.body.post_id === 'null') {
       let result = await pool.execute(
         'INSERT INTO post (user_id, post_type_id, post_title, content, post_main_photo, create_time, coordinate, tags, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',

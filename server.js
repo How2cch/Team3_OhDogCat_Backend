@@ -51,18 +51,16 @@ app.use('/store', storeAdmin);
 // ============== API Routers ==============
 app.use(express.json()); // ? express 使用 body-parser 解析帶有 JSON 有效負載的傳入請求
 
-// // =============雨信區
+// Rain 票卷相關 //userid title 開始時間相關
 
-// //Rain 票卷相關 //userid title 開始時間相關
-
-// const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
-// app.use('/api/1.0/', TravelGetAPI);
+const TravelGetAPI = require('./routers/Travel/TravelTicket/TravelTicket');
+app.use('/api/1.0/', TravelGetAPI);
 
 // // Rain post更改日期 travel title
-// const TraveldetailUpdate = require('./routers/Travel/Travel_post_LocationID/travelLocationID');
-// app.use('/api/1.0/', TraveldetailUpdate);
+const TraveldetailUpdate = require('./routers/Travel/Travel_post_LocationID/travelLocationID');
+app.use('/api/1.0/', TraveldetailUpdate);
 
-// // =============雨信區
+//  =============雨信區
 
 // // ----EC穗懷區
 // // =============================================================================================EC穗懷區
@@ -117,7 +115,10 @@ app.get('/', (req, res) => {
   res.send('<h4>首頁<h4>');
 });
 
-//==== 孝強 ====//
+// =============================================================================================社群區
+
+// ----社群孝強區
+
 // CommunityHomePage //
 const communityHomePageAPI = require('./routers/Community/CommunityHomePage/homePage'); // ? 將 API route 整理於 ./routers 個別檔案中
 app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔案後將其視為中間件使用，第一個參數為預設 path
@@ -126,8 +127,6 @@ app.use('/api/1.0/communityHomePage', communityHomePageAPI); // ? 讀進 API 檔
 
 // const communityPostEditAPI = require('./routers/post');
 // app.use('/api/1.0/post', communityPostEditAPI);
-
-//==== 孝強 ====//
 
 // ----社群luis區
 
@@ -145,7 +144,7 @@ app.use('/api/1.0/post', recommendProductAPI);
 // const testAPI = require('./routers/haui');
 // app.use('/api/1.0/huai', testAPI);
 
-// ----社群luis區 要比404前面
+// =============================================================================================社群區
 
 app.use((req, res) => {
   console.log('這個頁面找不到');
