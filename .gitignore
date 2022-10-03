@@ -5,3 +5,4 @@ node_modules/
 public/travel/post
 public/community/post
 public/
+.DS_Store
