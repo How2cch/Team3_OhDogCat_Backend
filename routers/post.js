@@ -109,8 +109,9 @@ router.post('/likes', async (req, res) => {
     try {
       // console.log(1);
       let [addLike] = await pool.execute(
-        'DELETE FROM `post_like` WHERE post_id=?',
-        [postID]
+        'DELETE FROM `post_like` WHERE post_id=?,user_id=?',
+
+        [postID, userLike]
       );
       // console.log(addLike);
       res.json(addLike);
@@ -161,8 +162,8 @@ router.post('/likes', async (req, res) => {
 
 // 單獨取一般貼文資料 抬頭 luis
 router.get('/post', async (req, res) => {
-  let user_id = req.body.user_id;
-  console.log('user_id', user_id);
+  // console.log(req.query);
+  // TODO:偵測userID
   try {
     let [result] = await pool.execute(
       'SELECT * FROM post WHERE id >= ? AND user_id = ? AND status =1 AND post_type_id =1 ORDER BY id DESC',
