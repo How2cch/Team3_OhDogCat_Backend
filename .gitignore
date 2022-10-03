@@ -3,9 +3,5 @@ node_modules/
 .eslintrc.json
 .prettierrc
 
-
 # public/travel/post
-public/community/post
-public/tripPost
-public/uploads
 public/

@@ -156,7 +156,7 @@ router.get('/list', authMiddleware.authVerify, async (req, res) => {
       [req.session.user.id]
       // [req.query.id]
     );
-    // console.log(comment);
+    // console.log('list',list);
     res.json(list);
   } catch (error) {
     console.error(error);
@@ -169,11 +169,12 @@ router.get('/showcart', async (req, res) => {
   const productId = req.query.productId;
   // console.log('productId', product_id);
   try {
+    // TODO:店家名稱
     const [showcart] = await pool.execute(
-      'SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`main_photo`, `product`.`photo_path` FROM `cart` JOIN `product` ON `cart`.`product_id` = `product`.`id` WHERE `cart`.`product_id` = ?',
+      "SELECT `cart`.`user_id`,`cart`.`product_id`, `cart`.`quantity`, `product`.`name`, `product`.`price`, `product`.`store_id`, `product`.`main_photo`, `product`.`photo_path`,`store`.`name` AS `store_name`  FROM (`cart` INNER JOIN `product` ON `cart`.`product_id` = `product`.`id`) INNER JOIN `store` ON `product`.`store_id` = `store`.`id` WHERE `cart`.`product_id` = ?",
       [productId]
     );
-    // console.log('showcart', showcart);
+    // console.log('------showcart-----', showcart);
     res.json(showcart);
   } catch (error) {
     console.error(error);
