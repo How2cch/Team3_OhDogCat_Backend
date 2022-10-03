@@ -28,13 +28,15 @@ router.post('/order', async (req, res) => {
 
     const [result] = await pool.execute('SELECT quantity FROM voucher WHERE user_id = ? AND product_id = ?', [req.session.user.id, orderBuying.product_id]);
     // TODO: 獲取需要的資訊 from 資料庫
+
+    // console.log('---------------req.session-----------',req.session);
     const mailData = {
       address: req.session.user.email,
       user_name: req.session.user.name,
-      product_name: '貓砂盆',
+      product_name: orderBuying.product_name,
       product_quantity: orderBuying.product_quantity,
       payment_type: orderBuying.pay,
-      store_name: '測試店家',
+      store_name: orderBuying.store_name,
       total: orderBuying.total,
     };
     if (result.length === 0) {
@@ -48,7 +50,9 @@ router.post('/order', async (req, res) => {
         orderBuying.user_id,
         orderBuying.product_id,
       ]);
+      // console.log('------------mailData-----------',mailData);
       sendMail(mailData);
+
       return res.status(201).json({ status: 'ok', message: '成功建立訂單' });
     }
   } catch (error) {

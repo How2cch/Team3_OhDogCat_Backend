@@ -15,7 +15,12 @@ const userRegister = async (req, res) => {
   const validation = validationResult(req);
   let error = validation.array();
   if (req.body.socialName.length > 20 || /\s/.test(req.body.socialName)) {
-    error.push({ param: 'socialName', value: req.body.socialName, msg: '暱稱不可包含空格且長度不得超過 20 個字', location: 'body' });
+    error.push({
+      param: 'socialName',
+      value: req.body.socialName,
+      msg: '暱稱不可包含空格且長度不得超過 20 個字',
+      location: 'body',
+    });
   }
 
   // = 如果有任一驗證出現 Error 紀錄，則中斷，返回前端驗證結果
@@ -30,19 +35,46 @@ const userRegister = async (req, res) => {
     const existUser = await authModel.isAccountExist(req.body);
     if (existUser.length > 0) {
       console.log('existUser', existUser);
-      const emailError = { param: 'email', value: req.body.socialName, msg: '這個 Email 已被註冊', location: 'body' };
-      const socialNameError = { param: 'socialName', value: req.body.socialName, msg: '這個暱稱已被使用', location: 'body' };
-      if (existUser[0].email === req.body.email && existUser[0].social_name === req.body.socialName)
-        return res.status(400).json({ message: '註冊失敗', error: [emailError, socialNameError] });
-      if (existUser[0].email === req.body.email) return res.status(400).json({ message: '註冊失敗', error: [emailError] });
-      if (existUser[0].social_name === req.body.socialName) return res.status(400).json({ message: '註冊失敗', error: [socialNameError] });
+      const emailError = {
+        param: 'email',
+        value: req.body.socialName,
+        msg: '這個 Email 已被註冊',
+        location: 'body',
+      };
+      const socialNameError = {
+        param: 'socialName',
+        value: req.body.socialName,
+        msg: '這個暱稱已被使用',
+        location: 'body',
+      };
+      if (
+        existUser[0].email === req.body.email &&
+        existUser[0].social_name === req.body.socialName
+      )
+        return res
+          .status(400)
+          .json({ message: '註冊失敗', error: [emailError, socialNameError] });
+      if (existUser[0].email === req.body.email)
+        return res
+          .status(400)
+          .json({ message: '註冊失敗', error: [emailError] });
+      if (existUser[0].social_name === req.body.socialName)
+        return res
+          .status(400)
+          .json({ message: '註冊失敗', error: [socialNameError] });
     }
 
     // = 將密碼雜湊，並整理 user insert info
     const hashPassword = await bcrypt.hash(req.body.password, 10);
     console.log('雜湊密碼', hashPassword);
     const now = moment().format('YYYY-MM-DD hh:mm:ss');
-    const insertInfo = { email: req.body.email, password: hashPassword, social_name: req.body.socialName, photo: '', create_time: now };
+    const insertInfo = {
+      email: req.body.email,
+      password: hashPassword,
+      social_name: req.body.socialName,
+      photo: '',
+      create_time: now,
+    };
 
     // = 寫進資料庫，回傳結果給前端
     const result = await authModel.insertUser(insertInfo);
@@ -60,7 +92,9 @@ const userRegister = async (req, res) => {
     req.session.user = registerUser;
     // console.log('session ====================', req.session);
 
-    res.status(201).json({ status: 'ok', message: '註冊成功', user: registerUser });
+    res
+      .status(201)
+      .json({ status: 'ok', message: '註冊成功', user: registerUser });
   } catch (error) {
     res.status(500).json({ message: '異常，請洽系統管理員' });
     throw new Error(error);
@@ -75,19 +109,30 @@ const userLogin = async (req, res) => {
   // = 如果有任一驗證出現 Error 紀錄，則中斷，返回前端驗證結果
   if (validation.array().length > 0) {
     console.log('error', validation.array());
-    return res.status(401).json({ status: 'failed', message: '帳號或密碼錯誤' });
+    return res
+      .status(401)
+      .json({ status: 'failed', message: '帳號或密碼錯誤' });
   }
 
   try {
     // = 進資料庫驗證信箱搜尋是否有匹配的資料
     const [existUser] = await authModel.isLoginUserExist(req.body);
     console.log('existUser', existUser ? existUser : '沒有這個 user');
-    if (!existUser) return res.status(401).json({ status: 'failed', message: '帳號或密碼錯誤' });
+    if (!existUser)
+      return res
+        .status(401)
+        .json({ status: 'failed', message: '帳號或密碼錯誤' });
 
     // = 比較密碼是否正確
-    let checkPassword = await bcrypt.compare(req.body.password, existUser.password);
+    let checkPassword = await bcrypt.compare(
+      req.body.password,
+      existUser.password
+    );
     console.log(checkPassword);
-    if (!checkPassword) return res.status(401).json({ status: 'failed', message: '帳號或密碼錯誤' });
+    if (!checkPassword)
+      return res
+        .status(401)
+        .json({ status: 'failed', message: '帳號或密碼錯誤' });
 
     // = 寫進 Session 回給前端
     const loginUser = {
@@ -103,7 +148,9 @@ const userLogin = async (req, res) => {
     req.session.user = loginUser;
     console.log('session ====================', req.session);
 
-    res.status(200).json({ status: 'ok', message: '登入成功', user: loginUser });
+    res
+      .status(200)
+      .json({ status: 'ok', message: '登入成功', user: loginUser });
   } catch (error) {
     res.status(500).json({ message: '異常，請洽系統管理員' });
     throw new Error(error);
@@ -111,8 +158,11 @@ const userLogin = async (req, res) => {
 };
 
 const userLineRegister = async (req, res) => {
-  if (!req.query.code) return res.redirect(`http://localhost:3000?line_login=false`);
-  res.redirect(`http://localhost:3000?line_login=true&code=${req.query.code}&state=${req.query.state}`);
+  if (!req.query.code)
+    return res.redirect(`http://localhost:3000?line_login=false`);
+  res.redirect(
+    `http://localhost:3000?line_login=true&code=${req.query.code}&state=${req.query.state}`
+  );
 };
 
 const userLineLogin = async (req, res) => {
@@ -136,7 +186,11 @@ const userLineLogin = async (req, res) => {
 
   try {
     // = 跟 line 換取用戶 token
-    const tokenResult = await axios.post('https://api.line.me/oauth2/v2.1/token', Qs.stringify(requestBody), config);
+    const tokenResult = await axios.post(
+      'https://api.line.me/oauth2/v2.1/token',
+      Qs.stringify(requestBody),
+      config
+    );
     console.log('tokenResult data=', tokenResult);
     // = 解析 token
     const { picture, email } = jwtDecode(tokenResult.data.id_token);
@@ -149,9 +203,17 @@ const userLineLogin = async (req, res) => {
     const isExist = existUser ? existUser.email === email : false;
     console.log('isExist=', isExist);
     const now = moment().format('YYYY-MM-DD hh:mm:ss');
-    const insertInfo = { email: email, social_name: '', password: '', photo: picture, create_time: now };
+    const insertInfo = {
+      email: email,
+      social_name: '',
+      password: '',
+      photo: picture,
+      create_time: now,
+    };
     console.log('insertInfo=', insertInfo);
-    const insertResult = isExist ? false : await authModel.insertUser(insertInfo);
+    const insertResult = isExist
+      ? false
+      : await authModel.insertUser(insertInfo);
     console.log(isExist ? '該信箱已有註冊紀錄' : '用戶成功使用 line 註冊');
     console.log('insertResult=', insertResult);
 
@@ -169,7 +231,9 @@ const userLineLogin = async (req, res) => {
     console.log('loginUser=', loginUser);
     req.session.user = loginUser;
     console.log('session ====================', req.session);
-    res.status(200).json({ status: 'ok', message: '登入成功', user: loginUser });
+    res
+      .status(200)
+      .json({ status: 'ok', message: '登入成功', user: loginUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '異常，請洽系統管理員', error: error });
@@ -189,10 +253,17 @@ const userVerifyStatus = async (req, res) => {
   console.log('用戶進行登入驗證');
   if (!req.session.user) {
     console.log('用戶無登入權限');
-    return res.status(200).json({ status: 'ok', isLogin: false, message: '此用戶無登入權限' });
+    return res
+      .status(200)
+      .json({ status: 'ok', isLogin: false, message: '此用戶無登入權限' });
   } else {
     console.log('用戶登入驗證成功');
-    return res.status(200).json({ status: 'ok', isLogin: true, message: '此用戶處於登入狀態', user: req.session.user });
+    return res.status(200).json({
+      status: 'ok',
+      isLogin: true,
+      message: '此用戶處於登入狀態',
+      user: req.session.user,
+    });
   }
 };
 
@@ -201,20 +272,38 @@ const userAccountValidation = async (req, res) => {
   try {
     if (req.body.action === 'mail') {
       const code = uuidv4();
-      const expired_time = moment().add(5, 'minute').format('YYYY-MM-DD HH:mm:ss');
-      await authModel.creatUserValidationCode(req.session.user.id, code, expired_time);
+      const expired_time = moment()
+        .add(5, 'minute')
+        .format('YYYY-MM-DD HH:mm:ss');
+      await authModel.creatUserValidationCode(
+        req.session.user.id,
+        code,
+        expired_time
+      );
       sendMail({ address: req.session.user.email, code: code });
       return res.status(201).json({ status: 'ok', message: '驗證信已寄發' });
     }
     if (req.body.action === 'validation') {
       console.log(req.body);
-      if (req.session.user.account_valid) return res.status(400).json({ message: '用戶信箱不需再驗證' });
+      if (req.session.user.account_valid)
+        return res.status(400).json({ message: '用戶信箱不需再驗證' });
       const data = await authModel.getValidationInfo(req.session.user.id);
       const now = moment().format('YYYY-MM-DD HH:mm:ss');
-      if (!data || !data.code === req.body.code || !moment(data.expired_time).isAfter(now)) return res.status(400).json({ message: '驗證失敗，請再試一次' });
+      if (
+        !data ||
+        !data.code === req.body.code ||
+        !moment(data.expired_time).isAfter(now)
+      )
+        return res.status(400).json({ message: '驗證失敗，請再試一次' });
       await authModel.updateAccountValid(req.session.user.id);
       req.session.user.account_valid = true;
-      res.status(201).json({ status: 'ok', message: '用戶信箱已成功驗證', user: req.session.user });
+      res
+        .status(201)
+        .json({
+          status: 'ok',
+          message: '用戶信箱已成功驗證',
+          user: req.session.user,
+        });
     }
   } catch (error) {
     console.log(error);
@@ -222,4 +311,12 @@ const userAccountValidation = async (req, res) => {
   }
 };
 
-module.exports = { userRegister, userLogin, userLogout, userVerifyStatus, userLineLogin, userLineRegister, userAccountValidation };
+module.exports = {
+  userRegister,
+  userLogin,
+  userLogout,
+  userVerifyStatus,
+  userLineLogin,
+  userLineRegister,
+  userAccountValidation,
+};
