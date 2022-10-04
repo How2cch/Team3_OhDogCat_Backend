@@ -85,7 +85,7 @@ router.post('/voucher/exchange', async (req, res) => {
 
 router.get('/message/:id', async (req, res) => {
   try {
-    return res.render('store_admin_conversation', { id: req.params.id });
+    return res.render('store_admin_conversation', { id: req.params.id, BASE_URL: process.env.OPEN_URL });
   } catch (error) {
     console.error(error);
   }
@@ -97,7 +97,10 @@ router.get('/message', async (req, res) => {
     const [conversation] = await pool.execute('SELECT c.*, u.name AS user_name, u.photo AS user_photo FROM `conversation` AS c JOIN user AS u ON c.user_id = u.id WHERE c.id = ?', [
       req.query.id,
     ]);
-    const [data] = await pool.execute('SELECT * FROM `conversation_detail` WHERE conversation_id = ?', [req.query.id]);
+    const [data] = await pool.execute(
+      'SELECT c.*, p.id AS product_id, p.name AS product_name, p.photo_path, p.main_photo, p.price, p.per_score FROM `conversation_detail` AS c LEFT JOIN product AS p ON c.product_id = p.id  WHERE conversation_id = ?',
+      [req.query.id]
+    );
     conversation[0]['messages'] = data;
     return res.status(200).json({ data: conversation[0] });
   } catch (error) {

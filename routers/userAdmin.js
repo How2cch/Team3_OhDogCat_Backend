@@ -90,9 +90,11 @@ router.get('/order', authMiddleware.authVerify, adminController.userGetOrderInfo
 router.post('/score/:productId', authMiddleware.authVerify, adminController.userPostScore);
 router.get('/collection', authMiddleware.authVerify, adminController.userGetCollectionInfo);
 router.get('/conversation', authMiddleware.authVerify, adminController.userGetConversationList);
+router.post('/conversation/:storeId', authMiddleware.authVerify, adminController.userCreateConversation);
+router.get('/conversation/product/:storeId', adminController.userGetConversationProduct);
 router.post('/conversation/text/:id', authMiddleware.authVerify, adminController.userPostTextMessage);
 router.post('/conversation/sticker/:id', authMiddleware.authVerify, adminController.userPostStickerMessage);
+router.post('/conversation/product/:id', authMiddleware.authVerify, adminController.userPostProductMessage);
 router.post('/conversation/photo/:id', messageImgUploader.single('photo'), authMiddleware.authVerify, adminController.userPostPhotoMessage);
-router.post('/conversation/:receiverId');
 
 module.exports = router;

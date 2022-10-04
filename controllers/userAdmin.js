@@ -15,20 +15,10 @@ const userReadVouchers = async (req, res) => {
     console.log(data);
     data.forEach((item) => {
       const { product_id } = item;
-      if (
-        result.length === 0 ||
-        product_id !== result[result.length - 1].product_id
-      )
-        return result.push({ ...item, photos: [item.photos] });
+      if (result.length === 0 || product_id !== result[result.length - 1].product_id) return result.push({ ...item, photos: [item.photos] });
       result[result.length - 1].photos.push(item.photos);
     });
-    console.log(
-      '用戶id' +
-        req.session.user.id +
-        '檢視 Voucher 成功，共 ' +
-        result.length +
-        ' 筆'
-    );
+    console.log('用戶id' + req.session.user.id + '檢視 Voucher 成功，共 ' + result.length + ' 筆');
 
     res.status(200).json({ status: 'ok', data: result });
   } catch (error) {
@@ -50,26 +40,13 @@ const userGetVouchersId = async (req, res) => {
     console.log('用戶票券庫存', isEnough.length > 0);
 
     if (isEnough.length > 0) {
-      const v_time_end = isEnough[0].valid_time_end
-        ? isEnough[0].valid_time_end
-        : '9999-12-31';
-      const v_time_start = isEnough[0].valid_time_start
-        ? isEnough[0].valid_time_start
-        : '1900-01-01';
+      const v_time_end = isEnough[0].valid_time_end ? isEnough[0].valid_time_end : '9999-12-31';
+      const v_time_start = isEnough[0].valid_time_start ? isEnough[0].valid_time_start : '1900-01-01';
 
-      console.log(
-        '時間合法',
-        moment().isBefore(v_time_end) && moment(v_time_start).isBefore(moment())
-      );
-      console.log(
-        '數量合法',
-        Number(isEnough[0].quantity) >= Number(req.query.quantity)
-      );
+      console.log('時間合法', moment().isBefore(v_time_end) && moment(v_time_start).isBefore(moment()));
+      console.log('數量合法', Number(isEnough[0].quantity) >= Number(req.query.quantity));
 
-      isEnough =
-        moment().isBefore(v_time_end) &&
-        moment(v_time_start).isBefore(moment()) &&
-        Number(isEnough[0].quantity) >= Number(req.query.quantity);
+      isEnough = moment().isBefore(v_time_end) && moment(v_time_start).isBefore(moment()) && Number(isEnough[0].quantity) >= Number(req.query.quantity);
     } else {
       return res.status(400).json({
         message: '無法使用',
@@ -84,26 +61,19 @@ const userGetVouchersId = async (req, res) => {
       });
 
     // = 搜尋核銷列表是否有可用合法資料
-    const [isExist] = await pool.execute(
-      'SELECT * FROM voucher_exchange WHERE user_id = ? AND product_id = ? AND status = 1 AND expired_time between NOW() and ?;',
-      [
-        req.session.user.id,
-        req.params.productId,
-        moment().add(3, 'minute').format('YYYY-MM-DD HH:mm:ss'),
-      ]
-    );
+    const [isExist] = await pool.execute('SELECT * FROM voucher_exchange WHERE user_id = ? AND product_id = ? AND status = 1 AND expired_time between NOW() and ?;', [
+      req.session.user.id,
+      req.params.productId,
+      moment().add(3, 'minute').format('YYYY-MM-DD HH:mm:ss'),
+    ]);
     console.log('有登記核銷紀錄', isExist.length > 0);
 
     const now = moment();
-    const isValid =
-      isExist.length > 0 && moment(now).isBefore(isExist[0].expired_time);
+    const isValid = isExist.length > 0 && moment(now).isBefore(isExist[0].expired_time);
     console.log('是否有可用記錄', isValid);
     const newExpire = moment().add(3, 'minute').format('YYYY-MM-DD HH:mm:ss');
     if (isExist.length !== 0 && isValid) {
-      await pool.execute(
-        'UPDATE voucher_exchange SET expired_time = ? ,quantity = ?  WHERE id = ?',
-        [newExpire, req.query.quantity, isExist[0].id]
-      );
+      await pool.execute('UPDATE voucher_exchange SET expired_time = ? ,quantity = ?  WHERE id = ?', [newExpire, req.query.quantity, isExist[0].id]);
       console.log('id = ', isExist[0].id);
       return res.status(200).json({
         status: 'ok',
@@ -115,16 +85,13 @@ const userGetVouchersId = async (req, res) => {
     }
     console.log('創建新核銷 id');
     const uuid = uuidv4();
-    await pool.execute(
-      `INSERT INTO voucher_exchange (id , user_id, product_id, quantity, expired_time) VALUES (?,?,?,?,?)`,
-      [
-        uuid,
-        req.session.user.id,
-        req.params.productId,
-        Number(req.query.quantity),
-        newExpire,
-      ]
-    );
+    await pool.execute(`INSERT INTO voucher_exchange (id , user_id, product_id, quantity, expired_time) VALUES (?,?,?,?,?)`, [
+      uuid,
+      req.session.user.id,
+      req.params.productId,
+      Number(req.query.quantity),
+      newExpire,
+    ]);
     console.log('id = ', uuid);
     res.status(200).json({
       status: 'ok',
@@ -198,9 +165,7 @@ const userEditName = async (req, res) => {
     await adminModel.updateName(req.session.user.id, req.body.name);
     req.session.user.name = req.body.name;
     console.log('session ====================', req.session);
-    res
-      .status(201)
-      .json({ status: 'ok', message: '修改成功', value: req.body.name });
+    res.status(201).json({ status: 'ok', message: '修改成功', value: req.body.name });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '異常，請洽系統管理員', error: error });
@@ -213,9 +178,7 @@ const userEditPhone = async (req, res) => {
     console.log('用戶id' + req.session.user.id + '欲修改手機號碼');
     await adminModel.updatePhone(req.session.user.id, req.body.phone);
     console.log('session ====================', req.session);
-    res
-      .status(201)
-      .json({ status: 'ok', message: '修改成功', value: req.body.phone });
+    res.status(201).json({ status: 'ok', message: '修改成功', value: req.body.phone });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '異常，請洽系統管理員', error: error });
@@ -228,9 +191,7 @@ const userEditGender = async (req, res) => {
     console.log('用戶id' + req.session.user.id + '欲修改性別');
     await adminModel.updateGender(req.session.user.id, req.body.gender);
     console.log('session ====================', req.session);
-    res
-      .status(201)
-      .json({ status: 'ok', message: '修改成功', value: req.body.gender });
+    res.status(201).json({ status: 'ok', message: '修改成功', value: req.body.gender });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '異常，請洽系統管理員', error: error });
@@ -243,14 +204,9 @@ const userEditPhoto = async (req, res) => {
   try {
     let filePath = req.file ? '/user/uploads/' + req.file.filename : '';
     console.log('圖片路徑', filePath);
-    await pool.execute('UPDATE user SET photo = ? WHERE id = ?', [
-      filePath,
-      req.session.user.id,
-    ]);
+    await pool.execute('UPDATE user SET photo = ? WHERE id = ?', [filePath, req.session.user.id]);
     req.session.user.photo = filePath;
-    res
-      .status(201)
-      .json({ status: 'ok', message: '修改成功', user: req.session.user });
+    res.status(201).json({ status: 'ok', message: '修改成功', user: req.session.user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '異常，請洽系統管理員', error: error });
@@ -274,13 +230,7 @@ const userPostScore = async (req, res) => {
     let isScored = await adminModel.isOrderScored(req.body.order_no);
     console.log('isScored', isScored);
     if (isScored) return res.status(400).json({ message: '該筆訂單已評價' });
-    await adminModel.postScore(
-      req.params.productId,
-      req.session.user.id,
-      req.body.comment,
-      req.body.score,
-      req.body.order_no
-    );
+    await adminModel.postScore(req.params.productId, req.session.user.id, req.body.comment, req.body.score, req.body.order_no);
     let updateData = await adminModel.getUserOrderInfo(req.session.user.id);
     res.status(200).json({ status: 'ok', updateData: updateData });
   } catch (error) {
@@ -296,34 +246,20 @@ const userResetPassword = async (req, res) => {
       console.log('step', 1);
 
       console.log(isEmailExist);
-      if (!isEmailExist)
-        return res
-          .status(200)
-          .json({ status: 'ok', action: 'mail', message: '信件已寄發' });
+      if (!isEmailExist) return res.status(200).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
       console.log('step', 2);
 
       const code = uuidv4();
-      const expired_time = moment()
-        .add(5, 'minute')
-        .format('YYYY-MM-DD HH:mm:ss');
+      const expired_time = moment().add(5, 'minute').format('YYYY-MM-DD HH:mm:ss');
       await adminModel.createPwdResetCode(code, isEmailExist.id, expired_time);
       console.log('step', 3);
       sendMail({ address: req.body.email, code: code });
-      return res
-        .status(200)
-        .json({ status: 'ok', action: 'mail', message: '信件已寄發' });
+      return res.status(200).json({ status: 'ok', action: 'mail', message: '信件已寄發' });
     }
     if (req.body.action === 'reset') {
       const result = await adminModel.pwdResetCodeValidation(req.body.code);
       const now = moment().format('YYYY-MM-DD HH:mm:ss');
-      if (
-        !result ||
-        moment(now).isAfter(result.expired_time) ||
-        result.status != 1
-      )
-        return res
-          .status(400)
-          .json({ message: '密碼重設憑證已無效，需重新申請' });
+      if (!result || moment(now).isAfter(result.expired_time) || result.status != 1) return res.status(400).json({ message: '密碼重設憑證已無效，需重新申請' });
       const validation = validationResult(req);
       let error = validation.array();
       if (error[0]) {
@@ -331,14 +267,8 @@ const userResetPassword = async (req, res) => {
         return res.status(400).json({ message: '密碼格式錯誤', error: error });
       }
       const newPassword = await bcrypt.hash(req.body.password, 10);
-      await adminModel.resetPassword(
-        req.body.code,
-        result.user_id,
-        newPassword
-      );
-      return res
-        .status(204)
-        .json({ status: 'ok', action: 'reset', message: '密碼重設成功' });
+      await adminModel.resetPassword(req.body.code, result.user_id, newPassword);
+      return res.status(204).json({ status: 'ok', action: 'reset', message: '密碼重設成功' });
     }
   } catch (error) {
     console.log(error);
@@ -362,8 +292,7 @@ const userEditPassword = async (req, res) => {
     console.log('用戶id' + req.session.user.id + '欲修改密碼');
 
     const oldPassword = await adminModel.getUserPassword(req.session.user.id);
-    if (!oldPassword.password)
-      return res.status(400).json({ message: '無效操作' });
+    if (!oldPassword.password) return res.status(400).json({ message: '無效操作' });
 
     const validation = validationResult(req);
     const error = validation.array();
@@ -372,19 +301,11 @@ const userEditPassword = async (req, res) => {
       return res.status(400).json({ message: '密碼格式錯誤', error: error });
     }
 
-    const checkPassword = await bcrypt.compare(
-      req.body.oldPassword,
-      oldPassword.password
-    );
-    if (!checkPassword)
-      return res.status(400).json({ message: '舊密碼輸入錯誤' });
+    const checkPassword = await bcrypt.compare(req.body.oldPassword, oldPassword.password);
+    if (!checkPassword) return res.status(400).json({ message: '舊密碼輸入錯誤' });
 
-    const newPasswordValid = await bcrypt.compare(
-      req.body.password,
-      oldPassword.password
-    );
-    if (newPasswordValid)
-      return res.status(400).json({ message: '請輸入與舊密碼不同的新密碼' });
+    const newPasswordValid = await bcrypt.compare(req.body.password, oldPassword.password);
+    if (newPasswordValid) return res.status(400).json({ message: '請輸入與舊密碼不同的新密碼' });
 
     const newPassword = await bcrypt.hash(req.body.password, 10);
     await adminModel.updateUserPassword(newPassword, req.session.user.id);
@@ -401,8 +322,7 @@ const userCreatePassword = async (req, res) => {
     console.log('用戶id' + req.session.user.id + '欲新增密碼');
 
     const oldPassword = await adminModel.getUserPassword(req.session.user.id);
-    if (oldPassword.password)
-      return res.status(400).json({ message: '無效操作' });
+    if (oldPassword.password) return res.status(400).json({ message: '無效操作' });
 
     const validation = validationResult(req);
     const error = validation.array();
@@ -426,9 +346,7 @@ const userGetConversationList = async (req, res) => {
   console.log('用戶id' + req.session.user.id + '獲取聊天室清單');
   try {
     let listData = await adminModel.getConversationList(req.session.user.id);
-    const messageData = await adminModel.getConversationDetail(
-      listData.map((item) => item.id)
-    );
+    const messageData = await adminModel.getConversationDetail(listData.map((item) => item.id));
     for (const item of messageData) {
       const i = listData.findIndex((data) => data.id === item.conversation_id);
       if (listData[i]['messages']) listData[i]['messages'].push(item);
@@ -439,9 +357,7 @@ const userGetConversationList = async (req, res) => {
       if (!item.hasOwnProperty('messages')) item['messages'] = [];
     }
 
-    return res
-      .status(200)
-      .json({ status: 'ok', message: '成功', data: listData });
+    return res.status(200).json({ status: 'ok', message: '成功', data: listData });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: '異常，請洽系統管理員', error: error });
@@ -453,11 +369,7 @@ const userPostTextMessage = async (req, res) => {
   try {
     console.log('req.body.content', req.body.content);
     const now = moment().format('YYYY-MM-DD HH:mm:ss');
-    const result = await adminModel.postTextMessage(
-      req.params.id,
-      req.body.content,
-      now
-    );
+    const result = await adminModel.postTextMessage(req.params.id, req.body.content, now);
     console.log(result);
     return res.status(201).json({
       status: 'ok',
@@ -476,11 +388,7 @@ const userPostStickerMessage = async (req, res) => {
   try {
     console.log('req.body.content', req.body.sticker);
     const now = moment().format('YYYY-MM-DD HH:mm:ss');
-    const result = await adminModel.postStickerMessage(
-      req.params.id,
-      req.body.sticker,
-      now
-    );
+    const result = await adminModel.postStickerMessage(req.params.id, req.body.sticker, now);
     console.log(result);
     return res.status(201).json({
       status: 'ok',
@@ -500,11 +408,7 @@ const userPostPhotoMessage = async (req, res) => {
     console.log('req.body.content', req.body.photo);
     const now = moment().format('YYYY-MM-DD HH:mm:ss');
     let filePath = req.file ? '/conversation/uploads/' + req.file.filename : '';
-    const result = await adminModel.postPhotoMessage(
-      req.params.id,
-      filePath,
-      now
-    );
+    const result = await adminModel.postPhotoMessage(req.params.id, filePath, now);
     return res.status(201).json({
       status: 'ok',
       message: '成功',
@@ -512,6 +416,47 @@ const userPostPhotoMessage = async (req, res) => {
       photoPath: filePath,
       create_time: now,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userPostProductMessage = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '新增商品訊息');
+  try {
+    console.log('req.body.product_id', req.body.product_id);
+    const now = moment().format('YYYY-MM-DD HH:mm:ss');
+    const result = await adminModel.postProductMessage(req.params.id, req.body.product_id, now);
+    return res.status(201).json({
+      status: 'ok',
+      message: '成功',
+      result: result.insertId,
+      product_id: req.body.product_id,
+      create_time: now,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+
+const userGetConversationProduct = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '獲取聊天室商品列表');
+  try {
+    console.log('req.params.storeId', req.params.storeId);
+    let data = await adminModel.getConversationProduct(req.params.storeId);
+    return res.status(200).json({ status: 'ok', data: data });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: '異常，請洽系統管理員', error: error });
+  }
+};
+const userCreateConversation = async (req, res) => {
+  console.log('用戶id' + req.session.user.id + '開啟聊天室');
+  try {
+    let data = await adminModel.createConversation(req.session.user.id, req.params.storeId);
+    return res.status(200).json({ status: 'ok', data: { isNew: data.insertId > 0, insertId: data.insertId } });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: '異常，請洽系統管理員', error: error });
@@ -537,4 +482,7 @@ module.exports = {
   userPostTextMessage,
   userPostStickerMessage,
   userPostPhotoMessage,
+  userGetConversationProduct,
+  userPostProductMessage,
+  userCreateConversation,
 };

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oh!DogCat 店家核銷</title>
+  <title>Oh!DogCat 店家訊息</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
     integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
@@ -34,7 +33,6 @@
       background-color: rgba(0, 0, 0, .1);
       /* Chrome Safari */
       border-radius: 4px;
-
     }
 
     *::-webkit-scrollbar-thumb {
@@ -104,6 +102,66 @@
       align-items: end;
       gap: 12px;
     }
+
+    .product_item {
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, .15);
+      transition: 0.3s;
+      overflow: hidden;
+      -webkit-user-select: none;
+      animation: message-show 0.3s linear 0.1s 1 forwards;
+      cursor: pointer;
+    }
+
+    .product_item .obj-fit {
+      width: 120px;
+      height: 100px;
+    }
+
+    .product_item .obj-fit img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product_item .p_title h6 {
+      display: -webkit-box;
+      line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      white-space: normal;
+      font-size: 15px;
+    }
+
+    .product_item .p_score {
+      position: relative;
+      padding-left: 24px;
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .product_item .p_score::after {
+      content: '';
+      position: absolute;
+      background: url('../../../images/travel_dog_paws.svg') no-repeat left center / contain;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 18px;
+    }
+
+    .product_item .p_price {
+      font-size: 13px;
+      font-weight: bold;
+      color: #EF7A70;
+    }
+
+    .product_item .p_price span {
+      font-size: 16px;
+    }
+
 
     .main .message_list.own {
       justify-content: flex-end;
@@ -192,7 +250,7 @@
       width: 140px;
       height: 100%;
       background-color: #a9a9a9;
-      border-radius: 0 8px 8px 0 ;
+      border-radius: 0 8px 8px 0;
       opacity: 0;
       transition: .3s;
       transform: translateX(-100%);
@@ -254,77 +312,52 @@
       document.querySelector('body > div').classList.add('show')
       document.querySelector('.main').scrollTo(0, document.querySelector('.main').scrollHeight);
     };
-
   </script>
 </head>
-
-<body>
-  <div class="text-center my-5 p-3 position-relative"
-    style="width: 80%; max-width:560px; margin: 0 auto; border: 2px solid #f0f0f0; border-radius: 8px; box-shadow: 0px 0px 8px rgba(0, 0, 0, .05);">
-    <div class="store_card">
-      <div class="header">
-        <div class="title d-flex">
-          <div class="obj-fit flex-shrink-0">
-            <img src="./public/user/px-12.jpg" alt="">
-          </div>
-          <div class="name d-flex align-items-center">
-            <div class="pl-3">
-              用戶用戶
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="main px-2 py-4">
-      </div>
-      <div class="footer d-flex w-100">
-        <div class="btn-wrap d-flex flex-column h-100">
-          <div class="btn1 h-50 d-flex align-items-center justify-content-center">
-            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em"
-              width="1em" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M256 224c-79.41 0-192 122.76-192 200.25 0 34.9 26.81 55.75 71.74 55.75 48.84 0 81.09-25.08 120.26-25.08 39.51 0 71.85 25.08 120.26 25.08 44.93 0 71.74-20.85 71.74-55.75C448 346.76 335.41 224 256 224zm-147.28-12.61c-10.4-34.65-42.44-57.09-71.56-50.13-29.12 6.96-44.29 40.69-33.89 75.34 10.4 34.65 42.44 57.09 71.56 50.13 29.12-6.96 44.29-40.69 33.89-75.34zm84.72-20.78c30.94-8.14 46.42-49.94 34.58-93.36s-46.52-72.01-77.46-63.87-46.42 49.94-34.58 93.36c11.84 43.42 46.53 72.02 77.46 63.87zm281.39-29.34c-29.12-6.96-61.15 15.48-71.56 50.13-10.4 34.65 4.77 68.38 33.89 75.34 29.12 6.96 61.15-15.48 71.56-50.13 10.4-34.65-4.77-68.38-33.89-75.34zm-156.27 29.34c30.94 8.14 65.62-20.45 77.46-63.87 11.84-43.42-3.64-85.21-34.58-93.36s-65.62 20.45-77.46 63.87c-11.84 43.42 3.64 85.22 34.58 93.36z">
-              </path>
-            </svg>
-          </div>
-          <label for="messageImg" class="btn2 h-50 d-flex align-items-center justify-content-center">
-            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em"
-              width="1em" xmlns="http://www.w3.org/2000/svg">
-              <rect width="416" height="352" x="48" y="80" fill="none" stroke-linejoin="round" stroke-width="32" rx="48"
-                ry="48"></rect>
-              <circle cx="336" cy="176" r="32" fill="none" stroke-miterlimit="10" stroke-width="32"></circle>
-              <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
-                d="M304 335.79l-90.66-90.49a32 32 0 00-43.87-1.3L48 352m176 80l123.34-123.34a32 32 0 0143.11-2L464 368">
-              </path>
-            </svg>
-          </label>
-        </div>
-        <input id="messageImg" type="file" accept="image/*">
-        <div class="input-group flex-fill rounded">
-          <textarea name="" id="" class="flex-fill rounded-left"></textarea>
-          <button class="btn btn3 btn-secondary">送出</button>
+<div class="text-center my-5 p-3 position-relative" id="undefined"
+  style="width: 80%; max-width:560px; margin: 0 auto; border: 2px solid #f0f0f0; border-radius: 8px; box-shadow: 0px 0px 8px rgba(0, 0, 0, .05);">
+  <div class="store_card">
+    <div class="header">
+      <div class="title d-flex">
+        <div class="obj-fit flex-shrink-0"><img src="" alt=""></div>
+        <div class="name d-flex align-items-center">
+          <div class="pl-3">&#x7528;&#x6236;&#x7528;&#x6236;</div>
         </div>
       </div>
     </div>
-
-  </div>
-  <div class="stickers position-fixed d-flex flex-column">
-    <div class="obj-fit">
-      <img src="http://localhost:3007/chat/sticker1.png" alt="">
+    <div class="main px-2 py-4">
     </div>
-    <div class="obj-fit">
-      <img src="http://localhost:3007/chat/sticker2.png" alt="">
-    </div>
-    <div class="obj-fit">
-      <img src="http://localhost:3007/chat/sticker3.png" alt="">
-    </div>
-    <div class="obj-fit">
-      <img src="http://localhost:3007/chat/sticker4.png" alt="">
+    <div class="footer d-flex w-100">
+      <div class="btn-wrap d-flex flex-column h-100">
+        <div class="btn1 h-50 d-flex align-items-center justify-content-center"><svg stroke="currentColor"
+            fill="currentColor" stroke-width="0" viewbox="0 0 512 512" height="1em" width="1em"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M256 224c-79.41 0-192 122.76-192 200.25 0 34.9 26.81 55.75 71.74 55.75 48.84 0 81.09-25.08 120.26-25.08 39.51 0 71.85 25.08 120.26 25.08 44.93 0 71.74-20.85 71.74-55.75C448 346.76 335.41 224 256 224zm-147.28-12.61c-10.4-34.65-42.44-57.09-71.56-50.13-29.12 6.96-44.29 40.69-33.89 75.34 10.4 34.65 42.44 57.09 71.56 50.13 29.12-6.96 44.29-40.69 33.89-75.34zm84.72-20.78c30.94-8.14 46.42-49.94 34.58-93.36s-46.52-72.01-77.46-63.87-46.42 49.94-34.58 93.36c11.84 43.42 46.53 72.02 77.46 63.87zm281.39-29.34c-29.12-6.96-61.15 15.48-71.56 50.13-10.4 34.65 4.77 68.38 33.89 75.34 29.12 6.96 61.15-15.48 71.56-50.13 10.4-34.65-4.77-68.38-33.89-75.34zm-156.27 29.34c30.94 8.14 65.62-20.45 77.46-63.87 11.84-43.42-3.64-85.21-34.58-93.36s-65.62 20.45-77.46 63.87c-11.84 43.42 3.64 85.22 34.58 93.36z">
+            </path>
+          </svg></div><label class="btn2 h-50 d-flex align-items-center justify-content-center" for="messageImg"><svg
+            stroke="currentColor" fill="currentColor" stroke-width="0" viewbox="0 0 512 512" height="1em" width="1em"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect width="416" height="352" x="48" y="80" fill="none" stroke-linejoin="round" stroke-width="32" rx="48"
+              ry="48"></rect>
+            <circle cx="336" cy="176" r="32" fill="none" stroke-miterlimit="10" stroke-width="32"></circle>
+            <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
+              d="M304 335.79l-90.66-90.49a32 32 0 00-43.87-1.3L48 352m176 80l123.34-123.34a32 32 0 0143.11-2L464 368">
+            </path>
+          </svg></label>
+      </div><input id="messageImg" type="file" accept="image/*">
+      <div class="input-group flex-fill rounded"><textarea class="flex-fill rounded-left" name=""
+          id=""></textarea><button class="btn btn3 btn-secondary">&#x9001;&#x51FA;</button></div>
     </div>
   </div>
-</body>
-
+</div>
+<div class="stickers position-fixed d-flex flex-column">
+  <div class="obj-fit"><img src="http://localhost:3007/chat/sticker1.png" alt=""></div>
+  <div class="obj-fit"><img src="http://localhost:3007/chat/sticker2.png" alt=""></div>
+  <div class="obj-fit"><img src="http://localhost:3007/chat/sticker3.png" alt=""></div>
+  <div class="obj-fit"><img src="http://localhost:3007/chat/sticker4.png" alt=""></div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+<script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+  integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
 <script src="http://localhost:3007/chat/message.js" type=""></script>
-<script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
-
-</html>

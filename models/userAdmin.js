@@ -69,7 +69,7 @@ const getUserProfile = async (id) => {
 const getUserOrderInfo = async (id) => {
   try {
     const [data] = await pool.execute(
-      'SELECT s.name AS store_name, o.product_id, p.name AS product_name, p.photo_path, p.main_photo , o.product_quantity, o.order_no, o.product_price, o.total, o.pay, o.coupon_number, o.coupon_name, o.order_time, o.comment_status FROM (order_buying AS o JOIN product AS p ON o.product_id = p.id) JOIN store AS s ON p.store_id = s.id WHERE o.user_id = ? ORDER BY `o`.`order_time` DESC',
+      'SELECT s.id AS store_id, s.name AS store_name,s.photo AS store_photo, o.product_id, p.name AS product_name, p.photo_path, p.main_photo , o.product_quantity, o.order_no, o.product_price, o.total, o.pay, o.coupon_number, o.coupon_name, o.order_time, o.comment_status FROM (order_buying AS o JOIN product AS p ON o.product_id = p.id) JOIN store AS s ON p.store_id = s.id WHERE o.user_id = ? ORDER BY `o`.`order_time` DESC',
       [id]
     );
     return data;
@@ -188,7 +188,10 @@ const getConversationDetail = async (ids) => {
       }
     }
     if (sqlWHERE === '') sqlWHERE = 'conversation_id = 0';
-    const [data] = await pool.execute('SELECT * FROM `conversation_detail` WHERE ' + sqlWHERE);
+    const [data] = await pool.execute(
+      'SELECT c.*, p.id AS product_id, p.name AS product_name, p.photo_path, p.main_photo, p.price, p.per_score FROM `conversation_detail` AS c LEFT JOIN product AS p ON c.product_id = p.id  WHERE ' +
+        sqlWHERE
+    );
     return data;
   } catch (error) {
     console.error(error);
@@ -241,6 +244,39 @@ const postPhotoMessage = async (conversation_id, photoPath, time) => {
   }
 };
 
+const postProductMessage = async (conversation_id, product_id, time) => {
+  try {
+    const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, product_id, sender, create_time) VALUES (?,?,?,?,?)  ', [
+      conversation_id,
+      4,
+      product_id,
+      1,
+      time,
+    ]);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const getConversationProduct = async (storeId) => {
+  try {
+    const [data] = await pool.execute('SELECT * FROM product WHERE store_id = ?', [storeId]);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const createConversation = async (userId, storeId) => {
+  try {
+    const [data] = await pool.execute('INSERT IGNORE INTO conversation ( user_id, store_id) VALUES (?,?)', [userId, storeId]);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 module.exports = {
   isSocialNameExist,
   updateSocialName,
@@ -264,4 +300,7 @@ module.exports = {
   postTextMessage,
   postStickerMessage,
   postPhotoMessage,
+  getConversationProduct,
+  postProductMessage,
+  createConversation,
 };
