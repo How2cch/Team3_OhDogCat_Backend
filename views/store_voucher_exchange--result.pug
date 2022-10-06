@@ -37,5 +37,15 @@ head
     document.querySelector('body > div').classList.add('show')
     };
 block  content
-  .text-center.my-5.py-3.px-md-5.px-3(style='width: calc(100% - 32px); max-width:400px; margin: 0 auto; border: 2px solid #f0f0f0; border-radius: 8px; box-shadow: 0px 0px 8px rgba(0, 0, 0, .05);')
+  .text-center.my-5.py-3.px-md-5.px-3(id=`${id}` style='width: calc(100% - 32px); max-width:400px; margin: 0 auto; border: 2px solid #f0f0f0; border-radius: 8px; box-shadow: 0px 0px 8px rgba(0, 0, 0, .05);')
     h4.fw-bold.text-left #{text}
+script(src='https://cdn.socket.io/4.5.0/socket.io.min.js' integrity='sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k' crossorigin='anonymous')
+script.
+      let socket = io();
+      if (document.querySelector('.text-center').id !== 'false') {
+        socket.emit('exchangeResult', {
+          result: true,
+          user_id: Number(document.querySelector('.text-center').id),
+        });
+      }
+

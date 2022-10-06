@@ -15,8 +15,14 @@ router.get('/voucher/exchange/:exchangeId', async (req, res) => {
       [req.params.exchangeId, moment().format('YYYY-MM-DD HH:mm;ss')]
     );
     console.log(productResult);
-    if (productResult.length === 0) return res.render('store_voucher_exchange--result', { text: '該核銷代碼已失效，請重新兌換' });
-    const [staffResult] = await pool.execute('SELECT id, name FROM store_staff WHERE store_id = ?', [productResult[0].store_id]);
+    if (productResult.length === 0)
+      return res.render('store_voucher_exchange--result', {
+        text: '該核銷代碼已失效，請重新兌換',
+      });
+    const [staffResult] = await pool.execute(
+      'SELECT id, name FROM store_staff WHERE store_id = ?',
+      [productResult[0].store_id]
+    );
     const data = {
       submit_url: process.env.OPEN_URL + '/store/voucher/exchange',
       quantity: productResult[0].quantity,
@@ -29,7 +35,9 @@ router.get('/voucher/exchange/:exchangeId', async (req, res) => {
     res.render('store_voucher_exchange', data);
   } catch (error) {
     console.error(error);
-    res.render('store_voucher_exchange--result', { text: '系統異常，請洽平台管理員' });
+    res.render('store_voucher_exchange--result', {
+      text: '系統異常，請洽平台管理員',
+    });
   }
 });
 
@@ -39,10 +47,20 @@ router.post('/voucher/exchange', async (req, res) => {
     const now = moment();
     // = 確認核銷行為是合法對象所為
     console.log('staff id = ' + req.body.staff_id + ' 正在核銷');
-    const [staffVerify] = await pool.execute('SELECT name, password FROM store_staff WHERE id =?', [req.body.staff_id]);
-    let checkPassword = await bcrypt.compare(req.body.staff_password, staffVerify[0].password);
+    const [staffVerify] = await pool.execute(
+      'SELECT name, password FROM store_staff WHERE id =?',
+      [req.body.staff_id]
+    );
+    let checkPassword = await bcrypt.compare(
+      req.body.staff_password,
+      staffVerify[0].password
+    );
     console.log('staff 密碼審核', checkPassword);
-    if (!checkPassword) return res.render('store_voucher_exchange--result', { text: '核銷失敗，請確認核銷人員密碼' });
+    if (!checkPassword)
+      return res.render('store_voucher_exchange--result', {
+        text: '核銷失敗，請確認核銷人員密碼',
+        id: 'false',
+      });
 
     // = 確認核銷內容合法
     const [voucherResult] = await pool.execute(
@@ -50,22 +68,50 @@ router.post('/voucher/exchange', async (req, res) => {
       [req.body.exchange_id]
     );
 
-    const { store_name, user_id, user_name, user_email, product_id, product_name, exchange_quantity, quantity, expired_time, status } = voucherResult[0];
+    const {
+      store_name,
+      user_id,
+      user_name,
+      user_email,
+      product_id,
+      product_name,
+      exchange_quantity,
+      quantity,
+      expired_time,
+      status,
+    } = voucherResult[0];
     console.log('檢查時間合法');
-    if (now.isAfter(expired_time)) return res.render('store_voucher_exchange--result', { text: '核銷失敗，已逾時，請重新兌換' });
+    if (now.isAfter(expired_time))
+      return res.render('store_voucher_exchange--result', {
+        text: '核銷失敗，已逾時，請重新兌換',
+        id: 'false',
+      });
     console.log('檢查兌換庫存足夠');
-    if (quantity < exchange_quantity) return res.render('store_voucher_exchange--result', { text: '核銷失敗，可兌換數量不足' });
+    if (quantity < exchange_quantity)
+      return res.render('store_voucher_exchange--result', {
+        text: '核銷失敗，可兌換數量不足',
+      });
     console.log('檢查兌換憑證合法');
-    if (status === 0) return res.render('store_voucher_exchange--result', { text: '核銷失敗，兌換憑證已失效' });
+    if (status === 0)
+      return res.render('store_voucher_exchange--result', {
+        text: '核銷失敗，兌換憑證已失效',
+        id: 'false',
+      });
     // = 核銷內容無誤，更新資料庫
-    await pool.execute('UPDATE voucher_exchange SET status = 0 , exchange_time = ?, exchange_staff = ? WHERE id = ?', [
-      now.format('YYYY-MM-DD HH:mm:ss'),
-      req.body.staff_id,
-      req.body.exchange_id,
-    ]);
+    await pool.execute(
+      'UPDATE voucher_exchange SET status = 0 , exchange_time = ?, exchange_staff = ? WHERE id = ?',
+      [
+        now.format('YYYY-MM-DD HH:mm:ss'),
+        req.body.staff_id,
+        req.body.exchange_id,
+      ]
+    );
     console.log('該票券剩餘', quantity);
     console.log('本次使用', exchange_quantity);
-    await pool.execute('UPDATE voucher SET quantity = ? WHERE user_id = ? AND product_id = ?', [quantity - exchange_quantity, user_id, product_id]);
+    await pool.execute(
+      'UPDATE voucher SET quantity = ? WHERE user_id = ? AND product_id = ?',
+      [quantity - exchange_quantity, user_id, product_id]
+    );
     const mainInfo = {
       address: user_email,
       userName: user_name,
@@ -76,16 +122,24 @@ router.post('/voucher/exchange', async (req, res) => {
       storeName: store_name,
     };
     sendMail(mainInfo);
-    res.render('store_voucher_exchange--result', { text: '核銷成功！' });
+    res.render('store_voucher_exchange--result', {
+      text: '核銷成功！',
+      id: user_id,
+    });
   } catch (error) {
     console.error(error);
-    res.render('store_voucher_exchange--result', { text: '系統異常，請洽平台管理員' });
+    res.render('store_voucher_exchange--result', {
+      text: '系統異常，請洽平台管理員',
+    });
   }
 });
 
 router.get('/message/:id', async (req, res) => {
   try {
-    return res.render('store_admin_conversation', { id: req.params.id, BASE_URL: process.env.OPEN_URL });
+    return res.render('store_admin_conversation', {
+      id: req.params.id,
+      BASE_URL: process.env.OPEN_URL,
+    });
   } catch (error) {
     console.error(error);
   }
@@ -94,9 +148,10 @@ router.get('/message/:id', async (req, res) => {
 router.get('/message', async (req, res) => {
   console.log(req.body);
   try {
-    const [conversation] = await pool.execute('SELECT c.*, u.name AS user_name, u.photo AS user_photo FROM `conversation` AS c JOIN user AS u ON c.user_id = u.id WHERE c.id = ?', [
-      req.query.id,
-    ]);
+    const [conversation] = await pool.execute(
+      'SELECT c.*, u.name AS user_name, u.photo AS user_photo FROM `conversation` AS c JOIN user AS u ON c.user_id = u.id WHERE c.id = ?',
+      [req.query.id]
+    );
     const [data] = await pool.execute(
       'SELECT c.*, p.id AS product_id, p.name AS product_name, p.photo_path, p.main_photo, p.price, p.per_score FROM `conversation_detail` AS c LEFT JOIN product AS p ON c.product_id = p.id  WHERE conversation_id = ?',
       [req.query.id]
@@ -115,33 +170,24 @@ router.post('/message', async (req, res) => {
   const time = moment().format('YYYY-MM-DD HH:mm:ss');
   try {
     if (req.body.type === 1) {
-      const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
-        conversation_id,
-        1,
-        content,
-        2,
-        time,
-      ]);
+      const [data] = await pool.execute(
+        'INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ',
+        [conversation_id, 1, content, 2, time]
+      );
       return res.status(201).json(data);
     }
     if (req.body.type === 2) {
-      const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ', [
-        conversation_id,
-        2,
-        content,
-        2,
-        time,
-      ]);
+      const [data] = await pool.execute(
+        'INSERT INTO conversation_detail (conversation_id, type, content, sender, create_time) VALUES (?,?,?,?,?)  ',
+        [conversation_id, 2, content, 2, time]
+      );
       return res.status(201).json(data);
     }
     if (req.body.type === 3) {
-      const [data] = await pool.execute('INSERT INTO conversation_detail (conversation_id, type, sticker, sender, create_time) VALUES (?,?,?,?,?)  ', [
-        conversation_id,
-        3,
-        content,
-        2,
-        time,
-      ]);
+      const [data] = await pool.execute(
+        'INSERT INTO conversation_detail (conversation_id, type, sticker, sender, create_time) VALUES (?,?,?,?,?)  ',
+        [conversation_id, 3, content, 2, time]
+      );
       return res.status(201).json(data);
     }
   } catch (error) {

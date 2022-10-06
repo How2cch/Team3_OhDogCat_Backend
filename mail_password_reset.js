@@ -7,16 +7,19 @@ require('dotenv').config();
 
 const sendAccountValidationMail = ({ address, code }) => {
   let mailOptions = {
-    from: '"OhDogCat! 你和毛小孩的好夥伴" ohdogcat.myfriend@gmail.com',
+    from: '"Oh!DogCat 你和毛小孩的好夥伴" ohdogcat.myfriend@gmail.com',
     to: address,
     subject: '【密碼重設】 Oh!DogCat 會員密碼重設信',
   };
 
   const transporter = nodeMailer.createTransport(mailConfig);
 
-  mailOptions.html = pug.renderFile(__dirname + '/views/mail_password_reset.pug', {
-    code: code,
-  });
+  mailOptions.html = pug.renderFile(
+    __dirname + '/views/mail_password_reset.pug',
+    {
+      code: code,
+    }
+  );
 
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {

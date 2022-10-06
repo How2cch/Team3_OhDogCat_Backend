@@ -16,7 +16,18 @@ router.get('/item', async (req, res) => {
   );
   let newArr = [];
   result.forEach((data) => {
-    const { id, name, intro, price, per_score, main_photo, photo_path, product_tag, description, ...newObject } = data;
+    const {
+      id,
+      name,
+      intro,
+      price,
+      per_score,
+      main_photo,
+      photo_path,
+      product_tag,
+      description,
+      ...newObject
+    } = data;
     if (newArr.length === 0 || id !== newArr[newArr.length - 1].id)
       return newArr.push({
         id: id,
@@ -42,7 +53,10 @@ router.get('/item', async (req, res) => {
 router.get('/recommend', async (req, res) => {
   // console.log(req.query);
   try {
-    const [recommend] = await pool.execute(`SELECT id,name, price,photo_path,main_photo FROM product WHERE product_type_id = 4 ORDER BY RAND() LIMIT ?`, [2]);
+    const [recommend] = await pool.execute(
+      `SELECT id,name, price,photo_path,main_photo FROM product WHERE product_type_id = 4 ORDER BY RAND() LIMIT ?`,
+      [2]
+    );
     console.log(recommend);
     res.json(recommend);
   } catch (error) {
@@ -55,7 +69,7 @@ router.get('/recommend', async (req, res) => {
 router.get('/comment', async (req, res) => {
   try {
     const [comment] = await pool.execute(
-      `SELECT product_comment.* ,social_name, photo FROM  product_comment JOIN user ON product_comment.product_comment_user_id = user.id WHERE product_id = ?`,
+      `SELECT product_comment.* ,social_name, photo FROM product_comment JOIN user ON product_comment.product_comment_user_id = user.id WHERE product_comment.product_id = ? ORDER BY id DESC`,
       [req.query.id]
     );
     // console.log(comment);
